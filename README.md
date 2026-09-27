@@ -12,7 +12,7 @@ Simulações, experimentos e materiais didáticos interativos reunidos em um só
 ![CSS3](https://img.shields.io/badge/CSS3-1572B6?logo=css3&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?logo=javascript&logoColor=black)
 ![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-222222?logo=githubpages&logoColor=white)
-[![Licença: CC BY 4.0](https://img.shields.io/badge/Licen%C3%A7a-CC%20BY%204.0-lightgrey?logo=creativecommons&logoColor=white)](LICENSE)
+[![Licença: CC BY-NC 4.0](https://img.shields.io/badge/Licen%C3%A7a-CC%20BY--NC%204.0-lightgrey?logo=creativecommons&logoColor=white)](LICENSE)
 
 </div>
 
@@ -88,11 +88,15 @@ Nenhuma instalação é necessária.
 ## Licença
 
 Este projeto está licenciado sob a
-[Creative Commons Atribuição 4.0 Internacional (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/deed.pt-br).
+[Creative Commons Atribuição-NãoComercial 4.0 Internacional (CC BY-NC 4.0)](https://creativecommons.org/licenses/by-nc/4.0/deed.pt-br).
 
-Você pode copiar, distribuir, adaptar e usar o material para qualquer finalidade,
-inclusive comercial, desde que dê o crédito apropriado ao autor, indique a licença
-e informe se foram feitas alterações. Veja o texto completo em [`LICENSE`](LICENSE).
+Você pode copiar, distribuir e adaptar o material, desde que:
+
+- **Atribuição** — dê o crédito apropriado ao autor, indique a licença e informe se foram feitas alterações;
+- **Não comercial** — não utilize o material para fins comerciais, como venda, cursos pagos
+  ou qualquer outra forma de remuneração.
+
+Para usos comerciais, entre em contato com o autor. Veja o texto completo em [`LICENSE`](LICENSE).
 
 ## Autor
 
