@@ -16,38 +16,38 @@
  *  status     (opcional)    "pronto", "em construção" ou "planejado"
  *  imagem     (opcional)    Caminho para uma imagem de capa: "img/capa.png"
  *  data       (opcional)    Data de publicação no formato "AAAA-MM-DD"
- *
- *  Os três projetos abaixo são EXEMPLOS — edite ou apague.
  * ============================================================
  */
 
 const PROJETOS = [
   {
     titulo: "Pêndulo Simples",
-    descricao: "Simulação interativa para investigar como comprimento e gravidade afetam o período de oscilação.",
+    descricao: "Investigue o que controla o período de um pêndulo, construa o gráfico T² × L e descubra a gravidade de um planeta misterioso.",
     area: "Física",
-    link: "projetos/exemplo/",
-    etiquetas: ["mecânica", "simulação", "oscilações"],
+    link: "projetos/pendulo/",
+    etiquetas: ["mecânica", "oscilações", "gráficos", "gravidade"],
     nivel: "Médio",
     status: "pronto",
     data: "2026-09-27",
   },
   {
     titulo: "Titulação Ácido-Base",
-    descricao: "Bancada virtual de titulação com curva de pH em tempo real e escolha de indicadores.",
+    descricao: "Titule ácidos fortes e fracos, acompanhe a curva de pH em tempo real, escolha o indicador certo e determine a concentração de uma amostra desconhecida.",
     area: "Química",
-    link: "#",
-    etiquetas: ["soluções", "pH", "experimento"],
+    link: "projetos/titulacao/",
+    etiquetas: ["soluções", "pH", "indicadores", "estequiometria"],
     nivel: "Médio",
-    status: "em construção",
+    status: "pronto",
+    data: "2026-09-27",
   },
   {
     titulo: "Microscópio Virtual",
-    descricao: "Observe lâminas de células vegetais e animais com diferentes aumentos e focos.",
+    descricao: "Focalize lâminas de cebola, mucosa bucal, elódea e sangue; compare células vegetais e animais e estime o tamanho de uma célula.",
     area: "Biologia",
-    link: "#",
-    etiquetas: ["citologia", "microscopia"],
+    link: "projetos/microscopio/",
+    etiquetas: ["citologia", "microscopia", "células"],
     nivel: "Fundamental",
-    status: "planejado",
+    status: "pronto",
+    data: "2026-09-27",
   },
 ];

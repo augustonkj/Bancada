@@ -1,0 +1,618 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pêndulo Simples — Bancada</title>
+  <meta name="description" content="Laboratório virtual: investigue o período do pêndulo simples e determine a aceleração da gravidade.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%23f4f1ea' stroke='%231d1f1c' stroke-width='2'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-family='Georgia,serif' font-weight='700' font-size='17' fill='%231d1f1c'%3EB%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;1,9..144,500&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../_comum/lab.css">
+</head>
+<body>
+  <header class="lab-topo">
+    <a class="lab-topo__voltar" href="../../">← Bancada</a>
+    <div class="lab-topo__acoes">
+      <button class="botao-icone" id="lab-imprimir" type="button" aria-label="Imprimir relatório" title="Imprimir relatório">⎙</button>
+      <button class="botao-icone" id="lab-tema" type="button" aria-label="Alternar tema claro/escuro" title="Alternar tema">◐</button>
+    </div>
+  </header>
+
+  <div class="lab">
+    <nav class="lab-sumario" aria-label="Etapas do laboratório">
+      <p>Roteiro</p>
+      <ol>
+        <li><a href="#objetivos">Objetivos</a></li>
+        <li><a href="#hipoteses">Hipóteses</a></li>
+        <li><a href="#conceitos">Conceitos</a></li>
+        <li><a href="#experimento">Experimento</a></li>
+        <li><a href="#analise">Análise de dados</a></li>
+        <li><a href="#questoes">Questões</a></li>
+        <li><a href="#conclusao">Conclusão</a></li>
+      </ol>
+      <div class="lab-progresso">
+        <span id="progresso-texto">0 questões corretas</span>
+        <div class="lab-progresso__barra"><span id="progresso-barra"></span></div>
+      </div>
+    </nav>
+
+    <main class="lab-conteudo">
+      <header class="lab-cabecalho">
+        <p class="lab-rotulo">Física · Mecânica · Laboratório 01</p>
+        <h1>Pêndulo Simples</h1>
+        <p class="lab-cabecalho__resumo">
+          Do relógio de parede à medição da gravidade em outros planetas: descubra o que controla
+          o ritmo de um pêndulo e use-o como instrumento científico.
+        </p>
+        <dl class="lab-ficha">
+          <div><dt>Nível</dt><dd>Ensino Médio</dd></div>
+          <div><dt>Duração</dt><dd>2 aulas (≈ 100 min)</dd></div>
+          <div><dt>Pré-requisitos</dt><dd>Grandezas e unidades, noção de gráfico</dd></div>
+          <div><dt>BNCC</dt><dd>EM13CNT204</dd></div>
+        </dl>
+      </header>
+
+      <!-- 1. OBJETIVOS -->
+      <section class="secao" id="objetivos">
+        <h2><span class="num">01</span> Objetivos</h2>
+        <p>Ao final deste laboratório, você será capaz de:</p>
+        <ul class="objetivos">
+          <li>Identificar quais grandezas influenciam — e quais não influenciam — o período de um pêndulo.</li>
+          <li>Relacionar o período com o comprimento do fio e a aceleração da gravidade por meio de uma equação.</li>
+          <li>Construir e interpretar um gráfico linearizado (T² × L).</li>
+          <li>Determinar experimentalmente o valor da gravidade de um planeta desconhecido.</li>
+        </ul>
+      </section>
+
+      <!-- 2. HIPÓTESES -->
+      <section class="secao" id="hipoteses">
+        <h2><span class="num">02</span> Antes de começar: suas hipóteses</h2>
+        <p>
+          Cientistas começam com perguntas e previsões. Responda com o que você <em>acha</em> que vai
+          acontecer — não existe resposta errada aqui. Você vai testar suas hipóteses no experimento.
+        </p>
+        <div id="hipoteses-lista"></div>
+      </section>
+
+      <!-- 3. CONCEITOS -->
+      <section class="secao" id="conceitos">
+        <h2><span class="num">03</span> Conceitos</h2>
+        <p>
+          Um <strong>pêndulo simples</strong> é um corpo pequeno (a <em>massa pendular</em>) preso a um fio
+          leve e inextensível, que oscila em torno de uma posição de equilíbrio sob a ação da gravidade.
+        </p>
+
+        <h3>Período e frequência</h3>
+        <p>
+          O <strong>período (T)</strong> é o tempo de uma oscilação completa: ida e volta ao mesmo ponto.
+          Ele é medido em segundos. A <strong>frequência (f)</strong> é o número de oscilações por segundo,
+          medida em hertz (Hz), e vale f = 1/T.
+        </p>
+
+        <h3>A equação do período</h3>
+        <p>Para oscilações de pequena amplitude (ângulos de até cerca de 15°), o período é dado por:</p>
+        <div class="formula">
+          T = 2π √(<i>L</i> / <i>g</i>)
+          <small>válida para pequenas amplitudes</small>
+        </div>
+        <dl class="variaveis">
+          <dt>T</dt><dd>período, em segundos (s)</dd>
+          <dt>L</dt><dd>comprimento do fio, do ponto de suspensão ao centro da massa, em metros (m)</dd>
+          <dt>g</dt><dd>aceleração da gravidade local, em m/s²</dd>
+        </dl>
+
+        <div class="caixa caixa--pense">
+          <span class="caixa__titulo">Pense</span>
+          <p>Repare no que <strong>não</strong> aparece na equação: a massa e a amplitude. O que isso significa?</p>
+        </div>
+
+        <h3>Por que a massa não importa?</h3>
+        <p>
+          Uma massa maior é puxada com mais força pela gravidade, mas também é mais difícil de acelerar
+          (tem mais inércia). Os dois efeitos se cancelam exatamente — a mesma razão pela qual, sem ar,
+          uma pena e um martelo caem juntos.
+        </p>
+
+        <div class="caixa caixa--curiosidade">
+          <span class="caixa__titulo">Você sabia?</span>
+          <p>
+            Galileu Galilei percebeu, por volta de 1583, que os lustres da catedral de Pisa levavam o mesmo
+            tempo para oscilar, fosse o balanço grande ou pequeno. Ele mediu o tempo usando a própria pulsação.
+            Décadas depois, Christiaan Huygens usou essa descoberta para construir o primeiro relógio de pêndulo,
+            que por quase 300 anos foi o relógio mais preciso do mundo.
+          </p>
+        </div>
+      </section>
+
+      <!-- 4. EXPERIMENTO -->
+      <section class="secao" id="experimento">
+        <h2><span class="num">04</span> Experimento</h2>
+        <p>
+          A bancada abaixo simula um pêndulo real — incluindo o efeito de amplitudes grandes, que a equação
+          simplificada não considera. O período é medido automaticamente a cada oscilação.
+        </p>
+
+        <div class="bancada">
+          <div class="bancada__tela" id="tela-wrap">
+            <canvas id="tela" aria-label="Simulação do pêndulo"></canvas>
+            <div class="bancada__leitura" style="top:auto;bottom:12px" aria-live="polite">
+              <span>Oscilações: <b id="l-osc">0</b></span>
+              <span>Tempo: <b id="l-tempo">0,00</b> s</span>
+              <span>T medido: <b id="l-t">—</b> s</span>
+            </div>
+          </div>
+
+          <div class="bancada__controles">
+            <h4>Controles</h4>
+            <label class="controle">
+              <span class="controle__topo">Local <output></output></span>
+              <select id="c-local">
+                <option value="terra">Terra (g = 9,8 m/s²)</option>
+                <option value="lua">Lua (g = 1,62 m/s²)</option>
+                <option value="marte">Marte (g = 3,71 m/s²)</option>
+                <option value="jupiter">Júpiter (g = 24,79 m/s²)</option>
+                <option value="misterio">Planeta X (g desconhecido)</option>
+              </select>
+            </label>
+            <label class="controle">
+              <span class="controle__topo">Comprimento do fio <output id="o-l"></output></span>
+              <input id="c-l" type="range" min="0.20" max="2.00" step="0.05" value="1.00">
+            </label>
+            <label class="controle">
+              <span class="controle__topo">Massa <output id="o-m"></output></span>
+              <input id="c-m" type="range" min="50" max="1000" step="50" value="200">
+            </label>
+            <label class="controle">
+              <span class="controle__topo">Amplitude inicial <output id="o-a"></output></span>
+              <input id="c-a" type="range" min="5" max="80" step="5" value="10">
+            </label>
+            <div class="botoes">
+              <button class="botao" id="b-soltar" type="button">↺ Soltar de novo</button>
+              <button class="botao" id="b-pausar" type="button">❚❚ Pausar</button>
+            </div>
+            <button class="botao botao--primario" id="b-registrar" type="button">Registrar medição</button>
+            <p id="aviso-registro" class="mono" style="margin:0;font-size:12px;color:var(--tinta-suave)">
+              Aguarde ao menos uma oscilação completa para registrar.
+            </p>
+          </div>
+        </div>
+
+        <h3>Procedimento</h3>
+        <ol class="procedimento">
+          <li>
+            <strong>Efeito do comprimento.</strong> Na Terra, com amplitude de 10°, registre medições para
+            pelo menos <strong>cinco comprimentos</strong> diferentes (ex.: 0,4 · 0,8 · 1,2 · 1,6 · 2,0 m).
+          </li>
+          <li>
+            <strong>Efeito da massa.</strong> Fixe o comprimento em 1,0 m e registre medições com três massas
+            diferentes. O período mudou?
+          </li>
+          <li>
+            <strong>Efeito da amplitude.</strong> Com L = 1,0 m, registre medições com amplitudes de 10°, 30°,
+            50° e 70°. Compare o período medido com o previsto pela equação.
+          </li>
+          <li>
+            <strong>Outros mundos.</strong> Repita uma medição com L = 1,0 m na Lua, em Marte e em Júpiter.
+          </li>
+          <li>
+            <strong>Desafio: Planeta X.</strong> Selecione o Planeta X e registre ao menos cinco comprimentos
+            com amplitude pequena. Você vai usar esses dados para descobrir a gravidade dele.
+          </li>
+        </ol>
+
+        <div class="caixa caixa--atencao">
+          <span class="caixa__titulo">Boas práticas</span>
+          <p>
+            Em um laboratório real, mede-se o tempo de 10 oscilações e divide-se por 10 — isso reduz o erro
+            do cronômetro. Mude <strong>uma variável por vez</strong> e mantenha as outras fixas: é assim que
+            sabemos qual delas causou o efeito.
+          </p>
+        </div>
+      </section>
+
+      <!-- 5. ANÁLISE -->
+      <section class="secao" id="analise">
+        <h2><span class="num">05</span> Análise de dados</h2>
+        <h3>Tabela de medições</h3>
+        <div id="tabela"></div>
+
+        <h3>Gráfico</h3>
+        <p>
+          Escolha o conjunto de dados e o tipo de gráfico. Primeiro observe <strong>T × L</strong>: a relação
+          é uma curva. Depois mude para <strong>T² × L</strong> e veja o que acontece.
+        </p>
+        <div class="botoes nao-imprimir">
+          <label class="controle" style="min-width:200px">
+            <span class="controle__topo">Dados de</span>
+            <select id="g-local"></select>
+          </label>
+          <label class="controle" style="min-width:200px">
+            <span class="controle__topo">Tipo de gráfico</span>
+            <select id="g-tipo">
+              <option value="t">T × L</option>
+              <option value="t2" selected>T² × L (linearizado)</option>
+            </select>
+          </label>
+        </div>
+        <div class="grafico">
+          <canvas id="grafico" aria-label="Gráfico das medições"></canvas>
+          <p class="grafico__legenda" id="g-legenda"></p>
+        </div>
+
+        <div class="caixa">
+          <span class="caixa__titulo">Por que linearizar?</span>
+          <p>
+            Elevando a equação ao quadrado: <b>T² = (4π²/g) · L</b>. Isso tem a forma de uma reta,
+            <b>y = a·x</b>, em que y = T², x = L e a inclinação é a = 4π²/g. Medindo a inclinação da reta,
+            descobrimos a gravidade: <b>g = 4π² / a</b>. Retas são muito mais fáceis de analisar do que curvas!
+          </p>
+        </div>
+      </section>
+
+      <!-- 6. QUESTÕES -->
+      <section class="secao" id="questoes">
+        <h2><span class="num">06</span> Questões</h2>
+        <p>Responda às questões. As objetivas são corrigidas na hora, com explicação.</p>
+        <div id="questoes-lista"></div>
+      </section>
+
+      <!-- 7. CONCLUSÃO -->
+      <section class="secao" id="conclusao">
+        <h2><span class="num">07</span> Conclusão</h2>
+        <p>
+          Volte às suas hipóteses da seção 2. Quais foram confirmadas pelo experimento? Quais precisaram ser
+          revistas? Mudar de ideia diante de evidências é exatamente o que a ciência faz.
+        </p>
+        <h3>Resumo</h3>
+        <ul>
+          <li>O período do pêndulo depende do <strong>comprimento</strong> e da <strong>gravidade</strong>.</li>
+          <li>A <strong>massa</strong> não altera o período.</li>
+          <li>Para <strong>pequenas amplitudes</strong>, o período praticamente não depende da amplitude (isocronismo).
+            Em amplitudes grandes, o período aumenta um pouco.</li>
+          <li>O gráfico T² × L é uma reta cuja inclinação permite calcular g.</li>
+        </ul>
+        <h3>Para ir além</h3>
+        <ul>
+          <li>Faça o experimento de verdade: um barbante, uma porca de metal e o cronômetro do celular bastam.
+            Compare o seu g com 9,8 m/s².</li>
+          <li>Pesquise sobre o <em>pêndulo de Foucault</em> e como ele provou que a Terra gira.</li>
+          <li>Por que balanços de parquinho parecem ter um “ritmo natural”? Pesquise sobre <em>ressonância</em>.</li>
+        </ul>
+        <div class="botoes nao-imprimir">
+          <button class="botao botao--primario" type="button" onclick="window.print()">⎙ Imprimir relatório</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <footer class="lab-rodape"><p></p></footer>
+
+  <script src="../_comum/lab.js"></script>
+  <script>
+  (function () {
+    "use strict";
+    Lab.iniciar({ id: "pendulo" });
+    const { fmt } = Lab;
+
+    /* ---------- Locais e o Planeta X ---------- */
+    let gMisterio = Lab.armazenamento.ler("bancada:pendulo:gX", null);
+    if (!gMisterio) {
+      gMisterio = Math.round((4 + Math.random() * 16) * 100) / 100; // entre 4 e 20 m/s²
+      Lab.armazenamento.gravar("bancada:pendulo:gX", gMisterio);
+    }
+    const LOCAIS = {
+      terra: { nome: "Terra", g: 9.8 },
+      lua: { nome: "Lua", g: 1.62 },
+      marte: { nome: "Marte", g: 3.71 },
+      jupiter: { nome: "Júpiter", g: 24.79 },
+      misterio: { nome: "Planeta X", g: gMisterio, oculto: true },
+    };
+
+    /* ---------- Controles ---------- */
+    const $ = (id) => document.getElementById(id);
+    const cL = $("c-l"), cM = $("c-m"), cA = $("c-a"), cLocal = $("c-local");
+    const params = () => ({
+      L: +cL.value, m: +cM.value, a0: +cA.value * Math.PI / 180, local: LOCAIS[cLocal.value],
+    });
+
+    function atualizarRotulos() {
+      $("o-l").textContent = fmt(+cL.value, 2) + " m";
+      $("o-m").textContent = cM.value + " g";
+      $("o-a").textContent = cA.value + "°";
+    }
+
+    /* ---------- Física (integração RK4, equação completa sem aproximação) ---------- */
+    let theta, omega, tempo, meiasOsc, ultimaVirada, periodos, pausado = false;
+
+    function soltar() {
+      const p = params();
+      theta = p.a0; omega = 0; tempo = 0; meiasOsc = 0; ultimaVirada = null; periodos = [];
+      $("l-t").textContent = "—";
+      $("b-registrar").disabled = true;
+      $("aviso-registro").hidden = false;
+    }
+
+    function passo(dt) {
+      const { L, local } = params();
+      const k = local.g / L;
+      const f = (th, om) => [om, -k * Math.sin(th)];
+      const [a1, b1] = f(theta, omega);
+      const [a2, b2] = f(theta + a1 * dt / 2, omega + b1 * dt / 2);
+      const [a3, b3] = f(theta + a2 * dt / 2, omega + b2 * dt / 2);
+      const [a4, b4] = f(theta + a3 * dt, omega + b3 * dt);
+      const omegaAntes = omega;
+      theta += (a1 + 2 * a2 + 2 * a3 + a4) * dt / 6;
+      omega += (b1 + 2 * b2 + 2 * b3 + b4) * dt / 6;
+      tempo += dt;
+      // cada inversão de sentido (ω troca de sinal) marca meia oscilação
+      if (omegaAntes !== 0 && Math.sign(omegaAntes) !== Math.sign(omega)) {
+        meiasOsc++;
+        if (meiasOsc % 2 === 0) {
+          if (ultimaVirada !== null) periodos.push(tempo - ultimaVirada);
+          ultimaVirada = tempo;
+          if (meiasOsc === 2) periodos.push(tempo); // primeira oscilação completa desde a soltura
+        }
+      }
+    }
+
+    const periodoMedido = () => periodos.length ? periodos[periodos.length - 1] : NaN;
+
+    /* ---------- Desenho ---------- */
+    const tela = $("tela"), ctx = tela.getContext("2d");
+    let rastro = [];
+
+    function desenhar() {
+      const dpr = window.devicePixelRatio || 1;
+      const w = tela.clientWidth, h = tela.clientHeight;
+      if (tela.width !== w * dpr || tela.height !== h * dpr) { tela.width = w * dpr; tela.height = h * dpr; }
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, w, h);
+
+      const { L, m, a0 } = params();
+      const ox = w / 2, oy = 30;
+      // cabe o fio mais longo (2 m) na altura e a amplitude atual na largura
+      const escala = Math.min((h - 70) / 2.0, (w / 2 - 28) / (2.0 * Math.sin(Math.max(a0, 0.35))));
+      const comp = L * escala;
+      const x = ox + Math.sin(theta) * comp, y = oy + Math.cos(theta) * comp;
+      const raio = 8 + Math.cbrt(m) * 1.3;
+
+      // régua de ângulo
+      ctx.strokeStyle = Lab.cor("--linha");
+      ctx.setLineDash([4, 5]);
+      ctx.beginPath(); ctx.moveTo(ox, oy); ctx.lineTo(ox, oy + comp + 20); ctx.stroke();
+      ctx.beginPath(); ctx.arc(ox, oy, comp, Math.PI / 2 - a0, Math.PI / 2 + a0); ctx.stroke();
+      ctx.setLineDash([]);
+
+      // rastro
+      rastro.push({ x, y }); if (rastro.length > 40) rastro.shift();
+      rastro.forEach((p, i) => {
+        ctx.fillStyle = Lab.cor("--destaque");
+        ctx.globalAlpha = (i / rastro.length) * 0.25;
+        ctx.beginPath(); ctx.arc(p.x, p.y, 3, 0, Math.PI * 2); ctx.fill();
+      });
+      ctx.globalAlpha = 1;
+
+      // suporte
+      ctx.fillStyle = Lab.cor("--tinta");
+      ctx.fillRect(ox - 60, oy - 8, 120, 6);
+
+      // fio e massa
+      ctx.strokeStyle = Lab.cor("--tinta");
+      ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(ox, oy); ctx.lineTo(x, y); ctx.stroke();
+      ctx.lineWidth = 1;
+      ctx.fillStyle = Lab.cor("--destaque");
+      ctx.beginPath(); ctx.arc(x, y, raio, 0, Math.PI * 2); ctx.fill();
+
+      // ângulo atual
+      ctx.fillStyle = Lab.cor("--tinta-suave");
+      ctx.font = '12px "IBM Plex Mono", ui-monospace, monospace';
+      ctx.textAlign = "right";
+      ctx.fillText(`θ = ${fmt(theta * 180 / Math.PI, 0)}°`, w - 14, h - 14);
+    }
+
+    /* ---------- Laço de animação ---------- */
+    let anterior = performance.now();
+    function quadro(agora) {
+      let dt = Math.min((agora - anterior) / 1000, 0.05);
+      anterior = agora;
+      if (!pausado) {
+        const sub = 20;
+        for (let i = 0; i < sub; i++) passo(dt / sub);
+        $("l-osc").textContent = Math.floor(meiasOsc / 2);
+        $("l-tempo").textContent = fmt(tempo, 2);
+        const T = periodoMedido();
+        if (Number.isFinite(T)) {
+          $("l-t").textContent = fmt(T, 3);
+          $("b-registrar").disabled = false;
+          $("aviso-registro").hidden = true;
+        }
+      }
+      desenhar();
+      requestAnimationFrame(quadro);
+    }
+
+    /* ---------- Tabela ---------- */
+    let pronto = false; // o gráfico é criado depois da tabela
+    const tabela = Lab.tabela($("tabela"), {
+      nomeArquivo: "pendulo-medicoes",
+      colunas: [
+        { chave: "local", titulo: "Local", texto: true },
+        { chave: "gTexto", titulo: "g (m/s²)" },
+        { chave: "L", titulo: "L (m)", casas: 2 },
+        { chave: "m", titulo: "m (g)", casas: 0 },
+        { chave: "amp", titulo: "θ₀ (°)", casas: 0 },
+        { chave: "T", titulo: "T medido (s)", casas: 3 },
+        { chave: "Tteo", titulo: "T teórico (s)", casas: 3 },
+        { chave: "T2", titulo: "T² (s²)", casas: 3 },
+      ],
+      aoMudar: () => { if (pronto) { atualizarSeletorGrafico(); atualizarGrafico(); } },
+    });
+
+    $("b-registrar").addEventListener("click", () => {
+      const p = params(), T = periodoMedido();
+      if (!Number.isFinite(T)) return;
+      tabela.adicionar({
+        local: p.local.nome,
+        gTexto: p.local.oculto ? "?" : fmt(p.local.g, 2),
+        L: p.L, m: p.m, amp: +cA.value,
+        T, T2: T * T,
+        Tteo: p.local.oculto ? "?" : 2 * Math.PI * Math.sqrt(p.L / p.local.g),
+      });
+    });
+
+    /* ---------- Gráfico ---------- */
+    const grafico = Lab.grafico($("grafico"), { rotuloX: "L (m)", rotuloY: "T² (s²)" });
+    const gLocal = $("g-local"), gTipo = $("g-tipo");
+
+    function atualizarSeletorGrafico() {
+      const atual = gLocal.value;
+      const locais = Array.from(new Set(tabela.linhas().map((l) => l.local)));
+      gLocal.innerHTML = locais.length
+        ? locais.map((n) => `<option>${Lab.escapar(n)}</option>`).join("")
+        : "<option>—</option>";
+      if (locais.includes(atual)) gLocal.value = atual;
+    }
+
+    // g obtido a partir do ajuste T² = a·L (+ b), usando apenas amplitudes ≤ 20°
+    function ajusteDoLocal(nome) {
+      const pts = tabela.linhas()
+        .filter((l) => l.local === nome && l.amp <= 20)
+        .map((l) => ({ x: l.L, y: l.T2 }));
+      const distintos = new Set(pts.map((p) => p.x)).size;
+      if (distintos < 2) return null;
+      const aj = Lab.ajusteLinear(pts);
+      return aj ? { ...aj, g: 4 * Math.PI * Math.PI / aj.a, n: pts.length } : null;
+    }
+
+    function atualizarGrafico() {
+      const nome = gLocal.value, quadrado = gTipo.value === "t2";
+      const linhas = tabela.linhas().filter((l) => l.local === nome);
+      const pts = linhas.map((l) => ({ x: l.L, y: quadrado ? l.T2 : l.T }));
+      const series = [{ pontos: pts, tipo: "pontos", cor: "--destaque" }];
+      const legenda = $("g-legenda");
+      const aj = ajusteDoLocal(nome);
+
+      if (quadrado && aj) {
+        const xMax = Math.max(...pts.map((p) => p.x));
+        series.unshift({ pontos: [{ x: 0, y: aj.b }, { x: xMax, y: aj.a * xMax + aj.b }], tipo: "linha", cor: "--tinta-suave" });
+        legenda.innerHTML =
+          `Reta ajustada: T² = ${fmt(aj.a, 3)}·L ${aj.b >= 0 ? "+" : "−"} ${fmt(Math.abs(aj.b), 3)} ` +
+          `(r² = ${fmt(aj.r2, 4)}) → <strong>g = 4π²/${fmt(aj.a, 3)} ≈ ${fmt(aj.g, 2)} m/s²</strong>` +
+          ` · ${aj.n} medições com amplitude ≤ 20°`;
+      } else if (quadrado) {
+        legenda.textContent = "Registre ao menos dois comprimentos diferentes (amplitude ≤ 20°) para ajustar a reta.";
+      } else {
+        legenda.textContent = pts.length ? "Observe: os pontos formam uma curva, não uma reta." : "";
+      }
+      grafico.atualizar({ series, rotuloY: quadrado ? "T² (s²)" : "T (s)" });
+    }
+
+    gLocal.addEventListener("change", atualizarGrafico);
+    gTipo.addEventListener("change", atualizarGrafico);
+
+    /* ---------- Hipóteses ---------- */
+    Lab.questoes($("hipoteses-lista"), [
+      {
+        tipo: "aberta",
+        enunciado: "<p>Se você trocar a massa do pêndulo por outra <strong>quatro vezes mais pesada</strong>, o que acontece com o tempo de cada oscilação? Por quê?</p>",
+        modelo: "<p>Guarde sua hipótese! Você vai testá-la na etapa 2 do procedimento.</p>",
+      },
+      {
+        tipo: "aberta",
+        enunciado: "<p>E se você usar um fio <strong>mais comprido</strong>? O pêndulo vai oscilar mais rápido ou mais devagar?</p>",
+        modelo: "<p>Guarde sua hipótese! Você vai testá-la na etapa 1 do procedimento.</p>",
+      },
+      {
+        tipo: "aberta",
+        enunciado: "<p>Um astronauta leva um relógio de pêndulo para a <strong>Lua</strong>. O relógio vai adiantar, atrasar ou funcionar normalmente?</p>",
+        modelo: "<p>Guarde sua hipótese! Você vai testá-la na etapa 4 do procedimento.</p>",
+      },
+    ], { chave: "hipoteses", semPlacar: true });
+
+    /* ---------- Questões ---------- */
+    Lab.questoes($("questoes-lista"), [
+      {
+        tipo: "multipla", nivel: "fácil",
+        enunciado: "<p>De acordo com seus experimentos, qual grandeza <strong>não</strong> altera o período do pêndulo?</p>",
+        alternativas: ["O comprimento do fio", "A aceleração da gravidade", "A massa pendular", "O planeta onde o pêndulo está"],
+        correta: 2,
+        explicacao: "A massa não aparece na equação T = 2π√(L/g). A força peso aumenta com a massa, mas a inércia também — os efeitos se cancelam.",
+      },
+      {
+        tipo: "multipla", nivel: "médio",
+        enunciado: "<p>Se o comprimento do fio for <strong>quadruplicado</strong>, o período:</p>",
+        alternativas: ["fica quatro vezes maior", "dobra", "não se altera", "cai pela metade"],
+        correta: 1,
+        explicacao: "T é proporcional a √L. Multiplicando L por 4, T fica multiplicado por √4 = 2.",
+      },
+      {
+        tipo: "numerica", nivel: "fácil",
+        enunciado: "<p>Calcule o período de um pêndulo de <strong>1,00 m</strong> na Terra (g = 9,8 m/s²). Use π = 3,14.</p>",
+        resposta: 2 * 3.14 * Math.sqrt(1 / 9.8), tolerancia: 0.02, unidade: "s",
+        explicacao: "T = 2π√(L/g) = 2 × 3,14 × √(1,00 / 9,8) ≈ 6,28 × 0,319 ≈ 2,01 s.",
+      },
+      {
+        tipo: "multipla", nivel: "médio",
+        enunciado: "<p>Um relógio de pêndulo que funciona perfeitamente na Terra é levado para a Lua (g ≈ 1,6 m/s²). O relógio vai:</p>",
+        alternativas: ["adiantar, porque o pêndulo oscila mais rápido", "atrasar, porque o pêndulo oscila mais devagar", "funcionar normalmente, porque o fio é o mesmo", "parar completamente"],
+        correta: 1,
+        explicacao: "Com g menor, T = 2π√(L/g) fica maior (cerca de 2,5 vezes). Cada “tique” demora mais, e o relógio atrasa.",
+      },
+      {
+        tipo: "multipla", nivel: "médio",
+        enunciado: "<p>Na etapa 3, você mediu o período com amplitude de 70°. Comparado ao valor da equação T = 2π√(L/g), o período medido foi:</p>",
+        alternativas: ["igual, pois a amplitude não aparece na equação", "menor", "maior", "zero"],
+        correta: 2,
+        explicacao: "A equação só vale para pequenas amplitudes. Para ângulos grandes, o período real é maior — cerca de 10% maior a 70°. É por isso que os relógios de pêndulo oscilam pouco.",
+      },
+      {
+        tipo: "numerica", nivel: "desafio",
+        enunciado: "<p>Qual deve ser o comprimento de um pêndulo, na Terra (g = 9,8 m/s²), para que o período seja exatamente <strong>1,0 s</strong>?</p>",
+        resposta: 9.8 / (4 * Math.PI * Math.PI), tolerancia: 0.03, unidade: "m",
+        explicacao: "Isolando L: L = g·T²/(4π²) = 9,8 × 1² / 39,5 ≈ 0,248 m, ou cerca de 25 cm.",
+      },
+      {
+        tipo: "numerica", nivel: "desafio",
+        enunciado: "<p><strong>Planeta X:</strong> usando o gráfico T² × L dos seus dados do Planeta X, determine a aceleração da gravidade desse planeta.</p>",
+        resposta: () => gMisterio, tolerancia: 0.04, unidade: "m/s²",
+        explicacao: `Pela inclinação a da reta T² × L, g = 4π²/a. Cada estudante recebe um Planeta X diferente, então não adianta copiar do colega!`,
+      },
+      {
+        tipo: "aberta", nivel: "reflexão",
+        enunciado: "<p>No verão, o fio metálico de um relógio de pêndulo se dilata (fica mais comprido). O relógio passa a adiantar ou atrasar? Como um relojoeiro poderia corrigir isso?</p>",
+        modelo: "<p>Com o fio mais comprido, o período aumenta e o relógio <strong>atrasa</strong>. Para corrigir, o relojoeiro sobe a massa pendular (há um parafuso de ajuste embaixo dela), encurtando o comprimento efetivo. Relógios de precisão usam hastes de materiais que quase não se dilatam, como a liga Invar.</p>",
+      },
+      {
+        tipo: "aberta", nivel: "reflexão",
+        enunciado: "<p>Explique, com suas palavras, por que o gráfico T² × L é uma reta e o que a inclinação dessa reta representa fisicamente.</p>",
+        modelo: "<p>Elevando T = 2π√(L/g) ao quadrado, obtemos T² = (4π²/g)·L. Como 4π²/g é constante para um mesmo local, T² é diretamente proporcional a L — e uma relação de proporcionalidade direta é uma reta que passa pela origem. A inclinação vale 4π²/g; portanto, quanto maior a gravidade, menos inclinada é a reta.</p>",
+      },
+    ], {
+      aoAtualizar(acertos, total) {
+        $("progresso-texto").textContent = `${acertos} de ${total} questões corretas`;
+        $("progresso-barra").style.width = (total ? (acertos / total) * 100 : 0) + "%";
+      },
+    });
+
+    /* ---------- Início ---------- */
+    [cL, cM, cA].forEach((c) => c.addEventListener("input", () => { atualizarRotulos(); soltar(); rastro = []; }));
+    cLocal.addEventListener("change", () => { soltar(); rastro = []; });
+    $("b-soltar").addEventListener("click", () => { soltar(); rastro = []; });
+    $("b-pausar").addEventListener("click", (e) => {
+      pausado = !pausado;
+      e.currentTarget.textContent = pausado ? "▶ Continuar" : "❚❚ Pausar";
+    });
+
+    atualizarRotulos();
+    soltar();
+    pronto = true;
+    atualizarSeletorGrafico();
+    atualizarGrafico();
+    requestAnimationFrame(quadro);
+  })();
+  </script>
+</body>
+</html>

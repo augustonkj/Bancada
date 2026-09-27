@@ -1,0 +1,1041 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Titulação Ácido-Base — Bancada</title>
+  <meta name="description" content="Laboratório virtual: titule ácidos forte e fraco com NaOH, construa a curva de titulação, escolha o indicador certo e descubra a concentração de uma amostra desconhecida.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%23f4f1ea' stroke='%231d1f1c' stroke-width='2'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-family='Georgia,serif' font-weight='700' font-size='17' fill='%231d1f1c'%3EB%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;1,9..144,500&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../_comum/lab.css">
+  <style>
+    .bancada__leitura.leitura--direita { left: auto; right: 12px; }
+    .botoes--adicao .botao { flex: 1 1 auto; padding-inline: 10px; }
+    .botao.aberta { color: #fff; background: var(--info); border-color: var(--info); }
+    .fixo { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 14px; padding: 8px 10px; border: 1px dashed var(--linha); border-radius: 6px; }
+  </style>
+</head>
+<body>
+  <header class="lab-topo">
+    <a class="lab-topo__voltar" href="../../">← Bancada</a>
+    <div class="lab-topo__acoes">
+      <button class="botao-icone" id="lab-imprimir" type="button" aria-label="Imprimir relatório" title="Imprimir relatório">⎙</button>
+      <button class="botao-icone" id="lab-tema" type="button" aria-label="Alternar tema claro/escuro" title="Alternar tema">◐</button>
+    </div>
+  </header>
+
+  <div class="lab">
+    <nav class="lab-sumario" aria-label="Etapas do laboratório">
+      <p>Roteiro</p>
+      <ol>
+        <li><a href="#objetivos">Objetivos</a></li>
+        <li><a href="#hipoteses">Hipóteses</a></li>
+        <li><a href="#conceitos">Conceitos</a></li>
+        <li><a href="#experimento">Experimento</a></li>
+        <li><a href="#analise">Análise de dados</a></li>
+        <li><a href="#questoes">Questões</a></li>
+        <li><a href="#conclusao">Conclusão</a></li>
+      </ol>
+      <div class="lab-progresso">
+        <span id="progresso-texto">0 questões corretas</span>
+        <div class="lab-progresso__barra"><span id="progresso-barra"></span></div>
+      </div>
+    </nav>
+
+    <main class="lab-conteudo">
+      <header class="lab-cabecalho">
+        <p class="lab-rotulo">Química · Soluções · Laboratório 02</p>
+        <h1>Titulação Ácido-Base</h1>
+        <p class="lab-cabecalho__resumo">
+          Gota a gota, uma base neutraliza um ácido — até que uma única gota muda tudo. Use uma bureta,
+          um indicador e uma curva de pH para descobrir quanto ácido existe em uma amostra.
+        </p>
+        <dl class="lab-ficha">
+          <div><dt>Nível</dt><dd>Ensino Médio</dd></div>
+          <div><dt>Duração</dt><dd>2 aulas (≈ 100 min)</dd></div>
+          <div><dt>Pré-requisitos</dt><dd>Concentração em mol/L, reações químicas, logaritmo (noção)</dd></div>
+          <div><dt>BNCC</dt><dd>EM13CNT301</dd></div>
+        </dl>
+      </header>
+
+      <!-- 1. OBJETIVOS -->
+      <section class="secao" id="objetivos">
+        <h2><span class="num">01</span> Objetivos</h2>
+        <p>Ao final deste laboratório, você será capaz de:</p>
+        <ul class="objetivos">
+          <li><span>Descrever a reação de neutralização entre um ácido e uma base e reconhecer o que acontece com o pH durante uma titulação.</span></li>
+          <li><span>Diferenciar <strong>ponto de equivalência</strong> e <strong>ponto de viragem</strong> do indicador.</span></li>
+          <li><span>Construir e interpretar a curva de titulação (pH × volume de base) de um ácido forte e de um ácido fraco.</span></li>
+          <li><span>Escolher um indicador adequado a partir da faixa de pH em que ele muda de cor.</span></li>
+          <li><span>Calcular a concentração de uma solução ácida desconhecida usando C<sub>a</sub>·V<sub>a</sub> = C<sub>b</sub>·V<sub>b</sub>.</span></li>
+        </ul>
+      </section>
+
+      <!-- 2. HIPÓTESES -->
+      <section class="secao" id="hipoteses">
+        <h2><span class="num">02</span> Antes de começar: suas hipóteses</h2>
+        <p>
+          Cientistas começam com perguntas e previsões. Responda com o que você <em>acha</em> que vai
+          acontecer — não existe resposta errada aqui. Você vai testar suas hipóteses no experimento.
+        </p>
+        <div id="hipoteses-lista"></div>
+      </section>
+
+      <!-- 3. CONCEITOS -->
+      <section class="secao" id="conceitos">
+        <h2><span class="num">03</span> Conceitos</h2>
+
+        <h3>Ácidos e bases de Arrhenius</h3>
+        <p>
+          Segundo Svante Arrhenius (1887), <strong>ácido</strong> é toda substância que, em água, libera
+          íons H<sup>+</sup> (mais precisamente, H<sub>3</sub>O<sup>+</sup>), e <strong>base</strong> é toda
+          substância que, em água, libera íons OH<sup>−</sup>.
+        </p>
+        <ul>
+          <li><strong>Ácido forte</strong> — ioniza-se praticamente por completo. Ex.: HCl → H<sup>+</sup> + Cl<sup>−</sup>.</li>
+          <li><strong>Ácido fraco</strong> — ioniza-se só parcialmente, em equilíbrio. Ex.: CH<sub>3</sub>COOH ⇌ H<sup>+</sup> + CH<sub>3</sub>COO<sup>−</sup>
+            (ácido acético, o ácido do vinagre). A “força” é medida pela constante de acidez K<sub>a</sub>: para o ácido acético,
+            K<sub>a</sub> = 1,8 × 10<sup>−5</sup>.</li>
+          <li><strong>Base forte</strong> — dissocia-se por completo. Ex.: NaOH → Na<sup>+</sup> + OH<sup>−</sup>.</li>
+        </ul>
+
+        <h3>A escala de pH</h3>
+        <p>O pH indica a acidez de uma solução a partir da concentração de íons H<sup>+</sup>:</p>
+        <div class="formula">
+          pH = −log [H<sup>+</sup>]
+          <small>[H⁺] em mol/L · a 25 °C</small>
+        </div>
+        <p>
+          Na água, H<sup>+</sup> e OH<sup>−</sup> estão sempre presentes e ligados pelo produto iônico da água:
+          [H<sup>+</sup>]·[OH<sup>−</sup>] = K<sub>w</sub> = 1,0 × 10<sup>−14</sup> (a 25 °C). Por isso, a 25 °C,
+          uma solução é <strong>ácida</strong> se pH &lt; 7, <strong>neutra</strong> se pH = 7 e <strong>básica</strong> se pH &gt; 7.
+          Como a escala é logarítmica, cada unidade de pH a menos significa <strong>dez vezes</strong> mais H<sup>+</sup>.
+        </p>
+
+        <h3>Neutralização</h3>
+        <p>Quando um ácido reage com uma base, forma-se um sal e água:</p>
+        <div class="formula">
+          HCl + NaOH → NaCl + H<sub>2</sub>O
+          <small>equação iônica essencial: H⁺ + OH⁻ → H₂O</small>
+        </div>
+        <p>
+          Com o ácido acético, a reação é CH<sub>3</sub>COOH + NaOH → CH<sub>3</sub>COONa + H<sub>2</sub>O. Nos dois casos,
+          <strong>1 mol de ácido reage com 1 mol de base</strong> (proporção 1 : 1).
+        </p>
+
+        <h3>O que é uma titulação?</h3>
+        <p>
+          <strong>Titulação</strong> é uma técnica de análise quantitativa: adiciona-se aos poucos uma solução de
+          concentração conhecida (o <strong>titulante</strong>, aqui NaOH, colocado na <strong>bureta</strong>) a um volume
+          conhecido da solução que se quer analisar (o <strong>titulado</strong>, aqui o ácido, no <strong>erlenmeyer</strong>),
+          até que a reação entre os dois seja completa.
+        </p>
+
+        <h3>Ponto de equivalência × ponto de viragem</h3>
+        <dl class="variaveis">
+          <dt>Equivalência</dt><dd>momento em que a quantidade de base adicionada é exatamente a necessária para reagir com todo o ácido
+            (n<sub>ácido</sub> = n<sub>base</sub>). É um conceito teórico: não dá para “ver”.</dd>
+          <dt>Viragem</dt><dd>momento em que o indicador muda de cor e o analista <em>para</em> a titulação (também chamado de
+            ponto final). Um bom indicador vira de cor o mais perto possível do ponto de equivalência.</dd>
+        </dl>
+
+        <h3>O cálculo da concentração</h3>
+        <p>
+          Como a quantidade de matéria é n = C·V e, na equivalência, n<sub>ácido</sub> = n<sub>base</sub> (reação 1 : 1):
+        </p>
+        <div class="formula">
+          C<sub>a</sub> · V<sub>a</sub> = C<sub>b</sub> · V<sub>b</sub>
+          <small>válida para reação 1 : 1 (ácido e base monopróticos)</small>
+        </div>
+        <dl class="variaveis">
+          <dt>C<sub>a</sub></dt><dd>concentração do ácido (mol/L) — geralmente o que se quer descobrir</dd>
+          <dt>V<sub>a</sub></dt><dd>volume de ácido colocado no erlenmeyer</dd>
+          <dt>C<sub>b</sub></dt><dd>concentração da base (mol/L), conhecida</dd>
+          <dt>V<sub>b</sub></dt><dd>volume de base gasto até o ponto de equivalência (lido na bureta)</dd>
+        </dl>
+        <div class="caixa">
+          <span class="caixa__titulo">Exemplo resolvido</span>
+          <p>
+            Uma alíquota de 20,00 mL de HCl foi titulada com NaOH 0,100 mol/L, e a viragem ocorreu após 16,40 mL de base.
+            Qual a concentração do ácido?
+          </p>
+          <p>
+            n(NaOH) = 0,100 mol/L × 0,01640 L = 1,64 × 10<sup>−3</sup> mol = n(HCl).<br>
+            C<sub>a</sub> = 1,64 × 10<sup>−3</sup> mol ÷ 0,02000 L = <strong>0,0820 mol/L</strong>.<br>
+            Direto pela fórmula: C<sub>a</sub> = (0,100 × 16,40) ÷ 20,00 = 0,0820 mol/L. Os volumes podem ficar em mL,
+            desde que os dois estejam na mesma unidade.
+          </p>
+        </div>
+
+        <h3>Indicadores ácido-base</h3>
+        <p>
+          Indicadores são ácidos fracos orgânicos cuja forma ácida (HIn) tem uma cor e cuja forma básica (In<sup>−</sup>)
+          tem outra. Cada indicador muda de cor dentro de uma <strong>faixa de viragem</strong> característica:
+        </p>
+        <div class="tabela-dados"><div class="tabela-dados__rolagem"><table>
+          <thead><tr><th>Indicador</th><th>Cor em meio ácido</th><th>Faixa de viragem (pH)</th><th>Cor em meio básico</th></tr></thead>
+          <tbody>
+            <tr><td style="font-family:inherit">Alaranjado de metila</td><td style="font-family:inherit">vermelho</td><td>3,1 – 4,4</td><td style="font-family:inherit">amarelo</td></tr>
+            <tr><td style="font-family:inherit">Azul de bromotimol</td><td style="font-family:inherit">amarelo</td><td>6,0 – 7,6</td><td style="font-family:inherit">azul</td></tr>
+            <tr><td style="font-family:inherit">Fenolftaleína</td><td style="font-family:inherit">incolor</td><td>8,2 – 10,0</td><td style="font-family:inherit">rosa</td></tr>
+          </tbody>
+        </table></div></div>
+
+        <div class="caixa caixa--pense">
+          <span class="caixa__titulo">Pense</span>
+          <p>
+            Se cada indicador vira em um pH diferente, será que qualquer um serve para qualquer titulação? Guarde esta
+            pergunta: você vai respondê-la com os seus próprios dados.
+          </p>
+        </div>
+
+        <div class="caixa caixa--curiosidade">
+          <span class="caixa__titulo">Você sabia?</span>
+          <p>
+            O suco de <strong>repolho roxo</strong> é um indicador caseiro: suas antocianinas ficam vermelhas em meio ácido
+            (limão, vinagre), arroxeadas perto do neutro e verdes a amareladas em meio básico (bicarbonato, sabão).
+            E a própria titulação é antiga: atribui-se ao químico francês Joseph Louis Gay-Lussac, no início do século XIX,
+            a criação dos nomes <em>bureta</em> e <em>pipeta</em>. Até hoje, titulações são usadas para medir a acidez do
+            vinagre, do leite, do vinho e até de combustíveis.
+          </p>
+        </div>
+
+        <div class="caixa caixa--atencao">
+          <span class="caixa__titulo">Segurança no laboratório real</span>
+          <p>
+            Use sempre <strong>óculos de proteção</strong>, <strong>luvas</strong> e jaleco. O <strong>NaOH é corrosivo</strong>:
+            ataca a pele e pode causar lesões graves nos olhos — em caso de contato, lave com muita água corrente por
+            vários minutos e avise o professor. <strong>Nunca pipete com a boca</strong>: use uma pera ou um pipetador.
+            Encha a bureta abaixo da altura dos olhos, com um funil, e descarte as soluções conforme a orientação do professor.
+          </p>
+        </div>
+      </section>
+
+      <!-- 4. EXPERIMENTO -->
+      <section class="secao" id="experimento">
+        <h2><span class="num">04</span> Experimento</h2>
+        <p>
+          Na bancada abaixo, a bureta contém NaOH 0,100 mol/L e o erlenmeyer contém <strong>25,00 mL</strong> de ácido e
+          algumas gotas de indicador. Um pHmetro mede o pH continuamente. A lupa à direita amplia a escala da bureta,
+          como quando olhamos o menisco de perto.
+        </p>
+
+        <div class="bancada">
+          <div class="bancada__tela" id="tela-wrap" style="--altura-tela: 460px">
+            <canvas id="tela" aria-label="Simulação da titulação: bureta com NaOH sobre um erlenmeyer com ácido e indicador"></canvas>
+            <div class="bancada__leitura leitura--direita" aria-live="polite">
+              <span>V(NaOH): <b id="l-v">0,00</b> mL</span>
+              <span>pH: <b id="l-ph">—</b></span>
+              <span>Cor: <b id="l-cor">—</b></span>
+            </div>
+          </div>
+
+          <div class="bancada__controles">
+            <h4>Controles</h4>
+            <label class="controle">
+              <span class="controle__topo">Ácido no erlenmeyer <output id="o-acido"></output></span>
+              <select id="c-acido">
+                <option value="hcl">HCl — ácido clorídrico (forte)</option>
+                <option value="acetico">CH₃COOH — ácido acético (fraco)</option>
+              </select>
+            </label>
+            <label class="controle">
+              <span class="controle__topo">Concentração do ácido <output id="o-amostra"></output></span>
+              <select id="c-amostra">
+                <option value="conhecida">0,100 mol/L (conhecida)</option>
+                <option value="desconhecida">Amostra desconhecida</option>
+              </select>
+            </label>
+            <div class="controle">
+              <span class="controle__topo">Titulante na bureta</span>
+              <span class="fixo">NaOH 0,100 mol/L · 50 mL</span>
+            </div>
+            <label class="controle">
+              <span class="controle__topo">Indicador <output id="o-ind"></output></span>
+              <select id="c-ind">
+                <option value="fenol">Fenolftaleína</option>
+                <option value="metila">Alaranjado de metila</option>
+                <option value="bromotimol">Azul de bromotimol</option>
+                <option value="sem">Sem indicador</option>
+              </select>
+            </label>
+            <div class="botoes botoes--adicao">
+              <button class="botao" id="b-gota" type="button">+1 gota (0,05 mL)</button>
+              <button class="botao" id="b-05" type="button">+0,5 mL</button>
+              <button class="botao" id="b-10" type="button">+1,0 mL</button>
+            </div>
+            <div class="botoes">
+              <button class="botao" id="b-torneira" type="button" aria-pressed="false">▶ Abrir torneira</button>
+              <button class="botao" id="b-reiniciar" type="button">↺ Reiniciar</button>
+            </div>
+            <button class="botao botao--primario" id="b-registrar" type="button">Registrar ponto</button>
+            <button class="botao" id="b-viragem" type="button">Registrar ponto de viragem</button>
+            <p id="aviso" class="mono" style="margin:0;font-size:12px;color:var(--tinta-suave)" aria-live="polite">
+              A torneira aberta adiciona cerca de 0,5 mL por segundo. Perto da viragem, use gotas.
+            </p>
+          </div>
+        </div>
+
+        <h3>Procedimento</h3>
+        <ol class="procedimento">
+          <li>
+            <strong>Ácido forte.</strong> Escolha HCl 0,100 mol/L e fenolftaleína. Adicione NaOH de 1,0 em 1,0 mL,
+            clicando em <em>Registrar ponto</em> a cada adição, até cerca de 35 mL. Anote o volume em que a solução
+            fica rosa e clique em <em>Registrar ponto de viragem</em>.
+          </li>
+          <li>
+            <strong>Ácido fraco.</strong> Clique em <em>Reiniciar</em>, troque para CH<sub>3</sub>COOH 0,100 mol/L (ainda com
+            fenolftaleína) e repita. Compare o pH inicial e o pH no ponto de equivalência com os do HCl.
+          </li>
+          <li>
+            <strong>Troca de indicador.</strong> Repita a titulação do ácido acético com <strong>alaranjado de metila</strong>.
+            Registre a viragem. Em que volume a cor mudou? Compare com o volume obtido com a fenolftaleína.
+          </li>
+          <li>
+            <strong>Pontos em torno da equivalência.</strong> Com qualquer ácido, adicione base rapidamente até uns 23 mL e
+            depois continue <strong>gota a gota</strong>, registrando um ponto a cada gota entre 24,00 e 26,00 mL.
+            Observe no gráfico o tamanho do “salto” de pH.
+          </li>
+          <li>
+            <strong>Desafio: amostra desconhecida.</strong> Selecione <em>Amostra desconhecida</em>, escolha um ácido e um
+            indicador adequado e titule. Registre o ponto de viragem e use-o para calcular a concentração do ácido (Questão 7).
+          </li>
+        </ol>
+
+        <div class="caixa caixa--atencao">
+          <span class="caixa__titulo">Boas práticas</span>
+          <p>
+            No laboratório real, leia a bureta com os olhos na altura da parte de baixo do <strong>menisco</strong>, coloque um
+            azulejo ou papel branco sob o erlenmeyer para enxergar melhor a cor e agite o frasco a cada adição. Faça primeiro
+            uma titulação rápida para saber “onde” fica a viragem e, depois, repita com cuidado, gota a gota, perto desse volume.
+            A viragem só é aceita quando a cor persiste por cerca de 30 segundos.
+          </p>
+        </div>
+      </section>
+
+      <!-- 5. ANÁLISE -->
+      <section class="secao" id="analise">
+        <h2><span class="num">05</span> Análise de dados</h2>
+        <h3>Tabela de medições</h3>
+        <div id="tabela"></div>
+
+        <h3>Curva de titulação</h3>
+        <p>
+          A linha mostra o pH medido continuamente pelo pHmetro na titulação atual; os pontos são as medições que você
+          registrou para o mesmo ácido e a mesma amostra. As linhas horizontais coloridas marcam a faixa de viragem do
+          indicador escolhido.
+        </p>
+        <div class="grafico">
+          <canvas id="grafico" aria-label="Curva de titulação: pH em função do volume de NaOH"></canvas>
+          <p class="grafico__legenda" id="g-legenda"></p>
+        </div>
+
+        <div class="caixa">
+          <span class="caixa__titulo">Lendo a curva</span>
+          <p>
+            A curva tem quatro regiões: <strong>(1)</strong> o início, cujo pH depende só do ácido e da sua força;
+            <strong>(2)</strong> uma região em que o pH sobe devagar, porque o OH<sup>−</sup> adicionado é consumido pelo ácido;
+            <strong>(3)</strong> o <strong>salto de pH</strong>, perto do ponto de equivalência, em que poucas gotas mudam o pH
+            em várias unidades; e <strong>(4)</strong> o excesso de base, em que o pH tende ao do NaOH diluído. O ponto de
+            equivalência fica no meio do salto, onde a curva é mais inclinada.
+          </p>
+        </div>
+
+        <div class="caixa">
+          <span class="caixa__titulo">Ácido fraco: o ponto de meia-equivalência</span>
+          <p>
+            Na titulação do ácido acético, a região (2) é uma <strong>solução-tampão</strong>: contém ao mesmo tempo
+            CH<sub>3</sub>COOH e CH<sub>3</sub>COO<sup>−</sup>, e por isso resiste à variação de pH. Pela equação de
+            Henderson-Hasselbalch, pH = pK<sub>a</sub> + log([CH<sub>3</sub>COO<sup>−</sup>]/[CH<sub>3</sub>COOH]).
+            Quando metade do ácido foi neutralizada (metade do volume de equivalência), as duas concentrações são iguais,
+            o log vale zero e <strong>pH = pK<sub>a</sub></strong> = −log(1,8 × 10<sup>−5</sup>) ≈ <strong>4,74</strong>.
+            É assim que químicos medem K<sub>a</sub> experimentalmente!
+          </p>
+          <p>
+            Repare também que, na equivalência, o erlenmeyer contém acetato de sódio, cujo íon reage com a água
+            (CH<sub>3</sub>COO<sup>−</sup> + H<sub>2</sub>O ⇌ CH<sub>3</sub>COOH + OH<sup>−</sup>). Por isso o pH de
+            equivalência do ácido fraco é <strong>maior que 7</strong>.
+          </p>
+        </div>
+
+        <div class="caixa caixa--pense">
+          <span class="caixa__titulo">Por que a escolha do indicador importa</span>
+          <p>
+            O indicador só funciona bem se a sua faixa de viragem cair <strong>dentro do salto de pH</strong>. Para o HCl, o
+            salto vai de pH ≈ 4 a 10 e os três indicadores viram praticamente no mesmo volume. Para o ácido acético, o salto é
+            menor e começa mais acima (pH ≈ 7,7 a 10): a fenolftaleína serve, mas o alaranjado de metila vira muito antes da
+            equivalência, ainda na região tampão.
+          </p>
+          <p id="indicador-info"></p>
+        </div>
+      </section>
+
+      <!-- 6. QUESTÕES -->
+      <section class="secao" id="questoes">
+        <h2><span class="num">06</span> Questões</h2>
+        <p>Responda às questões. As objetivas são corrigidas na hora, com explicação.</p>
+        <div id="questoes-lista"></div>
+      </section>
+
+      <!-- 7. CONCLUSÃO -->
+      <section class="secao" id="conclusao">
+        <h2><span class="num">07</span> Conclusão</h2>
+        <p>
+          Volte às suas hipóteses da seção 2. Quais foram confirmadas pelo experimento? Quais precisaram ser
+          revistas? Mudar de ideia diante de evidências é exatamente o que a ciência faz.
+        </p>
+        <h3>Resumo</h3>
+        <ul>
+          <li>Na titulação, uma solução de concentração conhecida reage com a amostra até a <strong>equivalência</strong>,
+            quando n<sub>ácido</sub> = n<sub>base</sub>; daí C<sub>a</sub>·V<sub>a</sub> = C<sub>b</sub>·V<sub>b</sub>.</li>
+          <li>O <strong>volume de equivalência</strong> depende só da quantidade de ácido — não da sua força.</li>
+          <li>O <strong>pH na equivalência</strong> é 7 para ácido forte com base forte, e maior que 7 para ácido fraco com
+            base forte (o ânion do ácido fraco deixa a solução básica).</li>
+          <li>Perto da equivalência ocorre um <strong>salto de pH</strong>; o indicador deve virar dentro desse salto.
+            Para o ácido acético, a fenolftaleína é adequada e o alaranjado de metila, não.</li>
+          <li>Para ácidos fracos, o pH na <strong>meia-equivalência</strong> é igual ao pK<sub>a</sub>.</li>
+        </ul>
+        <h3>Para ir além</h3>
+        <ul>
+          <li>Pesquise a acidez do vinagre no rótulo (em % de ácido acético) e calcule quanto NaOH 0,100 mol/L seria gasto
+            para titular 1,00 mL de vinagre.</li>
+          <li>Prepare um indicador de repolho roxo em casa e teste limão, vinagre, bicarbonato e sabão.</li>
+          <li>Pesquise como é a curva de titulação de um ácido <em>diprótico</em>, como o ácido fosfórico ou o carbônico:
+            quantos saltos ela tem?</li>
+          <li>Pesquise sobre a <em>titulação potenciométrica</em>, feita só com o pHmetro, sem indicador.</li>
+        </ul>
+        <div class="botoes nao-imprimir">
+          <button class="botao botao--primario" type="button" onclick="window.print()">⎙ Imprimir relatório</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <footer class="lab-rodape"><p></p></footer>
+
+  <script src="../_comum/lab.js"></script>
+  <script>
+  (function () {
+    "use strict";
+    Lab.iniciar({ id: "titulacao" });
+    const { fmt } = Lab;
+    const $ = (id) => document.getElementById(id);
+    let pronto = false;
+
+    /* ---------- Constantes ---------- */
+    const KW = 1.0e-14, KA = 1.8e-5, VA = 25.0, CB = 0.100, CAPACIDADE = 50, VAZAO = 0.5, GOTA = 0.05;
+
+    let cX = Lab.armazenamento.ler("bancada:titulacao:cX", null);
+    if (!Number.isFinite(cX)) {
+      cX = Math.round((0.050 + Math.random() * 0.100) * 1000) / 1000; // entre 0,050 e 0,150 mol/L
+      Lab.armazenamento.gravar("bancada:titulacao:cX", cX);
+    }
+
+    const ACIDOS = {
+      hcl: { nome: "HCl", fraco: false, info: "forte" },
+      acetico: { nome: "CH₃COOH", fraco: true, info: "Ka = 1,8×10⁻⁵" },
+    };
+
+    // cores RGBA; paradas distribuídas uniformemente ao longo da faixa de viragem
+    const AGUA = [196, 222, 238, 0.35];
+    const INDICADORES = {
+      fenol: { nome: "Fenolftaleína", faixa: [8.2, 10.0], paradas: [AGUA, [236, 150, 200, 0.55], [214, 30, 135, 0.85]],
+        nomes: ["incolor", "rosa-claro", "rosa"], linha: "#d6338a" },
+      metila: { nome: "Alaranjado de metila", faixa: [3.1, 4.4], paradas: [[210, 40, 38, 0.85], [236, 118, 34, 0.85], [240, 196, 40, 0.85]],
+        nomes: ["vermelho", "laranja", "amarelo"], linha: "#e0782a" },
+      bromotimol: { nome: "Azul de bromotimol", faixa: [6.0, 7.6], paradas: [[226, 204, 44, 0.85], [72, 160, 90, 0.85], [36, 86, 196, 0.85]],
+        nomes: ["amarelo", "verde", "azul"], linha: "#2f7fc1" },
+      sem: { nome: "Sem indicador", faixa: null, paradas: [AGUA], nomes: ["incolor"] },
+    };
+
+    /* ---------- Química: pH exato pelo balanço de cargas ----------
+     * [H⁺] + [Na⁺] = [OH⁻] + [A⁻], com [OH⁻] = Kw/[H⁺]
+     * ácido forte: [A⁻] = Ca ; ácido fraco: [A⁻] = Ca·Ka/(Ka + [H⁺])
+     * Resolvido por bisseção em log[H⁺] (a função é crescente em [H⁺]). */
+    function calcularPH(Vb, Ca0, fraco) {
+      const V = VA + Vb;
+      const Ca = Ca0 * VA / V, Na = CB * Vb / V;
+      const f = (x) => {
+        const h = Math.pow(10, x);
+        const A = fraco ? Ca * KA / (KA + h) : Ca;
+        return h + Na - KW / h - A;
+      };
+      let lo = -15.5, hi = 1.5;
+      for (let i = 0; i < 70; i++) {
+        const m = (lo + hi) / 2;
+        if (f(m) > 0) hi = m; else lo = m;
+      }
+      return -(lo + hi) / 2;
+    }
+
+    /* ---------- Estado ---------- */
+    const cAcido = $("c-acido"), cAmostra = $("c-amostra"), cInd = $("c-ind");
+    let Vb = 0, torneira = false, gotas = [], acumGota = 0, onda = 0, corExibida = null, curva = [];
+    let graficoSujo = true, ultimoGrafico = 0;
+
+    const exp = () => {
+      const desconhecida = cAmostra.value === "desconhecida";
+      return {
+        acidoId: cAcido.value, acido: ACIDOS[cAcido.value], indId: cInd.value, ind: INDICADORES[cInd.value],
+        desconhecida, Ca: desconhecida ? cX : 0.100,
+      };
+    };
+    const chaveExp = (e) => e.acidoId + "|" + (e.desconhecida ? "desconhecida" : "conhecida");
+    const pHatual = () => calcularPH(Vb, exp().Ca, exp().acido.fraco);
+    const Veq = () => exp().Ca * VA / CB;
+
+    function recalcularCurva() {
+      const e = exp();
+      curva = [];
+      for (let i = 0; i <= 2500; i++) { const v = i * 0.02; curva.push({ x: v, y: calcularPH(v, e.Ca, e.acido.fraco) }); }
+    }
+
+    /* ---------- Cor do indicador ---------- */
+    const suave = (t) => t * t * (3 - 2 * t);
+    function corAlvo(pH, ind) {
+      const p = ind.paradas;
+      if (!ind.faixa || p.length === 1) return { rgba: p[0].slice(), nome: ind.nomes[0] };
+      const [a, b] = ind.faixa;
+      const t = suave(Math.min(1, Math.max(0, (pH - a) / (b - a))));
+      const pos = t * (p.length - 1), i = Math.min(p.length - 2, Math.floor(pos)), u = pos - i;
+      const rgba = p[i].map((c, k) => c + (p[i + 1][k] - c) * u);
+      const nome = t < 0.12 ? ind.nomes[0] : t > 0.88 ? ind.nomes[2] : ind.nomes[1];
+      return { rgba, nome };
+    }
+    const rgbaCss = (c) => `rgba(${Math.round(c[0])},${Math.round(c[1])},${Math.round(c[2])},${c[3].toFixed(3)})`;
+
+    /* ---------- Adição de titulante ---------- */
+    function aviso(texto) { $("aviso").textContent = texto; }
+
+    function adicionar(dv, gotasVisuais) {
+      if (Vb >= CAPACIDADE - 1e-9) { aviso("A bureta está vazia (50 mL). Clique em Reiniciar para enchê-la de novo."); fecharTorneira(); return; }
+      Vb = Math.min(CAPACIDADE, Math.round((Vb + dv) * 1e6) / 1e6);
+      for (let i = 0; i < (gotasVisuais || 0); i++) gotas.push({ y: 0, v: 0, atraso: i * 0.07 });
+      if (Vb >= CAPACIDADE - 1e-9) { aviso("A bureta esvaziou (50 mL). Clique em Reiniciar para enchê-la de novo."); fecharTorneira(); }
+      atualizarLeitura();
+      graficoSujo = true;
+    }
+
+    function abrirTorneira() {
+      if (Vb >= CAPACIDADE - 1e-9) { adicionar(0); return; }
+      torneira = true;
+      const b = $("b-torneira");
+      b.textContent = "■ Fechar torneira"; b.classList.add("aberta"); b.setAttribute("aria-pressed", "true");
+    }
+    function fecharTorneira() {
+      torneira = false;
+      const b = $("b-torneira");
+      b.textContent = "▶ Abrir torneira"; b.classList.remove("aberta"); b.setAttribute("aria-pressed", "false");
+      graficoSujo = true;
+    }
+
+    function reiniciar() {
+      fecharTorneira();
+      Vb = 0; gotas = []; acumGota = 0; onda = 0;
+      const e = exp();
+      corExibida = corAlvo(pHatual(), e.ind).rgba;
+      recalcularCurva();
+      atualizarRotulos();
+      atualizarLeitura();
+      aviso("Bureta cheia (0,00 mL). A torneira aberta adiciona cerca de 0,5 mL por segundo. Perto da viragem, use gotas.");
+      $("b-viragem").disabled = e.indId === "sem";
+      graficoSujo = true;
+      if (pronto) { atualizarGrafico(); atualizarInfoIndicador(); }
+    }
+
+    function atualizarRotulos() {
+      const e = exp();
+      $("o-acido").textContent = e.acido.info;
+      $("o-amostra").textContent = e.desconhecida ? "? mol/L" : "0,100 mol/L";
+      $("o-ind").textContent = e.ind.faixa ? `pH ${fmt(e.ind.faixa[0], 1)}–${fmt(e.ind.faixa[1], 1)}` : "";
+    }
+
+    function atualizarLeitura() {
+      const e = exp(), pH = pHatual();
+      $("l-v").textContent = fmt(Vb, 2);
+      $("l-ph").textContent = fmt(pH, 2);
+      $("l-cor").textContent = corAlvo(pH, e.ind).nome;
+    }
+
+    /* ---------- Desenho ---------- */
+    const tela = $("tela"), ctx = tela.getContext("2d");
+    const FONTE = '"IBM Plex Mono", ui-monospace, monospace';
+
+    function desenhar() {
+      const dpr = window.devicePixelRatio || 1;
+      const w = tela.clientWidth, h = tela.clientHeight;
+      if (!w || !h) return;
+      if (tela.width !== Math.round(w * dpr) || tela.height !== Math.round(h * dpr)) {
+        tela.width = Math.round(w * dpr); tela.height = Math.round(h * dpr);
+      }
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, w, h);
+
+      const tinta = Lab.cor("--tinta"), suaveCor = Lab.cor("--tinta-suave"), linha = Lab.cor("--linha");
+      const papel = Lab.cor("--papel");
+      const TITULANTE = "rgba(170, 205, 232, 0.5)";
+
+      // geometria
+      const cx = Math.round(Math.max(110, w * 0.40));
+      const t = 16;                              // largura do tubo
+      const yTopo = 22, y0 = 40, y50 = Math.round(h * 0.56);
+      const k = (y50 - y0) / CAPACIDADE;
+      const yFimTubo = y50 + 14, yTorn = yFimTubo + 12, yPonta = yTorn + 32;
+      const fTopo = yPonta - 16, fGargalo = fTopo + 30, fBase = h - 20;
+      const larguraBase = Math.min(78, w * 0.2);
+      const yNivel = y0 + Vb * k;
+
+      // suporte universal e azulejo branco
+      const xHaste = cx - 72;
+      ctx.fillStyle = suaveCor;
+      ctx.fillRect(xHaste - 3, 12, 6, fBase - 8);
+      ctx.fillStyle = tinta;
+      ctx.fillRect(xHaste - 30, fBase + 4, cx + larguraBase + 16 - (xHaste - 30), 8);
+      ctx.fillStyle = "#ffffff";
+      ctx.strokeStyle = linha;
+      ctx.fillRect(cx - larguraBase - 10, fBase, 2 * larguraBase + 20, 4);
+      // garras
+      ctx.fillStyle = suaveCor;
+      [yTopo + 5, y50 + 4].forEach((yg) => {
+        ctx.fillRect(xHaste, yg - 2, cx - t / 2 - xHaste, 4);
+        ctx.fillRect(cx - t / 2 - 4, yg - 5, 4, 10);
+      });
+
+      // líquido na bureta (abaixo do menisco)
+      if (Vb < CAPACIDADE - 1e-9) {
+        ctx.fillStyle = TITULANTE;
+        ctx.beginPath();
+        ctx.moveTo(cx - t / 2 + 1, yNivel - 3);
+        ctx.quadraticCurveTo(cx, yNivel + 3, cx + t / 2 - 1, yNivel - 3);
+        ctx.lineTo(cx + t / 2 - 1, yFimTubo);
+        ctx.lineTo(cx - t / 2 + 1, yFimTubo);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = suaveCor;
+        ctx.beginPath();
+        ctx.moveTo(cx - t / 2 + 1, yNivel - 3);
+        ctx.quadraticCurveTo(cx, yNivel + 3, cx + t / 2 - 1, yNivel - 3);
+        ctx.stroke();
+      }
+      // ponta sempre cheia (a bureta é preenchida até a ponta antes de zerar)
+      ctx.fillStyle = TITULANTE;
+      ctx.fillRect(cx - 3, yFimTubo, 6, yTorn - yFimTubo);
+      ctx.beginPath();
+      ctx.moveTo(cx - 3, yTorn); ctx.lineTo(cx + 3, yTorn); ctx.lineTo(cx + 1.5, yPonta); ctx.lineTo(cx - 1.5, yPonta);
+      ctx.closePath(); ctx.fill();
+
+      // vidro da bureta
+      ctx.strokeStyle = suaveCor;
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(cx - t / 2, yTopo); ctx.lineTo(cx - t / 2, yFimTubo); ctx.lineTo(cx - 3, yFimTubo + 4); ctx.lineTo(cx - 3, yTorn);
+      ctx.lineTo(cx - 1.5, yPonta);
+      ctx.moveTo(cx + t / 2, yTopo); ctx.lineTo(cx + t / 2, yFimTubo); ctx.lineTo(cx + 3, yFimTubo + 4); ctx.lineTo(cx + 3, yTorn);
+      ctx.lineTo(cx + 1.5, yPonta);
+      ctx.stroke();
+      ctx.lineWidth = 1;
+
+      // graduação
+      ctx.strokeStyle = tinta;
+      ctx.fillStyle = suaveCor;
+      ctx.font = "10px " + FONTE;
+      ctx.textAlign = "right"; ctx.textBaseline = "middle";
+      for (let v = 0; v <= CAPACIDADE; v++) {
+        const y = y0 + v * k, maior = v % 5 === 0;
+        ctx.globalAlpha = maior ? 0.9 : 0.5;
+        ctx.beginPath(); ctx.moveTo(cx - t / 2, y); ctx.lineTo(cx - t / 2 + (maior ? 9 : 5), y); ctx.stroke();
+        if (maior) ctx.fillText(String(v), cx - t / 2 - 5, y);
+      }
+      ctx.globalAlpha = 1;
+      ctx.textAlign = "left";
+      ctx.fillText("mL", cx + t / 2 + 4, y0 - 12);
+
+      // torneira
+      ctx.fillStyle = papel;
+      ctx.strokeStyle = suaveCor;
+      ctx.beginPath(); ctx.arc(cx, yTorn, 5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = torneira ? Lab.cor("--info") : tinta;
+      if (torneira) ctx.fillRect(cx - 2, yTorn - 11, 4, 22);  // alavanca paralela ao tubo: aberta
+      else ctx.fillRect(cx - 14, yTorn - 2, 28, 4);            // perpendicular: fechada
+
+      // erlenmeyer: contorno
+      const gl = 14;
+      const caminho = new Path2D();
+      caminho.moveTo(cx - gl, fTopo);
+      caminho.lineTo(cx - gl, fGargalo);
+      caminho.lineTo(cx - larguraBase, fBase - 8);
+      caminho.quadraticCurveTo(cx - larguraBase, fBase, cx - larguraBase + 8, fBase);
+      caminho.lineTo(cx + larguraBase - 8, fBase);
+      caminho.quadraticCurveTo(cx + larguraBase, fBase, cx + larguraBase, fBase - 8);
+      caminho.lineTo(cx + gl, fGargalo);
+      caminho.lineTo(cx + gl, fTopo);
+
+      // líquido do erlenmeyer
+      const corpo = fBase - fGargalo;
+      const hLiq = corpo * (0.28 + 0.42 * Vb / CAPACIDADE);
+      const ySup = fBase - hLiq;
+      ctx.save();
+      ctx.clip(caminho);
+      ctx.fillStyle = rgbaCss(corExibida || AGUA);
+      ctx.beginPath();
+      ctx.moveTo(cx - larguraBase - 2, ySup);
+      const amp = onda * 1.4;
+      for (let x = cx - larguraBase - 2; x <= cx + larguraBase + 2; x += 4) {
+        ctx.lineTo(x, ySup + amp * Math.sin((x - cx) * 0.25 + performance.now() / 90));
+      }
+      ctx.lineTo(cx + larguraBase + 2, fBase + 2);
+      ctx.lineTo(cx - larguraBase - 2, fBase + 2);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+      ctx.strokeStyle = suaveCor;
+      ctx.lineWidth = 1.4;
+      ctx.stroke(caminho);
+      ctx.lineWidth = 1;
+      // borda do gargalo
+      ctx.beginPath(); ctx.moveTo(cx - gl - 3, fTopo); ctx.lineTo(cx - gl, fTopo); ctx.moveTo(cx + gl, fTopo); ctx.lineTo(cx + gl + 3, fTopo); ctx.stroke();
+
+      // gotas caindo
+      ctx.fillStyle = "rgba(150, 190, 225, 0.9)";
+      gotas.forEach((g) => {
+        if (g.atraso > 0) return;
+        const y = yPonta + 3 + g.y;
+        ctx.beginPath();
+        ctx.moveTo(cx, y - 4);
+        ctx.quadraticCurveTo(cx + 3, y + 1, cx, y + 3);
+        ctx.quadraticCurveTo(cx - 3, y + 1, cx, y - 4);
+        ctx.fill();
+      });
+      desenhar.ySuperficie = ySup - yPonta - 3;
+
+      // lupa: escala ampliada em torno do menisco
+      const lw = 92, lh = 150, lx = w - lw - 12, ly = 132;
+      if (lx > cx + t / 2 + 30) {
+        const cy = ly + lh / 2, esc = 40; // px por mL
+        ctx.save();
+        ctx.setLineDash([3, 4]);
+        ctx.strokeStyle = suaveCor;
+        ctx.beginPath(); ctx.moveTo(cx + t / 2 + 2, yNivel); ctx.lineTo(lx, cy); ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = papel;
+        ctx.fillRect(lx, ly, lw, lh);
+        ctx.beginPath(); ctx.rect(lx, ly, lw, lh); ctx.clip();
+        // líquido abaixo do menisco
+        if (Vb < CAPACIDADE - 1e-9) {
+          ctx.fillStyle = TITULANTE;
+          ctx.beginPath();
+          ctx.moveTo(lx, cy - 7);
+          ctx.quadraticCurveTo(lx + lw / 2, cy + 7, lx + lw, cy - 7);
+          ctx.lineTo(lx + lw, ly + lh); ctx.lineTo(lx, ly + lh); ctx.closePath(); ctx.fill();
+          ctx.strokeStyle = suaveCor;
+          ctx.beginPath(); ctx.moveTo(lx, cy - 7); ctx.quadraticCurveTo(lx + lw / 2, cy + 7, lx + lw, cy - 7); ctx.stroke();
+        }
+        ctx.strokeStyle = tinta; ctx.fillStyle = tinta;
+        ctx.font = "10px " + FONTE; ctx.textAlign = "left"; ctx.textBaseline = "middle";
+        const vIni = Math.max(0, Math.floor((Vb - 2) * 10)), vFim = Math.min(CAPACIDADE * 10, Math.ceil((Vb + 2) * 10));
+        for (let d = vIni; d <= vFim; d++) {
+          const y = cy + (d / 10 - Vb) * esc;
+          const tam = d % 10 === 0 ? 22 : d % 5 === 0 ? 15 : 8;
+          ctx.globalAlpha = d % 5 === 0 ? 0.9 : 0.55;
+          ctx.beginPath(); ctx.moveTo(lx, y); ctx.lineTo(lx + tam, y); ctx.stroke();
+          if (d % 5 === 0) ctx.fillText(fmt(d / 10, 1), lx + tam + 4, y);
+        }
+        ctx.globalAlpha = 1;
+        ctx.restore();
+        ctx.strokeStyle = linha;
+        ctx.strokeRect(lx, ly, lw, lh);
+        ctx.fillStyle = suaveCor;
+        ctx.font = "10px " + FONTE; ctx.textAlign = "center"; ctx.textBaseline = "bottom";
+        ctx.fillText("lupa da bureta", lx + lw / 2, ly - 4);
+        ctx.textBaseline = "top";
+        ctx.fillText(`leitura: ${fmt(Vb, 2)} mL`, lx + lw / 2, ly + lh + 4);
+      }
+
+      // rótulo do erlenmeyer
+      const e = exp();
+      ctx.fillStyle = suaveCor;
+      ctx.font = "11px " + FONTE; ctx.textAlign = "left"; ctx.textBaseline = "middle";
+      const xr = cx + larguraBase + 10;
+      if (xr + 90 < w) {
+        ctx.fillText(`${e.acido.nome} 25,00 mL`, xr, fBase - 34);
+        ctx.fillText(e.desconhecida ? "C = ? mol/L" : "C = 0,100 mol/L", xr, fBase - 20);
+      }
+      ctx.textAlign = "center";
+      ctx.fillText("NaOH 0,100 mol/L", cx, 10);
+    }
+
+    /* ---------- Laço de animação ---------- */
+    let anterior = performance.now();
+    function quadro(agora) {
+      const dt = Math.min((agora - anterior) / 1000, 0.05);
+      anterior = agora;
+
+      if (torneira) {
+        adicionar(VAZAO * dt, 0);
+        acumGota += VAZAO * dt;
+        while (acumGota >= GOTA) { acumGota -= GOTA; gotas.push({ y: 0, v: 0, atraso: 0 }); }
+      }
+
+      // gotas: queda livre até a superfície do líquido
+      const alvo = desenhar.ySuperficie || 100;
+      gotas.forEach((g) => {
+        if (g.atraso > 0) { g.atraso -= dt; return; }
+        g.v += 1400 * dt; g.y += g.v * dt;
+        if (g.y >= alvo) { g.fim = true; onda = 1; }
+      });
+      gotas = gotas.filter((g) => !g.fim);
+      onda = Math.max(0, onda - dt * 1.8);
+
+      // a cor da solução muda suavemente, como ao agitar o frasco
+      const alvoCor = corAlvo(pHatual(), exp().ind).rgba;
+      if (!corExibida) corExibida = alvoCor.slice();
+      const a = 1 - Math.exp(-dt * 6);
+      corExibida = corExibida.map((c, i) => c + (alvoCor[i] - c) * a);
+
+      if (graficoSujo && agora - ultimoGrafico > 150) { atualizarGrafico(); ultimoGrafico = agora; }
+
+      desenhar();
+      requestAnimationFrame(quadro);
+    }
+
+    /* ---------- Viragens registradas ---------- */
+    const CHAVE_VIR = "bancada:titulacao:viragens";
+    let viragens = Lab.armazenamento.ler(CHAVE_VIR, {});
+    function ultimaViragemDesconhecida() {
+      return Object.values(viragens).filter((v) => v.desconhecida).sort((a, b) => b.t - a.t)[0] || null;
+    }
+
+    /* ---------- Gráfico (criado antes da tabela, que chama aoMudar ao ser montada) ---------- */
+    const grafico = Lab.grafico($("grafico"), { rotuloX: "V de NaOH (mL)", rotuloY: "pH", xMin: 0, xMax: 50, yMin: 0, yMax: 14, passoX: 5, passoY: 2 });
+
+    /* ---------- Tabela ---------- */
+    const tabela = Lab.tabela($("tabela"), {
+      nomeArquivo: "titulacao-medicoes",
+      colunas: [
+        { chave: "acido", titulo: "Ácido" },
+        { chave: "caTexto", titulo: "C ácido (mol/L)" },
+        { chave: "indicador", titulo: "Indicador" },
+        { chave: "V", titulo: "V NaOH (mL)", casas: 2 },
+        { chave: "pH", titulo: "pH", casas: 2 },
+        { chave: "cor", titulo: "Cor" },
+        { chave: "nota", titulo: "Observação" },
+      ],
+      aoMudar: () => { if (pronto) atualizarGrafico(); },
+    });
+
+    function linhaAtual(nota) {
+      const e = exp(), pH = pHatual();
+      return {
+        acido: e.acido.nome, caTexto: e.desconhecida ? "?" : "0,100", indicador: e.ind.nome,
+        V: Vb, pH, cor: corAlvo(pH, e.ind).nome, nota: nota || "",
+        chaveExp: chaveExp(e),
+      };
+    }
+
+    $("b-registrar").addEventListener("click", () => {
+      tabela.adicionar(linhaAtual(""));
+      aviso(`Ponto registrado: V = ${fmt(Vb, 2)} mL, pH = ${fmt(pHatual(), 2)}.`);
+    });
+
+    $("b-viragem").addEventListener("click", () => {
+      const e = exp();
+      if (e.indId === "sem") return;
+      if (Vb <= 0) { aviso("Adicione NaOH e observe a cor mudar antes de registrar a viragem."); return; }
+      const pH = pHatual();
+      viragens[chaveExp(e) + "|" + e.indId] = {
+        V: Vb, pH, acido: e.acido.nome, acidoId: e.acidoId, indicador: e.ind.nome, indId: e.indId,
+        desconhecida: e.desconhecida, t: Date.now(),
+      };
+      Lab.armazenamento.gravar(CHAVE_VIR, viragens);
+      tabela.adicionar(linhaAtual("ponto de viragem"));
+      let msg = `Viragem registrada em V = ${fmt(Vb, 2)} mL (pH ${fmt(pH, 2)}, ${e.ind.nome.toLowerCase()}).`;
+      if (!e.desconhecida) {
+        const dif = Vb - Veq();
+        msg += ` O ponto de equivalência teórico é 25,00 mL: diferença de ${dif >= 0 ? "+" : "−"}${fmt(Math.abs(dif), 2)} mL.`;
+      } else {
+        msg += " Use esse volume para calcular a concentração da amostra.";
+      }
+      aviso(msg);
+    });
+
+    /* ---------- Curva de titulação ---------- */
+    function atualizarGrafico() {
+      graficoSujo = false;
+      const e = exp(), ch = chaveExp(e);
+      const ate = curva.filter((p) => p.x < Vb - 1e-9);
+      ate.push({ x: Vb, y: pHatual() });
+      const series = [];
+      if (e.ind.faixa) {
+        e.ind.faixa.forEach((y) => series.push({ pontos: [{ x: 0, y }, { x: 50, y }], tipo: "linha", cor: e.ind.linha }));
+      }
+      series.push({ pontos: ate, tipo: "linha", cor: "--info" });
+      const pts = tabela.linhas().filter((l) => l.chaveExp === ch).map((l) => ({ x: l.V, y: l.pH }));
+      series.push({ pontos: pts, tipo: "pontos", cor: "--destaque" });
+
+      const passou = Vb > Veq() + 1e-9;
+      const marcas = passou ? [{ x: Veq(), rotulo: "ponto de equivalência" }] : [];
+      grafico.atualizar({ series, marcas });
+
+      const partes = [
+        `25,00 mL de ${e.acido.nome} ${e.desconhecida ? "(concentração desconhecida)" : "0,100 mol/L"} titulados com NaOH 0,100 mol/L.`,
+      ];
+      if (e.ind.faixa) partes.push(`Linhas coloridas: faixa de viragem da ${e.ind.nome.toLowerCase()} (pH ${fmt(e.ind.faixa[0], 1)} a ${fmt(e.ind.faixa[1], 1)}).`);
+      if (pts.length) partes.push(`● ${pts.length} ponto(s) registrado(s) neste experimento.`);
+      if (passou) {
+        partes.push(e.desconhecida
+          ? "Você passou do ponto de equivalência (linha tracejada). Use o volume da viragem para calcular a concentração."
+          : `Ponto de equivalência: ${fmt(Veq(), 2)} mL, pH = ${fmt(calcularPH(Veq(), e.Ca, e.acido.fraco), 2)}.`);
+      }
+      $("g-legenda").textContent = partes.join(" ");
+    }
+
+    // Em que volume o indicador começa e termina de virar, na titulação atual (só para amostra conhecida)
+    function atualizarInfoIndicador() {
+      const e = exp(), el = $("indicador-info");
+      if (!e.ind.faixa) { el.textContent = "Agora: sem indicador, só o pHmetro permite localizar o ponto de equivalência."; return; }
+      if (e.desconhecida) {
+        el.textContent = `Agora: ${e.ind.nome} (faixa de pH ${fmt(e.ind.faixa[0], 1)} a ${fmt(e.ind.faixa[1], 1)}). Na amostra desconhecida, os volumes ficam por sua conta: compare no gráfico onde as linhas coloridas cruzam o salto.`;
+        return;
+      }
+      const cruza = (pH) => { const p = curva.find((q) => q.y >= pH); return p ? p.x : NaN; };
+      const [a, b] = e.ind.faixa;
+      const v1 = cruza(a), v2 = cruza(b), veq = Veq();
+      // adequado: a cor final aparece a até 2 gotas da equivalência e a transição não começa cedo demais
+      const dentro = Math.abs(v2 - veq) <= 0.1 && veq - v1 <= 0.02 * veq;
+      el.innerHTML = `Agora: <strong>${Lab.escapar(e.acido.nome)} com ${Lab.escapar(e.ind.nome.toLowerCase())}</strong> ` +
+        `(faixa de pH ${fmt(a, 1)} a ${fmt(b, 1)}). A cor começa a mudar com ≈ ${fmt(v1, 2)} mL e termina com ≈ ${fmt(v2, 2)} mL de NaOH; ` +
+        `o ponto de equivalência está em ${fmt(veq, 2)} mL. ` +
+        (dentro ? "A viragem cai dentro do salto de pH: indicador <strong>adequado</strong>."
+                : "A mudança de cor começa longe da equivalência ou é gradual demais: indicador <strong>inadequado</strong> para esta titulação.");
+    }
+
+    /* ---------- Hipóteses ---------- */
+    Lab.questoes($("hipoteses-lista"), [
+      {
+        tipo: "aberta",
+        enunciado: "<p>Ao adicionar NaOH ao ácido, você acha que o pH vai subir <strong>de forma gradual e constante</strong> ou vai haver algum momento de <strong>mudança brusca</strong>? Desenhe mentalmente o gráfico pH × volume.</p>",
+        modelo: "<p>Guarde sua hipótese! Você vai testá-la nas etapas 1 e 4 do procedimento.</p>",
+      },
+      {
+        tipo: "aberta",
+        enunciado: "<p>Para neutralizar 25,00 mL de ácido acético 0,100 mol/L (ácido fraco), será preciso <strong>mais, menos ou o mesmo volume</strong> de NaOH que para 25,00 mL de HCl 0,100 mol/L (ácido forte)? Por quê?</p>",
+        modelo: "<p>Guarde sua hipótese! Você vai testá-la nas etapas 1 e 2 do procedimento.</p>",
+      },
+      {
+        tipo: "aberta",
+        enunciado: "<p>No exato momento em que todo o ácido foi neutralizado, o pH da solução será sempre <strong>7</strong>? Vale tanto para o HCl quanto para o ácido acético?</p>",
+        modelo: "<p>Guarde sua hipótese! Você vai testá-la comparando as etapas 1 e 2.</p>",
+      },
+    ], { chave: "hipoteses", semPlacar: true });
+
+    /* ---------- Questões ---------- */
+    Lab.questoes($("questoes-lista"), [
+      {
+        tipo: "multipla", nivel: "fácil",
+        enunciado: "<p>Nas titulações com NaOH 0,100 mol/L, qual foi o pH no <strong>ponto de equivalência</strong>?</p>",
+        alternativas: [
+          "7,00 nas duas titulações",
+          "7,00 para o HCl e maior que 7 (≈ 8,7) para o ácido acético",
+          "7,00 para o HCl e menor que 7 para o ácido acético",
+          "Menor que 7 nas duas, porque ainda há ácido",
+        ],
+        correta: 1,
+        explicacao: "Na equivalência do HCl sobra só NaCl, cujos íons não reagem com a água: pH = 7,00. Na do ácido acético sobra acetato de sódio; o íon acetato é uma base fraca (CH₃COO⁻ + H₂O ⇌ CH₃COOH + OH⁻) e deixa a solução básica, com pH ≈ 8,72.",
+      },
+      {
+        tipo: "numerica", nivel: "fácil",
+        enunciado: "<p>Qual é o pH de uma solução de HCl <strong>0,010 mol/L</strong>?</p>",
+        resposta: 2, tolerancia: 0.02, unidade: "",
+        explicacao: "O HCl é um ácido forte e se ioniza totalmente: [H⁺] = 0,010 mol/L = 10⁻² mol/L. Logo pH = −log(10⁻²) = 2. (Compare: o HCl 0,100 mol/L da bancada tem pH 1,00 — dez vezes mais H⁺, uma unidade de pH a menos.)",
+      },
+      {
+        tipo: "numerica", nivel: "médio",
+        enunciado: "<p>Uma alíquota de <strong>25,00 mL</strong> de HCl de concentração desconhecida foi titulada com NaOH 0,100 mol/L. A viragem da fenolftaleína ocorreu após <strong>18,40 mL</strong> de base. Qual a concentração do ácido?</p>",
+        resposta: 0.100 * 18.40 / 25.00, tolerancia: 0.02, unidade: "mol/L",
+        explicacao: "Na equivalência, n(HCl) = n(NaOH): Cₐ·Vₐ = C_b·V_b → Cₐ = 0,100 × 18,40 ÷ 25,00 = 0,0736 mol/L.",
+      },
+      {
+        tipo: "multipla", nivel: "médio",
+        enunciado: "<p>Qual indicador é o mais adequado para titular <strong>ácido acético</strong> com NaOH?</p>",
+        alternativas: [
+          "Alaranjado de metila, porque vira em meio ácido e o titulado é um ácido",
+          "Fenolftaleína, porque sua faixa de viragem (8,2–10,0) fica dentro do salto de pH que contém o pH de equivalência (≈ 8,7)",
+          "Azul de bromotimol, porque vira perto de pH 7, que é sempre o pH de equivalência",
+          "Qualquer um, porque todos viram no mesmo volume",
+        ],
+        correta: 1,
+        explicacao: "O indicador precisa virar dentro do salto de pH. Para o ácido acético o salto vai de ≈ 7,7 a 10, e a equivalência está em pH ≈ 8,7: a fenolftaleína vira ali. O alaranjado de metila (3,1–4,4) muda de cor com apenas ≈ 8 mL de base, ainda na região tampão, e o azul de bromotimol (6,0–7,6) começa a mudar ≈ 1,3 mL antes da equivalência, numa transição gradual, difícil de marcar com precisão.",
+      },
+      {
+        tipo: "multipla", nivel: "médio",
+        enunciado: "<p>Qual afirmação sobre <strong>ponto de equivalência</strong> e <strong>ponto de viragem</strong> está correta?</p>",
+        alternativas: [
+          "São sempre o mesmo ponto, apenas com nomes diferentes",
+          "O ponto de equivalência é quando o indicador muda de cor; o de viragem, quando o pH é 7",
+          "O ponto de equivalência é quando n(ácido) = n(base); o de viragem é quando o indicador muda de cor — com um bom indicador, os dois ficam muito próximos",
+          "O ponto de viragem sempre acontece antes do ponto de equivalência",
+        ],
+        correta: 2,
+        explicacao: "A equivalência é definida pela estequiometria (quantidades iguais de ácido e base) e não depende do indicador. A viragem é o que observamos experimentalmente. A diferença entre os dois gera o erro de titulação — pequeno quando o indicador é bem escolhido, grande quando não é.",
+      },
+      {
+        tipo: "numerica", nivel: "médio",
+        enunciado: "<p>Na titulação de 25,00 mL de ácido acético 0,100 mol/L, qual é o pH depois de adicionados <strong>12,50 mL</strong> de NaOH 0,100 mol/L (metade do volume de equivalência)? Use sua curva ou K<sub>a</sub> = 1,8 × 10<sup>−5</sup>.</p>",
+        resposta: 4.74, tolerancia: 0.02, unidade: "",
+        explicacao: "Na meia-equivalência, metade do CH₃COOH virou CH₃COO⁻, então [CH₃COO⁻] = [CH₃COOH]. Pela equação de Henderson-Hasselbalch, pH = pKₐ + log 1 = pKₐ = −log(1,8 × 10⁻⁵) ≈ 4,74.",
+      },
+      {
+        tipo: "numerica", nivel: "desafio",
+        enunciado: "<p><strong>Amostra desconhecida:</strong> titule 25,00 mL da amostra desconhecida com NaOH 0,100 mol/L, usando um indicador adequado, e determine a <strong>concentração do ácido</strong>.</p>",
+        resposta: () => cX, tolerancia: 0.03, unidade: "mol/L",
+        get explicacao() {
+          let txt = "Na equivalência, n(ácido) = n(NaOH), logo Cₐ = C_b·V_b ÷ Vₐ = 0,100 × V_b ÷ 25,00. ";
+          const v = ultimaViragemDesconhecida();
+          if (v) {
+            txt += `Com a sua última viragem registrada (${fmt(v.V, 2)} mL, ${v.acido}, ${v.indicador.toLowerCase()}), ` +
+              `Cₐ = 0,100 × ${fmt(v.V, 2)} ÷ 25,00 = ${fmt(0.100 * v.V / 25, 4)} mol/L. `;
+            if (v.acidoId === "acetico" && v.indId === "metila") txt += "Atenção: o alaranjado de metila vira muito antes da equivalência do ácido acético — refaça com fenolftaleína! ";
+          } else {
+            txt += "Registre o ponto de viragem da amostra desconhecida na bancada para conferir o seu cálculo. ";
+          }
+          return txt + "Cada estudante recebe uma amostra diferente, então não adianta copiar do colega!";
+        },
+      },
+      {
+        tipo: "aberta", nivel: "reflexão",
+        enunciado: "<p>Um estudante titulou ácido acético usando <strong>alaranjado de metila</strong> e parou a titulação na viragem. A concentração que ele calculou ficou maior, menor ou igual à real? Explique usando a curva de titulação.</p>",
+        modelo: "<p>Ficou <strong>muito menor</strong> que a real. O alaranjado de metila muda de cor entre pH 3,1 e 4,4. Na titulação do ácido acético 0,100 mol/L, o pH já passa de 4,4 com cerca de 8 mL de NaOH — na região tampão, bem antes da equivalência (25,00 mL). O estudante usou um V<sub>b</sub> cerca de três vezes menor e, por Cₐ = C<sub>b</sub>·V<sub>b</sub>/Vₐ, subestimou a concentração. O indicador deve virar dentro do salto de pH, como a fenolftaleína (8,2–10,0), cuja faixa contém o pH de equivalência (≈ 8,7).</p>",
+      },
+      {
+        tipo: "aberta", nivel: "reflexão",
+        enunciado: "<p>Antes de titular, um colega acrescentou 20 mL de água destilada ao ácido no erlenmeyer, “para facilitar a agitação”. Isso muda o <strong>volume de NaOH</strong> gasto até a equivalência? E o <strong>pH inicial</strong>? E o volume seria diferente se o ácido fosse fraco em vez de forte?</p>",
+        modelo: "<p>O volume de NaOH <strong>não muda</strong>: a água não altera a quantidade de matéria de ácido (n = Cₐ·Vₐ), e é essa quantidade que a base precisa neutralizar. O <strong>pH inicial aumenta</strong>, porque o ácido fica mais diluído (menor [H⁺]), e o salto de pH fica um pouco menor. Pelo mesmo motivo, ácidos forte e fraco de mesma concentração e mesmo volume gastam o <strong>mesmo volume</strong> de base: a reação com OH⁻ consome todo o ácido, inclusive a parte não ionizada, pois o equilíbrio vai se deslocando. A força do ácido muda o formato da curva, não o volume de equivalência.</p>",
+      },
+    ], {
+      aoAtualizar(acertos, total) {
+        $("progresso-texto").textContent = `${acertos} de ${total} questões corretas`;
+        $("progresso-barra").style.width = (total ? (acertos / total) * 100 : 0) + "%";
+      },
+    });
+
+    /* ---------- Controles ---------- */
+    [cAcido, cAmostra, cInd].forEach((c) => c.addEventListener("change", reiniciar));
+    $("b-gota").addEventListener("click", () => adicionar(GOTA, 1));
+    $("b-05").addEventListener("click", () => adicionar(0.5, 4));
+    $("b-10").addEventListener("click", () => adicionar(1.0, 6));
+    $("b-torneira").addEventListener("click", () => (torneira ? fecharTorneira() : abrirTorneira()));
+    $("b-reiniciar").addEventListener("click", reiniciar);
+    document.addEventListener("lab:tema", () => { graficoSujo = true; });
+
+    /* ---------- Início ---------- */
+    reiniciar();
+    pronto = true;
+    atualizarGrafico();
+    atualizarInfoIndicador();
+    requestAnimationFrame(quadro);
+  })();
+  </script>
+</body>
+</html>

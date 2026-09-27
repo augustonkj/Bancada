@@ -326,12 +326,24 @@ a.cartao:hover, a.cartao:focus-visible {
 /* ---------- Rodapé ---------- */
 .rodape {
   padding: 24px clamp(16px, 5vw, 56px);
+  /* alinha com a coluna central de 1180px */
+  padding-inline: max(clamp(16px, 5vw, 56px), calc((100% - 1180px) / 2 + clamp(16px, 5vw, 56px)));
   border-top: 1px solid var(--linha);
   font-family: "IBM Plex Mono", ui-monospace, monospace;
   font-size: 12px;
   color: var(--tinta-suave);
 }
 .rodape p { margin: 0; }
+.rodape__autor { margin-bottom: 18px; }
+.rodape__rotulo { letter-spacing: 0.12em; text-transform: uppercase; }
+.rodape__nome {
+  margin: 4px 0 !important;
+  font-family: "Fraunces", Georgia, serif;
+  font-size: 20px;
+  color: var(--tinta);
+}
+.rodape__contatos { display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: 13px; }
+.rodape__licenca { padding-top: 14px; border-top: 1px dashed var(--linha); }
 .rodape a { color: inherit; text-underline-offset: 3px; }
 .rodape a:hover { color: var(--destaque); }
 
