@@ -332,6 +332,8 @@ a.cartao:hover, a.cartao:focus-visible {
   color: var(--tinta-suave);
 }
 .rodape p { margin: 0; }
+.rodape a { color: inherit; text-underline-offset: 3px; }
+.rodape a:hover { color: var(--destaque); }
 
 @media (prefers-reduced-motion: reduce) {
   .cartao { transition: none; }
