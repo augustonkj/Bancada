@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bancada — Laboratório Virtual de Ensino</title>
+  <meta name="description" content="Bancada: laboratório virtual de ensino com todos os meus projetos.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/estilo.css">
+</head>
+<body>
+  <header class="topo">
+    <div class="topo__marca">
+      <span class="topo__selo" aria-hidden="true">B</span>
+      <span class="topo__nome">Bancada</span>
+    </div>
+    <button class="tema" id="tema" type="button" aria-label="Alternar tema claro/escuro">◐</button>
+  </header>
+
+  <main class="pagina">
+    <section class="abertura">
+      <p class="rotulo">Laboratório virtual de ensino</p>
+      <h1>Tudo o que está <em>sobre a bancada</em>.</h1>
+      <p class="abertura__texto">
+        Experimentos, simulações e materiais didáticos reunidos em um só lugar.
+        Escolha um projeto e comece a explorar.
+      </p>
+      <dl class="contadores" id="contadores"></dl>
+    </section>
+
+    <section class="controles" aria-label="Buscar e filtrar projetos">
+      <label class="busca">
+        <span class="sr">Buscar projetos</span>
+        <input id="busca" type="search" placeholder="Buscar por nome, assunto ou etiqueta…" autocomplete="off">
+      </label>
+      <div class="filtros" id="filtros" role="group" aria-label="Filtrar por área"></div>
+    </section>
+
+    <section class="grade" id="grade" aria-live="polite"></section>
+    <p class="vazio" id="vazio" hidden>Nenhum projeto encontrado com esse filtro.</p>
+  </main>
+
+  <footer class="rodape">
+    <p>Bancada · laboratório virtual de ensino</p>
+  </footer>
+
+  <script src="js/projetos.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
