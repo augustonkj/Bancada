@@ -29,7 +29,7 @@
           <h3>${escapar(p.titulo)}</h3>
           <p>${escapar(p.descricao)}</p>
           <div class="lab__rodape">
-            <span>${p.duracao ? "⏱ " + escapar(p.duracao) : ""}</span>
+            <span>${p.etiquetas ? escapar(p.etiquetas.slice(0, 3).join(" · ")) : ""}</span>
             <span class="lab__entrar">Entrar →</span>
           </div>
         </div>
