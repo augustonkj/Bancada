@@ -2,125 +2,84 @@
   "use strict";
 
   const projetos = (typeof PROJETOS !== "undefined" ? PROJETOS : []).slice();
-  const grade = document.getElementById("grade");
-  const vazio = document.getElementById("vazio");
-  const busca = document.getElementById("busca");
-  const filtros = document.getElementById("filtros");
-  const contadores = document.getElementById("contadores");
-
+  const $ = (id) => document.getElementById(id);
+  const PUBLICOS = { fund: "Fundamental", medio: "Médio", grad: "Graduação", prof: "Professor" };
   const TODAS = "Todas";
   let areaAtiva = TODAS;
 
-  const normalizar = (s) =>
-    String(s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+  const normalizar = (s) => String(s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+  const escapar = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
-  const escapar = (s) =>
-    String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  // o público escolhido aqui é o mesmo usado dentro dos laboratórios
+  const ler = (k, p) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : p; } catch (_) { return p; } };
+  const gravar = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (_) {} };
+  let publico = PUBLICOS[ler("bancada:publico", "medio")] ? ler("bancada:publico", "medio") : "medio";
 
-  // Cor estável por área, derivada do nome
-  const matizDaArea = (area) => {
-    let h = 0;
-    for (const c of normalizar(area)) h = (h * 31 + c.charCodeAt(0)) % 360;
-    return h;
-  };
+  const areas = [TODAS, ...Array.from(new Set(projetos.map((p) => p.area))).sort((a, b) => a.localeCompare(b, "pt-BR"))];
+  const corDaArea = (a) => (projetos.find((p) => p.area === a) || {}).cor;
 
-  const areas = [TODAS, ...Array.from(new Set(projetos.map((p) => p.area).filter(Boolean))).sort((a, b) => a.localeCompare(b, "pt-BR"))];
-
-  function desenharContadores() {
-    const prontos = projetos.filter((p) => normalizar(p.status) === "pronto").length;
-    const itens = [
-      ["Projetos", projetos.length],
-      ["Áreas", areas.length - 1],
-      ["Prontos", prontos],
-    ];
-    contadores.innerHTML = itens
-      .map(([rotulo, valor]) => `<div><dt>${rotulo}</dt><dd>${valor}</dd></div>`)
-      .join("");
+  function desenharPublico() {
+    document.querySelectorAll("#publico-opcoes button").forEach((b) => b.setAttribute("aria-checked", String(b.dataset.valor === publico)));
   }
 
   function desenharFiltros() {
-    filtros.innerHTML = areas
-      .map((a) => `<button type="button" class="filtro" data-area="${escapar(a)}" aria-pressed="${a === areaAtiva}">${escapar(a)}</button>`)
-      .join("");
+    $("filtros").innerHTML = areas.map((a) =>
+      `<button type="button" class="filtro" data-area="${escapar(a)}" aria-pressed="${a === areaAtiva}"${corDaArea(a) ? ` style="--cor:${corDaArea(a)}"` : ""}>${escapar(a)}</button>`).join("");
   }
 
-  function cartao(p, i) {
-    const externo = /^https?:\/\//i.test(p.link || "");
-    const semLink = !p.link || p.link === "#";
-    const status = normalizar(p.status).replace(/\s+/g, "-");
-    const numero = String(i + 1).padStart(2, "0");
-    const capa = p.imagem
-      ? `<img class="cartao__capa" src="${escapar(p.imagem)}" alt="" loading="lazy">`
-      : "";
-    const etiquetas = (p.etiquetas || [])
-      .map((e) => `<li>${escapar(e)}</li>`)
-      .join("");
-
-    const tag = semLink ? "div" : "a";
-    const atributos = semLink
-      ? `aria-disabled="true"`
-      : `href="${escapar(p.link)}"${externo ? ' target="_blank" rel="noopener"' : ""}`;
-
+  function cartao(p) {
+    const atende = !p.publicos || p.publicos.includes(publico);
+    const link = p.link + (p.link.startsWith("http") ? "" : `?publico=${publico}`);
+    const publicos = (p.publicos || Object.keys(PUBLICOS)).map((k) => `<span class="${k === publico ? "ativo" : ""}">${PUBLICOS[k]}</span>`).join("");
     return `
-      <${tag} class="cartao${semLink ? " cartao--inativo" : ""}" ${atributos} style="--matiz:${matizDaArea(p.area)}">
-        ${capa}
-        <div class="cartao__corpo">
-          <div class="cartao__meta">
-            <span class="cartao__num">Nº ${numero}</span>
-            <span class="cartao__area">${escapar(p.area)}</span>
-          </div>
-          <h2 class="cartao__titulo">${escapar(p.titulo)}</h2>
-          <p class="cartao__desc">${escapar(p.descricao)}</p>
-          ${etiquetas ? `<ul class="cartao__etiquetas">${etiquetas}</ul>` : ""}
-          <div class="cartao__rodape">
-            ${p.status ? `<span class="status status--${status}">${escapar(p.status)}</span>` : "<span></span>"}
-            ${p.nivel ? `<span class="cartao__nivel">${escapar(p.nivel)}</span>` : ""}
-            ${semLink ? "" : `<span class="cartao__abrir" aria-hidden="true">${externo ? "↗" : "→"}</span>`}
+      <a class="lab${atende ? "" : " lab--indisponivel"}" href="${escapar(link)}" style="--cor:${escapar(p.cor || "#2563eb")}">
+        <div class="lab__arte">${p.ilustracao || ""}
+          <span class="lab__area">${escapar(p.area)}</span>
+          ${p.status && p.status !== "pronto" ? `<span class="lab__status">${escapar(p.status)}</span>` : ""}
+        </div>
+        <div class="lab__corpo">
+          <h3>${escapar(p.titulo)}</h3>
+          <p>${escapar(p.descricao)}</p>
+          <div class="lab__publicos" aria-label="Públicos atendidos">${publicos}</div>
+          <div class="lab__rodape">
+            <span>${p.duracao ? "⏱ " + escapar(p.duracao) : ""}${atende ? "" : " · ainda sem versão para este público"}</span>
+            <span class="lab__entrar">Entrar →</span>
           </div>
         </div>
-      </${tag}>`;
+      </a>`;
   }
 
   function desenharGrade() {
-    const termo = normalizar(busca.value.trim());
+    const termo = normalizar($("busca").value.trim());
     const visiveis = projetos
-      .map((p, i) => ({ p, i }))
-      .filter(({ p }) => areaAtiva === TODAS || p.area === areaAtiva)
-      .filter(({ p }) => {
-        if (!termo) return true;
-        const texto = normalizar([p.titulo, p.descricao, p.area, p.nivel, ...(p.etiquetas || [])].join(" "));
-        return texto.includes(termo);
-      });
-
-    grade.innerHTML = visiveis.map(({ p, i }) => cartao(p, i)).join("");
-    vazio.hidden = visiveis.length > 0;
+      .filter((p) => areaAtiva === TODAS || p.area === areaAtiva)
+      .filter((p) => !termo || normalizar([p.titulo, p.descricao, p.area, ...(p.etiquetas || [])].join(" ")).includes(termo))
+      // laboratórios que atendem o público escolhido aparecem primeiro
+      .sort((a, b) => Number(!a.publicos || a.publicos.includes(publico) ? 0 : 1) - Number(!b.publicos || b.publicos.includes(publico) ? 0 : 1));
+    $("grade").innerHTML = visiveis.map(cartao).join("");
+    $("vazio").hidden = visiveis.length > 0;
+    const n = projetos.filter((p) => !p.publicos || p.publicos.includes(publico)).length;
+    $("contagem").textContent = `${n} de ${projetos.length} laboratórios com versão para ${PUBLICOS[publico]}.`;
   }
 
-  filtros.addEventListener("click", (ev) => {
-    const botao = ev.target.closest(".filtro");
-    if (!botao) return;
-    areaAtiva = botao.dataset.area;
+  $("publico-opcoes").addEventListener("click", (e) => {
+    const b = e.target.closest("button[data-valor]");
+    if (!b) return;
+    publico = b.dataset.valor;
+    gravar("bancada:publico", publico);
+    desenharPublico();
+    desenharGrade();
+  });
+  $("filtros").addEventListener("click", (e) => {
+    const b = e.target.closest(".filtro");
+    if (!b) return;
+    areaAtiva = b.dataset.area;
     desenharFiltros();
     desenharGrade();
   });
+  $("busca").addEventListener("input", desenharGrade);
 
-  busca.addEventListener("input", desenharGrade);
-
-  // Tema claro/escuro
-  const raiz = document.documentElement;
-  try {
-    const salvo = localStorage.getItem("bancada-tema");
-    if (salvo) raiz.dataset.tema = salvo;
-  } catch (_) {}
-  document.getElementById("tema").addEventListener("click", () => {
-    const escuroAgora =
-      raiz.dataset.tema === "escuro" ||
-      (!raiz.dataset.tema && matchMedia("(prefers-color-scheme: dark)").matches);
-    raiz.dataset.tema = escuroAgora ? "claro" : "escuro";
-    try { localStorage.setItem("bancada-tema", raiz.dataset.tema); } catch (_) {}
-  });
-
-  desenharContadores();
+  desenharPublico();
   desenharFiltros();
   desenharGrade();
 })();

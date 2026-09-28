@@ -2,59 +2,123 @@
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Bancada — Laboratório Virtual de Ensino</title>
-  <meta name="description" content="Bancada: laboratório virtual de ensino com todos os meus projetos.">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%23f4f1ea' stroke='%231d1f1c' stroke-width='2'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-family='Georgia,serif' font-weight='700' font-size='17' fill='%231d1f1c'%3EB%3C/text%3E%3C/svg%3E">
+  <meta name="description" content="Bancada: laboratórios virtuais de Ciências com roteiro de prática, simulações realistas, questões e relatório — do Ensino Fundamental à Graduação.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%232563eb'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-family='Arial' font-weight='700' font-size='17' fill='white'%3EB%3C/text%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/estilo.css">
 </head>
 <body>
   <header class="topo">
-    <div class="topo__marca">
-      <span class="topo__selo" aria-hidden="true">B</span>
-      <span class="topo__nome">Bancada</span>
-    </div>
-    <button class="tema" id="tema" type="button" aria-label="Alternar tema claro/escuro">◐</button>
+    <a class="marca" href="./"><span class="marca__logo">B</span>Bancada</a>
+    <nav class="topo__links">
+      <a href="#laboratorios">Laboratórios</a>
+      <a href="#como-funciona">Como funciona</a>
+      <a href="#autor">Autor</a>
+    </nav>
   </header>
 
-  <main class="pagina">
-    <section class="abertura">
-      <p class="rotulo">Laboratório virtual de ensino</p>
-      <h1>Tudo o que está <em>sobre a bancada</em>.</h1>
-      <p class="abertura__texto">
-        Experimentos, simulações e materiais didáticos reunidos em um só lugar.
-        Escolha um projeto e comece a explorar.
-      </p>
-      <dl class="contadores" id="contadores"></dl>
-    </section>
+  <section class="heroi">
+    <div class="heroi__dentro">
+      <div class="heroi__texto">
+        <span class="selo">🔬 Laboratório virtual de ensino</span>
+        <h1>A prática de laboratório, <span class="destaque">na tela</span>.</h1>
+        <p>Experimentos com equipamentos de verdade, roteiro de prática, coleta de dados, gráficos, questões com correção imediata e relatório pronto para imprimir.</p>
+        <div class="heroi__acoes">
+          <a class="botao botao--primario" href="#laboratorios">Explorar laboratórios</a>
+          <a class="botao" href="#como-funciona">Como funciona</a>
+        </div>
+      </div>
+      <div class="heroi__arte" aria-hidden="true">
+        <div class="bolha bolha--1"></div><div class="bolha bolha--2"></div><div class="bolha bolha--3"></div>
+        <svg viewBox="0 0 360 300">
+          <rect x="10" y="244" width="340" height="18" rx="4" fill="#e4c49c"/><rect x="10" y="258" width="340" height="14" rx="3" fill="#b88c5e"/>
+          <!-- pêndulo -->
+          <rect x="38" y="234" width="70" height="10" rx="3" fill="#3b4557"/><rect x="64" y="60" width="6" height="176" rx="2" fill="#cbd5e1"/>
+          <rect x="66" y="70" width="70" height="5" rx="2" fill="#cbd5e1"/><rect x="60" y="66" width="14" height="13" rx="3" fill="#2563eb"/>
+          <path d="M132 75 L150 168" stroke="#1a2233" stroke-width="1.6"/><circle cx="151" cy="172" r="10" fill="#fbbf24"/>
+          <!-- bureta e erlenmeyer -->
+          <rect x="186" y="40" width="5" height="204" rx="2" fill="#cbd5e1"/><rect x="170" y="236" width="44" height="8" rx="3" fill="#3b4557"/>
+          <rect x="188" y="70" width="34" height="4" rx="2" fill="#cbd5e1"/>
+          <rect x="220" y="30" width="10" height="110" rx="3" fill="#fff" stroke="#94a3b8"/><rect x="221" y="60" width="8" height="79" fill="#c4b5fd"/>
+          <path d="M222 140 h6 l-2 8 h-2 z" fill="#94a3b8"/>
+          <path d="M208 244 L216 206 V194 h18 v12 L242 244 Z" fill="#fff" stroke="#94a3b8"/><path d="M211 242 L217 222 h16 L239 242 Z" fill="#ec4899"/>
+          <!-- microscópio -->
+          <path d="M270 244 h64 v-8 h-64 z" fill="#3b4557"/><path d="M318 236 V160 q0-10 -10-10 h-8" fill="none" stroke="#475569" stroke-width="11" stroke-linecap="round"/>
+          <rect x="280" y="196" width="46" height="6" rx="2" fill="#475569"/><rect x="286" y="104" width="15" height="44" rx="3" fill="#1e293b" transform="rotate(-18 293 126)"/>
+          <rect x="290" y="150" width="8" height="22" rx="2" fill="#64748b"/>
+        </svg>
+      </div>
+    </div>
+  </section>
 
-    <section class="controles" aria-label="Buscar e filtrar projetos">
-      <label class="busca">
-        <span class="sr">Buscar projetos</span>
-        <input id="busca" type="search" placeholder="Buscar por nome, assunto ou etiqueta…" autocomplete="off">
-      </label>
-      <div class="filtros" id="filtros" role="group" aria-label="Filtrar por área"></div>
-    </section>
+  <section class="publico" aria-labelledby="publico-titulo">
+    <div class="secao-dentro">
+      <h2 id="publico-titulo">Para quem é a aula?</h2>
+      <p class="subtitulo">Escolha o público. Os laboratórios ajustam a linguagem, a profundidade da teoria e as questões.</p>
+      <div class="publico__opcoes" id="publico-opcoes" role="radiogroup" aria-label="Público">
+        <button type="button" role="radio" data-valor="fund"><span class="publico__icone">🧒</span><b>Ensino Fundamental</b><span>Linguagem simples, descoberta guiada</span></button>
+        <button type="button" role="radio" data-valor="medio"><span class="publico__icone">🎒</span><b>Ensino Médio</b><span>Equações, gráficos e desafios</span></button>
+        <button type="button" role="radio" data-valor="grad"><span class="publico__icone">🎓</span><b>Graduação</b><span>Modelagem, regressão e incertezas</span></button>
+        <button type="button" role="radio" data-valor="prof"><span class="publico__icone">👩‍🏫</span><b>Professor</b><span>Guia de aula, gabarito e rubrica</span></button>
+      </div>
+    </div>
+  </section>
 
-    <section class="grade" id="grade" aria-live="polite"></section>
-    <p class="vazio" id="vazio" hidden>Nenhum projeto encontrado com esse filtro.</p>
+  <main class="secao-dentro" id="laboratorios">
+    <div class="lista-cabeca">
+      <div>
+        <h2>Laboratórios</h2>
+        <p class="subtitulo" id="contagem"></p>
+      </div>
+      <div class="controles">
+        <label class="busca"><span class="sr">Buscar</span>
+          <input id="busca" type="search" placeholder="Buscar laboratório ou assunto…" autocomplete="off">
+        </label>
+        <div class="filtros" id="filtros" role="group" aria-label="Filtrar por disciplina"></div>
+      </div>
+    </div>
+    <div class="grade" id="grade" aria-live="polite"></div>
+    <p class="vazio" id="vazio" hidden>Nenhum laboratório encontrado.</p>
   </main>
 
-  <footer class="rodape">
-    <div class="rodape__autor">
-      <p class="rodape__rotulo">Desenvolvido por</p>
-      <p class="rodape__nome">Doutorando Antonio Augusto Ignacio</p>
-      <p class="rodape__contatos">
-        <a href="mailto:augustonkj@gmail.com">augustonkj@gmail.com</a>
-        <span aria-hidden="true">·</span>
-        <a href="http://lattes.cnpq.br/4063776675134292" target="_blank" rel="noopener">Currículo Lattes</a>
-      </p>
+  <section class="como" id="como-funciona">
+    <div class="secao-dentro">
+      <h2>Como funciona uma prática</h2>
+      <p class="subtitulo">Cada laboratório segue o roteiro de uma aula prática real.</p>
+      <ol class="passos">
+        <li><span>1</span><b>Preparação</b>Objetivos, materiais, segurança e hipóteses.</li>
+        <li><span>2</span><b>Teoria</b>Os conceitos que serão testados.</li>
+        <li><span>3</span><b>Prática</b>Montar, medir e registrar na bancada.</li>
+        <li><span>4</span><b>Resultados</b>Tabela e gráficos com os seus dados.</li>
+        <li><span>5</span><b>Avaliação</b>Questões com correção e explicação.</li>
+        <li><span>6</span><b>Relatório</b>Tudo reunido, pronto para imprimir.</li>
+      </ol>
     </div>
-    <p class="rodape__licenca">Bancada · laboratório virtual de ensino · conteúdo sob licença
-      <a href="https://creativecommons.org/licenses/by-nc/4.0/deed.pt-br" target="_blank" rel="noopener license">CC BY-NC 4.0</a> · uso comercial não autorizado</p>
+  </section>
+
+  <section class="autor" id="autor">
+    <div class="secao-dentro autor__cartao">
+      <div class="autor__avatar" aria-hidden="true">AI</div>
+      <div>
+        <p class="autor__rotulo">Desenvolvido por</p>
+        <p class="autor__nome">Doutorando Antonio Augusto Ignacio</p>
+        <p class="autor__contatos">
+          <a href="mailto:augustonkj@gmail.com">✉ augustonkj@gmail.com</a>
+          <a href="http://lattes.cnpq.br/4063776675134292" target="_blank" rel="noopener">🎓 Currículo Lattes</a>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="rodape">
+    <div class="secao-dentro">
+      <p>Bancada · laboratório virtual de ensino · conteúdo sob licença
+        <a href="https://creativecommons.org/licenses/by-nc/4.0/deed.pt-br" target="_blank" rel="noopener license">CC BY-NC 4.0</a> · uso comercial não autorizado</p>
+    </div>
   </footer>
 
   <script src="js/projetos.js"></script>
