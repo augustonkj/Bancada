@@ -32,6 +32,9 @@
 *, *::before, *::after { box-sizing: border-box; }
 
 body {
+  /* recalculadas aqui porque cada página define --cor-area no <body> */
+  --cor-area-clara: color-mix(in srgb, var(--cor-area) 12%, white);
+  --cor-area-escura: color-mix(in srgb, var(--cor-area) 75%, black);
   margin: 0;
   font-family: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   font-size: 17px;
@@ -748,5 +751,7 @@ a { color: var(--cor-area-escura); text-underline-offset: 3px; }
 .formula small { margin-top: 10px; }
 .katex { font-size: 1.08em; }
 .variaveis dt .katex { font-size: 1.15em; color: var(--cor-area-escura); }
-.exemplo li .katex, .retorno .katex, .questao__enunciado .katex { white-space: nowrap; }
+/* fórmulas na linha podem quebrar no celular (o KaTeX impede por padrão) */
+:not(.katex-display) > .katex > .katex-html { white-space: normal; }
+.lista-check li > .katex { display: contents; }
 .katex-display { overflow-x: auto; overflow-y: hidden; padding: 4px 0; }

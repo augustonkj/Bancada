@@ -177,7 +177,8 @@
         new MutationObserver((muts) => {
           muts.forEach((m) => {
             const alvo = m.target.nodeType === 1 ? m.target : m.target.parentElement;
-            if (alvo && !alvo.closest(".katex")) pendentes.add(alvo);
+            // só elementos com LaTeX por converter (evita trabalho a cada quadro de animação)
+            if (alvo && !alvo.closest(".katex") && /\\[(\[]/.test(alvo.textContent)) pendentes.add(alvo);
           });
           if (!agendado) {
             agendado = true;

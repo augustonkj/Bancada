@@ -2,319 +2,536 @@
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Microscópio Virtual — Bancada</title>
-  <meta name="description" content="Laboratório virtual: aprenda a usar o microscópio óptico e observe células vegetais, animais e do sangue.">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%23f4f1ea' stroke='%231d1f1c' stroke-width='2'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-family='Georgia,serif' font-weight='700' font-size='17' fill='%231d1f1c'%3EB%3C/text%3E%3C/svg%3E">
+  <meta name="description" content="Laboratório virtual: aprenda a usar o microscópio óptico, observe células vegetais, animais e do sangue e estime o tamanho de uma célula.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2316a34a'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-family='Arial' font-weight='700' font-size='17' fill='white'%3EB%3C/text%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;1,9..144,500&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../_comum/lab.css">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../_comum/bancada.css">
   <style>
-    /* o campo ocupa a altura do painel de controles em telas largas */
-    #tela-wrap { --altura-tela: 460px; }
-    @media (min-width: 901px) { #tela-wrap { --altura-tela: 620px; } }
-    .revolver { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
-    .revolver .botao { padding: 8px 0; font-family: "IBM Plex Mono", ui-monospace, monospace; }
-    .revolver .botao[aria-pressed="true"] { color: #fff; background: var(--destaque); border-color: var(--destaque); }
-    .marcar { display: flex; gap: 8px; align-items: center; font-size: 14px; cursor: pointer; }
-    .marcar input { accent-color: var(--destaque); width: 16px; height: 16px; }
-    .cruzeta { display: grid; grid-template-columns: repeat(3, 44px); gap: 4px; }
-    .cruzeta .botao { padding: 6px 0; }
-    .avisos { display: grid; gap: 8px; padding: 12px; }
-    .avisos:empty { display: none; }
-    .avisos .caixa { margin: 0; padding: 8px 12px; font-size: 13.5px; line-height: 1.5; }
-    .dica-tela { margin: 0; padding: 8px 12px; font-size: 13px; color: var(--tinta-suave); border-top: 1px solid var(--linha); background: var(--papel); }
-    .figura { margin: 20px 0; padding: 12px; background: var(--papel); border: 1px solid var(--linha); border-radius: 8px; overflow-x: auto; }
-    .figura svg { display: block; width: 100%; max-width: 600px; height: auto; margin: 0 auto; }
-    .figura figcaption { margin-top: 6px; font-size: 14px; color: var(--tinta-suave); text-align: center; }
-    .comparacao { overflow-x: auto; margin: 16px 0; background: var(--papel); border: 1px solid var(--linha); border-radius: 8px; }
+    /* ---- estilos só desta página ---- */
+    /* as cores derivadas precisam ser recalculadas onde --cor-area é definida (no body) */
+    body { --cor-area-clara: color-mix(in srgb, var(--cor-area) 12%, white); --cor-area-escura: color-mix(in srgb, var(--cor-area) 75%, black); }
+    .cena { --altura-cena: 580px; --altura-cena-celular: 660px; }
+    #pratica .cena__dica { white-space: normal; width: max-content; max-width: calc(100% - 24px); text-align: center; line-height: 1.35; }
+    .painel__bloco.realce { border-color: var(--cor-area); box-shadow: 0 0 0 3px var(--cor-area-clara), var(--sombra); }
+    .opcoes--revolver button { flex: 1; font-family: "JetBrains Mono", ui-monospace, monospace; }
+    .ajuste { display: flex; gap: 6px; align-items: center; }
+    .ajuste input[type="range"] { flex: 1; min-width: 0; }
+    .ajuste button, .cruzeta button {
+      flex: none; width: 34px; height: 30px; padding: 0; font: inherit; font-size: 14px; font-weight: 700;
+      color: var(--tinta); background: var(--superficie); border: 1.5px solid var(--linha); border-radius: 8px; cursor: pointer;
+    }
+    .ajuste button:hover, .cruzeta button:hover { border-color: var(--cor-area); color: var(--cor-area-escura); }
+    .cruzeta { display: grid; grid-template-columns: repeat(3, 34px); gap: 4px; }
+    .linha-controles { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+    .marcar { display: flex; gap: 8px; align-items: center; font-size: 14px; cursor: pointer; margin-bottom: 12px; }
+    .marcar input { accent-color: var(--cor-area); width: 16px; height: 16px; }
+    .leitura--larga { grid-column: span 2; }
+    .comparacao { overflow-x: auto; margin: 16px 0; background: var(--superficie); border: 1px solid var(--linha); border-radius: 14px; }
     .comparacao table { width: 100%; border-collapse: collapse; font-size: 15px; }
-    .comparacao th, .comparacao td { padding: 9px 12px; text-align: left; border-bottom: 1px solid var(--linha); vertical-align: top; }
-    .comparacao th { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 12px; font-weight: 500; color: var(--tinta-suave); background: var(--fundo); }
-    .comparacao tr:last-child td { border-bottom: 0; }
+    .comparacao th, .comparacao td { padding: 10px 14px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--linha); }
+    .comparacao th { font-size: 13px; font-weight: 700; color: var(--tinta-suave); background: var(--superficie-2); }
+    .comparacao tbody tr:last-child td { border-bottom: 0; }
+    .comparacao td:first-child { font-weight: 700; white-space: nowrap; }
+    .comparacao .sim { color: var(--certo); font-weight: 600; }
+    .comparacao .nao { color: var(--errado); font-weight: 600; }
+    .comparacao .falta { color: var(--tinta-fraca); font-size: 13.5px; }
+    .partes { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 8px 20px; margin: 12px 0; }
+    .partes div { font-size: 15px; }
+    .partes dt { display: inline; font-weight: 800; color: var(--cor-area-escura); }
+    .partes dt::after { content: " — "; color: var(--tinta-fraca); font-weight: 400; }
+    .partes dd { display: inline; margin: 0; color: var(--tinta-suave); }
+    .figura--rolar { overflow-x: auto; }
+    .figura--rolar svg { display: block; width: 100%; min-width: 500px; max-width: 640px; height: auto; margin: 0 auto; }
+    #tabela td.esq, #rel-dados td.esq { white-space: normal; min-width: 130px; font-family: inherit; font-size: 14px; }
+    #tabela td:nth-child(6), #rel-dados td:nth-child(6) { min-width: 240px; }
+    .desenho-caixa { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 12px; margin-top: 10px; }
+    .desenho-caixa div { display: flex; align-items: flex-end; justify-content: center; height: 230px; padding: 10px; font-size: 13px; color: var(--tinta-fraca); border: 1.5px dashed #cfd6e2; border-radius: 50%; aspect-ratio: 1; max-width: 230px; margin: 0 auto; width: 100%; }
+    .formula .katex-display { margin: 0; }
   </style>
 </head>
-<body>
-  <header class="lab-topo">
-    <a class="lab-topo__voltar" href="../../">← Bancada</a>
-    <div class="lab-topo__acoes">
-      <button class="botao-icone" id="lab-imprimir" type="button" aria-label="Imprimir relatório" title="Imprimir relatório">⎙</button>
-      <button class="botao-icone" id="lab-tema" type="button" aria-label="Alternar tema claro/escuro" title="Alternar tema">◐</button>
-    </div>
+<body style="--cor-area:#16a34a">
+
+  <header class="barra">
+    <a class="barra__marca" href="../../"><span class="barra__logo">B</span>Bancada</a>
+    <span class="barra__titulo">Microscópio Virtual</span>
+    <button class="botao-icone" type="button" data-imprimir title="Imprimir relatório" aria-label="Imprimir relatório"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
   </header>
 
-  <div class="lab">
-    <nav class="lab-sumario" aria-label="Etapas do laboratório">
-      <p>Roteiro</p>
-      <ol>
-        <li><a href="#objetivos">Objetivos</a></li>
-        <li><a href="#hipoteses">Hipóteses</a></li>
-        <li><a href="#conceitos">Conceitos</a></li>
-        <li><a href="#experimento">Experimento</a></li>
-        <li><a href="#registro">Registro e análise</a></li>
-        <li><a href="#questoes">Questões</a></li>
-        <li><a href="#conclusao">Conclusão</a></li>
-      </ol>
-      <div class="lab-progresso">
-        <span id="progresso-texto">0 questões corretas</span>
-        <div class="lab-progresso__barra"><span id="progresso-barra"></span></div>
-      </div>
-    </nav>
-
-    <main class="lab-conteudo">
-      <header class="lab-cabecalho">
-        <p class="lab-rotulo">Biologia · Citologia · Laboratório 03</p>
+  <section class="capa">
+    <div class="capa__dentro">
+      <div>
+        <span class="capa__area">🔬 Biologia · Citologia</span>
         <h1>Microscópio Virtual</h1>
-        <p class="lab-cabecalho__resumo">
+        <p class="capa__resumo">
           Tudo o que é vivo é feito de células — mas quase nenhuma delas pode ser vista a olho nu.
-          Aprenda a usar o microscópio óptico e compare células de cebola, da sua bochecha, de uma
-          planta aquática e do sangue.
+          Aprenda a usar o microscópio óptico, compare células de cebola, da bochecha, de uma planta aquática
+          e do sangue, e descubra o tamanho real de uma célula.
         </p>
-        <dl class="lab-ficha">
-          <div><dt>Nível</dt><dd>Ensino Fundamental (anos finais)</dd></div>
-          <div><dt>Duração</dt><dd>2 aulas (≈ 100 min)</dd></div>
-          <div><dt>Pré-requisitos</dt><dd>Noção de ser vivo, multiplicação, milímetro</dd></div>
-          <div><dt>BNCC</dt><dd>EF06CI05 · EF06CI06</dd></div>
-        </dl>
-      </header>
-
-      <!-- 1. OBJETIVOS -->
-      <section class="secao" id="objetivos">
-        <h2><span class="num">01</span> Objetivos</h2>
-        <p>Ao final deste laboratório, você será capaz de:</p>
-        <ul class="objetivos">
-          <li>Identificar as partes do microscópio óptico e a função de cada uma.</li>
-          <li>Calcular o aumento total de uma observação e relacioná-lo ao tamanho do campo de visão.</li>
-          <li>Focalizar corretamente uma lâmina, começando sempre pela menor objetiva.</li>
-          <li>Reconhecer e comparar células vegetais, células animais e células do sangue.</li>
-          <li>Estimar o tamanho real de uma célula a partir do diâmetro do campo de visão.</li>
-        </ul>
-      </section>
-
-      <!-- 2. HIPÓTESES -->
-      <section class="secao" id="hipoteses">
-        <h2><span class="num">02</span> Antes de começar: suas hipóteses</h2>
-        <p>
-          Cientistas começam com perguntas e previsões. Responda com o que você <em>acha</em> que vai
-          acontecer — não existe resposta errada aqui. Você vai testar suas hipóteses no experimento.
-        </p>
-        <div id="hipoteses-lista"></div>
-      </section>
-
-      <!-- 3. CONCEITOS -->
-      <section class="secao" id="conceitos">
-        <h2><span class="num">03</span> Conceitos</h2>
-        <p>
-          O <strong>microscópio óptico</strong> (ou microscópio de luz) usa um conjunto de lentes para formar
-          uma imagem ampliada de objetos muito pequenos. A luz atravessa uma amostra fina, colocada sobre uma
-          <strong>lâmina</strong> de vidro e coberta por uma <strong>lamínula</strong>, e depois passa por duas
-          lentes que ampliam a imagem: a <strong>objetiva</strong> (perto da amostra) e a <strong>ocular</strong>
-          (perto do olho).
-        </p>
-
-        <h3>As partes do microscópio</h3>
-        <figure class="figura">
-          <svg viewBox="0 0 600 470" role="img" aria-labelledby="svg-titulo" font-family="IBM Plex Sans, system-ui, sans-serif" font-size="14">
-            <title id="svg-titulo">Esquema de um microscópio óptico com suas partes identificadas</title>
-            <!-- braço -->
-            <path d="M345 414 C 395 350, 395 240, 318 192" fill="none" style="stroke:var(--tinta-suave)" stroke-width="30" stroke-linecap="round"/>
-            <!-- base -->
-            <rect x="170" y="410" width="250" height="36" rx="10" style="fill:var(--tinta-suave);stroke:var(--tinta)" stroke-width="1.5"/>
-            <!-- fonte de luz -->
-            <rect x="252" y="394" width="36" height="16" rx="3" style="fill:var(--papel);stroke:var(--tinta)" stroke-width="1.5"/>
-            <circle cx="270" cy="392" r="7" fill="#f5c542" stroke="#b8860b" stroke-width="1"/>
-            <path d="M270 382 L270 372 M262 384 L256 377 M278 384 L284 377" stroke="#e0a800" stroke-width="1.5"/>
-            <!-- diafragma e condensador -->
-            <rect x="240" y="362" width="60" height="7" rx="2" style="fill:var(--linha);stroke:var(--tinta)" stroke-width="1.5"/>
-            <path d="M300 366 L320 372" style="stroke:var(--tinta)" stroke-width="2.5" stroke-linecap="round"/>
-            <rect x="246" y="338" width="48" height="24" rx="3" style="fill:var(--papel);stroke:var(--tinta)" stroke-width="1.5"/>
-            <!-- platina, lâmina e pinças -->
-            <rect x="175" y="318" width="200" height="14" rx="2" style="fill:var(--tinta-suave);stroke:var(--tinta)" stroke-width="1.5"/>
-            <rect x="210" y="312" width="110" height="6" fill="#bfe3f2" stroke="#6aa9c4" stroke-width="1"/>
-            <path d="M188 314 L232 309 M352 314 L308 309" style="stroke:var(--tinta)" stroke-width="3" stroke-linecap="round"/>
-            <!-- objetivas -->
-            <g style="stroke:var(--tinta)" stroke-width="1.5">
-              <g transform="rotate(20 243 220)">
-                <rect x="236" y="220" width="15" height="34" rx="2" style="fill:var(--papel)"/>
-                <rect x="236" y="236" width="15" height="4" fill="#d9534f"/>
-              </g>
-              <g transform="rotate(-20 297 220)">
-                <rect x="290" y="220" width="15" height="40" rx="2" style="fill:var(--papel)"/>
-                <rect x="290" y="238" width="15" height="4" fill="#f0c419"/>
-              </g>
-              <rect x="261" y="220" width="18" height="58" rx="2" style="fill:var(--papel)"/>
-              <rect x="261" y="244" width="18" height="4" fill="#5bc0de"/>
-              <rect x="264" y="278" width="12" height="8" rx="1" style="fill:var(--linha)"/>
-            </g>
-            <!-- revólver e cabeça -->
-            <path d="M232 204 L308 204 L296 222 L244 222 Z" style="fill:var(--linha);stroke:var(--tinta)" stroke-width="1.5"/>
-            <rect x="228" y="180" width="92" height="26" rx="6" style="fill:var(--papel);stroke:var(--tinta)" stroke-width="1.5"/>
-            <!-- tubo e ocular -->
-            <path d="M243 187 L267 177 L227 85 L203 95 Z" style="fill:var(--papel);stroke:var(--tinta)" stroke-width="1.5"/>
-            <path d="M207 94 L223 86 L209 54 L193 62 Z" style="fill:var(--linha);stroke:var(--tinta)" stroke-width="1.5"/>
-            <path d="M190 63 L212 52" style="stroke:var(--tinta)" stroke-width="4" stroke-linecap="round"/>
-            <!-- parafusos -->
-            <circle cx="380" cy="298" r="22" style="fill:var(--linha);stroke:var(--tinta)" stroke-width="1.5"/>
-            <circle cx="380" cy="298" r="10" style="fill:var(--papel);stroke:var(--tinta)" stroke-width="1.5"/>
-            <!-- linhas de chamada -->
-            <g style="stroke:var(--tinta-suave)" stroke-width="1">
-              <path d="M156 58 L198 62"/>
-              <path d="M156 126 L221 130"/>
-              <path d="M156 206 L238 212"/>
-              <path d="M156 256 L258 262"/>
-              <path d="M156 298 L196 312"/>
-              <path d="M156 330 L178 326"/>
-              <path d="M156 352 L246 350"/>
-              <path d="M156 376 L240 366"/>
-              <path d="M156 402 L252 402"/>
-              <path d="M434 222 L372 237"/>
-              <path d="M434 280 L401 292"/>
-              <path d="M434 322 L386 304"/>
-              <path d="M434 434 L412 430"/>
-            </g>
-            <g style="fill:var(--tinta)">
-              <text x="150" y="62" text-anchor="end">Ocular</text>
-              <text x="150" y="130" text-anchor="end">Tubo</text>
-              <text x="150" y="210" text-anchor="end">Revólver</text>
-              <text x="150" y="260" text-anchor="end">Objetivas</text>
-              <text x="150" y="302" text-anchor="end">Pinças</text>
-              <text x="150" y="334" text-anchor="end">Platina</text>
-              <text x="150" y="356" text-anchor="end">Condensador</text>
-              <text x="150" y="380" text-anchor="end">Diafragma</text>
-              <text x="150" y="406" text-anchor="end">Fonte de luz</text>
-              <text x="440" y="226">Braço</text>
-              <text x="440" y="284">Macrométrico</text>
-              <text x="440" y="326">Micrométrico</text>
-              <text x="440" y="438">Base</text>
-            </g>
-          </svg>
-          <figcaption>Partes do microscópio óptico. As faixas coloridas nas objetivas indicam o aumento de cada uma.</figcaption>
-        </figure>
-
-        <dl class="variaveis">
-          <dt>Ocular</dt><dd>lente por onde se olha; em geral aumenta 10×.</dd>
-          <dt>Objetivas</dt><dd>lentes próximas da amostra (4×, 10×, 40× e 100×), presas ao <strong>revólver</strong>, que gira para trocá-las.</dd>
-          <dt>Platina</dt><dd>mesa onde se apoia a lâmina, presa pelas <strong>pinças</strong>.</dd>
-          <dt>Fonte de luz</dt><dd>lâmpada que ilumina a amostra por baixo; o <strong>condensador</strong> concentra a luz sobre ela.</dd>
-          <dt>Diafragma</dt><dd>abertura ajustável que controla a quantidade de luz e o contraste.</dd>
-          <dt>Macrométrico</dt><dd>parafuso grande: sobe e desce a platina rapidamente — para o foco inicial em pequeno aumento.</dd>
-          <dt>Micrométrico</dt><dd>parafuso pequeno: movimentos finos — para o ajuste preciso do foco.</dd>
-          <dt>Braço e base</dt><dd>estrutura que sustenta o aparelho. Carregue o microscópio sempre com uma mão no braço e outra sob a base.</dd>
-        </dl>
-
-        <h3>Quanto o microscópio aumenta?</h3>
-        <p>O aumento total é o produto dos aumentos das duas lentes:</p>
-        <div class="formula">
-          Aumento total = ocular × objetiva
-          <small>exemplo: ocular de 10× com objetiva de 40× → 10 × 40 = 400×</small>
+        <div class="capa__fichas">
+          <span class="ficha"><span>Duração</span><b>2 aulas de 50 min</b></span>
+          <span class="ficha"><span>Nível</span><b>Ensino Fundamental II</b></span>
+          <span class="ficha"><span>Laboratório</span><b>03</b></span>
         </div>
-        <p>
-          Um aumento de 400× significa que a imagem parece 400 vezes maior do que o objeto real. Mas atenção:
-          quanto maior o aumento, <strong>menor é a área da lâmina que você enxerga</strong> (o campo de visão)
-          e <strong>mais escura</strong> fica a imagem, porque a mesma luz se espalha por uma imagem maior.
-        </p>
-        <div class="comparacao">
-          <table>
-            <thead><tr><th>Objetiva</th><th>Aumento total (ocular 10×)</th><th>Diâmetro do campo (aprox.)</th></tr></thead>
-            <tbody>
-              <tr><td>4×</td><td>40×</td><td>4,5 mm = 4 500 µm</td></tr>
-              <tr><td>10×</td><td>100×</td><td>1,8 mm = 1 800 µm</td></tr>
-              <tr><td>40×</td><td>400×</td><td>0,45 mm = 450 µm</td></tr>
-              <tr><td>100× (imersão em óleo)</td><td>1000×</td><td>0,18 mm = 180 µm</td></tr>
-            </tbody>
-          </table>
+      </div>
+      <svg class="capa__ilustracao" viewBox="0 0 320 280" role="img" aria-label="Ilustração de um microscópio e do campo de visão com células de cebola">
+        <defs>
+          <linearGradient id="cv-corpo" x1="0" x2="1"><stop offset="0" stop-color="#f8fafc"/><stop offset="1" stop-color="#b6c0cf"/></linearGradient>
+          <radialGradient id="cv-vinheta" cx=".5" cy=".5" r=".5"><stop offset=".62" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".32"/></radialGradient>
+          <radialGradient id="cv-luz" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fde68a" stop-opacity=".9"/><stop offset="1" stop-color="#fde68a" stop-opacity="0"/></radialGradient>
+          <clipPath id="cv-campo"><circle cx="228" cy="116" r="76"/></clipPath>
+        </defs>
+        <rect x="10" y="238" width="300" height="14" rx="4" fill="#d9b48a"/>
+        <rect x="10" y="250" width="300" height="10" rx="3" fill="#b88c5e"/>
+        <!-- microscópio -->
+        <ellipse cx="96" cy="239" rx="64" ry="4" fill="#5b3a17" opacity=".25"/>
+        <rect x="36" y="222" width="116" height="17" rx="6" fill="#3b4557"/>
+        <circle cx="114" cy="218" r="14" fill="url(#cv-luz)"/>
+        <ellipse cx="114" cy="220" rx="9" ry="3" fill="#fde68a"/>
+        <path d="M108 218 L120 218 L118 176 L110 176 Z" fill="#fde68a" opacity=".35"/>
+        <path d="M52 224 C 40 188, 46 140, 76 106 L 96 112 C 72 142, 66 188, 78 224 Z" fill="url(#cv-corpo)" stroke="#94a3b8"/>
+        <g transform="translate(108 102) rotate(34)">
+          <rect x="-9" y="-54" width="18" height="54" rx="3" fill="url(#cv-corpo)" stroke="#94a3b8"/>
+          <rect x="-7" y="-74" width="14" height="22" rx="2" fill="#334155"/>
+          <rect x="-8.5" y="-78" width="17" height="5" rx="2" fill="#0f172a"/>
+        </g>
+        <rect x="70" y="96" width="70" height="28" rx="9" fill="url(#cv-corpo)" stroke="#94a3b8"/>
+        <rect x="70" y="111" width="70" height="3.5" fill="#16a34a"/>
+        <ellipse cx="114" cy="126" rx="19" ry="4.5" fill="#64748b"/>
+        <rect x="108" y="128" width="12" height="28" rx="2" fill="#e2e8f0" stroke="#64748b"/>
+        <rect x="108" y="137" width="12" height="3" fill="#0ea5e9"/>
+        <rect x="80" y="168" width="78" height="6" rx="2" fill="#1f2937"/>
+        <rect x="92" y="164.5" width="46" height="3.5" fill="#bae6fd" stroke="#7fb3cc" stroke-width=".6"/>
+        <rect x="106" y="174" width="16" height="10" rx="2" fill="#475569"/>
+        <circle cx="70" cy="184" r="9" fill="#334155"/><circle cx="70" cy="184" r="3.5" fill="#94a3b8"/>
+        <circle cx="70" cy="204" r="5.5" fill="#334155"/>
+        <!-- linhas até o campo de visão -->
+        <path d="M151 40 L166 70 M151 40 L154 138" stroke="#16a34a" stroke-width="1.5" stroke-dasharray="4 5" opacity=".7"/>
+        <!-- campo de visão -->
+        <circle cx="228" cy="116" r="84" fill="#1f2937"/>
+        <circle cx="228" cy="116" r="76" fill="#f7efd6"/>
+        <g clip-path="url(#cv-campo)" stroke="#a8742c" stroke-width="2.2" fill="#efd49a">
+          <rect x="140" y="38" width="52" height="22" rx="3"/><rect x="194" y="38" width="46" height="22" rx="3"/><rect x="242" y="38" width="56" height="22" rx="3"/>
+          <rect x="150" y="62" width="44" height="22" rx="3"/><rect x="196" y="62" width="56" height="22" rx="3"/><rect x="254" y="62" width="50" height="22" rx="3"/>
+          <rect x="140" y="86" width="58" height="22" rx="3"/><rect x="200" y="86" width="48" height="22" rx="3"/><rect x="250" y="86" width="54" height="22" rx="3"/>
+          <rect x="146" y="110" width="46" height="22" rx="3"/><rect x="194" y="110" width="58" height="22" rx="3"/><rect x="254" y="110" width="48" height="22" rx="3"/>
+          <rect x="140" y="134" width="54" height="22" rx="3"/><rect x="196" y="134" width="48" height="22" rx="3"/><rect x="246" y="134" width="58" height="22" rx="3"/>
+          <rect x="152" y="158" width="48" height="22" rx="3"/><rect x="202" y="158" width="54" height="22" rx="3"/><rect x="258" y="158" width="46" height="22" rx="3"/>
+          <rect x="140" y="182" width="56" height="22" rx="3"/><rect x="198" y="182" width="50" height="22" rx="3"/><rect x="250" y="182" width="54" height="22" rx="3"/>
+        </g>
+        <g clip-path="url(#cv-campo)" fill="#a86a2c">
+          <ellipse cx="172" cy="46" rx="6" ry="4.5"/><ellipse cx="206" cy="53" rx="6" ry="4.5"/><ellipse cx="280" cy="45" rx="6" ry="4.5"/>
+          <ellipse cx="164" cy="75" rx="6" ry="4.5"/><ellipse cx="232" cy="69" rx="6" ry="4.5"/><ellipse cx="266" cy="76" rx="6" ry="4.5"/>
+          <ellipse cx="184" cy="93" rx="6" ry="4.5"/><ellipse cx="214" cy="100" rx="6" ry="4.5"/><ellipse cx="288" cy="94" rx="6" ry="4.5"/>
+          <ellipse cx="170" cy="124" rx="6" ry="4.5"/><ellipse cx="226" cy="117" rx="6" ry="4.5"/><ellipse cx="282" cy="124" rx="6" ry="4.5"/>
+          <ellipse cx="160" cy="141" rx="6" ry="4.5"/><ellipse cx="216" cy="148" rx="6" ry="4.5"/><ellipse cx="272" cy="141" rx="6" ry="4.5"/>
+          <ellipse cx="186" cy="172" rx="6" ry="4.5"/><ellipse cx="238" cy="165" rx="6" ry="4.5"/><ellipse cx="276" cy="172" rx="6" ry="4.5"/>
+          <ellipse cx="220" cy="189" rx="6" ry="4.5"/>
+        </g>
+        <circle cx="228" cy="116" r="76" fill="url(#cv-vinheta)"/>
+        <rect x="200" y="176" width="56" height="4" rx="1" fill="#1a2233"/>
+        <text x="228" y="172" text-anchor="middle" font-family="monospace" font-size="9" font-weight="700" fill="#1a2233">300 µm</text>
+      </svg>
+    </div>
+  </section>
+
+  <nav class="etapas-nav" aria-label="Etapas do laboratório">
+    <ol>
+      <li><a href="#preparacao"><span class="num">1</span>Preparação</a></li>
+      <li><a href="#teoria"><span class="num">2</span>Teoria</a></li>
+      <li><a href="#pratica"><span class="num">3</span>Prática</a></li>
+      <li><a href="#resultados"><span class="num">4</span>Resultados</a></li>
+      <li><a href="#avaliacao"><span class="num">5</span>Avaliação</a></li>
+      <li><a href="#relatorio"><span class="num">6</span>Relatório</a></li>
+    </ol>
+  </nav>
+
+  <main class="conteudo">
+
+    <!-- ===================== 1. PREPARAÇÃO ===================== -->
+    <section class="etapa" id="preparacao" data-titulo="Preparação">
+      <div class="etapa__cabeca">
+        <p class="etapa__rotulo">Etapa 1 de 6</p>
+        <h2>Preparação da prática</h2>
+        <p class="etapa__intro">Antes de ir para a bancada, entenda como esta prática funciona, conheça os objetivos e registre suas hipóteses.</p>
+      </div>
+
+      <div class="cartao" style="margin-bottom:20px">
+        <h3>👋 Bem-vindo(a) ao laboratório</h3>
+        <p>Esta prática foi pensada para você conseguir fazer <b>sozinho(a)</b>, no seu ritmo. Siga as etapas na ordem,
+          usando os botões no fim de cada página ou a barra de etapas no topo. Tudo o que você faz fica salvo neste navegador —
+          pode fechar e continuar depois.</p>
+        <p style="margin-bottom:8px">Durante a prática, fique atento às caixas coloridas:</p>
+        <div class="grade-3" style="gap:10px">
+          <div class="caixa" style="margin:0"><span class="caixa__icone">💡</span><div><span class="caixa__titulo">Dica</span><p>Explicações e atalhos.</p></div></div>
+          <div class="caixa caixa--pense" style="margin:0"><span class="caixa__icone">🤔</span><div><span class="caixa__titulo">Pense</span><p>Perguntas para refletir.</p></div></div>
+          <div class="caixa caixa--atencao" style="margin:0"><span class="caixa__icone">⚠️</span><div><span class="caixa__titulo">Atenção</span><p>Cuidados importantes.</p></div></div>
+          <div class="caixa caixa--curiosidade" style="margin:0"><span class="caixa__icone">📜</span><div><span class="caixa__titulo">Você sabia?</span><p>Curiosidades e história.</p></div></div>
         </div>
-        <p>
-          Repare: quando o aumento fica 4 vezes maior (de 100× para 400×), o diâmetro do campo fica 4 vezes menor.
-          O <strong>micrômetro (µm)</strong> é a unidade usada para células: 1 mm = 1 000 µm.
-        </p>
+      </div>
 
-        <h3>A teoria celular</h3>
-        <p>As observações ao microscópio levaram, no século XIX, à <strong>teoria celular</strong>, que afirma:</p>
-        <ul>
-          <li>todos os seres vivos são formados por uma ou mais células;</li>
-          <li>a célula é a menor unidade de estrutura e de funcionamento dos seres vivos;</li>
-          <li>toda célula surge de outra célula já existente, por divisão.</li>
-        </ul>
-
-        <h3>Célula vegetal × célula animal</h3>
-        <p>
-          Todas as células têm <strong>membrana plasmática</strong>, <strong>citoplasma</strong> e material genético
-          (nas células de plantas e animais, guardado no <strong>núcleo</strong>). Mas há diferenças importantes:
-        </p>
-        <div class="comparacao">
-          <table>
-            <thead><tr><th>Estrutura</th><th>Célula vegetal</th><th>Célula animal</th></tr></thead>
-            <tbody>
-              <tr><td>Membrana plasmática</td><td>Sim</td><td>Sim</td></tr>
-              <tr><td>Núcleo e citoplasma</td><td>Sim</td><td>Sim</td></tr>
-              <tr><td>Parede celular (celulose)</td><td>Sim — dá forma rígida, geralmente geométrica</td><td>Não — forma mais arredondada ou irregular</td></tr>
-              <tr><td>Cloroplastos</td><td>Sim, nas partes verdes expostas à luz</td><td>Não</td></tr>
-              <tr><td>Vacúolo</td><td>Um vacúolo central grande</td><td>Pequenos ou ausentes</td></tr>
-            </tbody>
-          </table>
+      <div class="grade-2">
+        <div class="cartao">
+          <h3>🎯 Objetivos</h3>
+          <p style="margin-top:0">Ao final desta prática, você será capaz de:</p>
+          <ul class="lista-check">
+            <li>Identificar as partes do microscópio óptico e dizer para que serve cada uma.</li>
+            <li>Focalizar uma lâmina corretamente, começando sempre pela objetiva de menor aumento.</li>
+            <li>Calcular o aumento total e relacioná-lo ao tamanho do campo de visão.</li>
+            <li>Reconhecer e comparar células vegetais, células animais e células do sangue.</li>
+            <li>Estimar o tamanho real de uma célula usando o diâmetro do campo de visão.</li>
+          </ul>
+          <p style="margin:14px 0 0;padding-top:12px;border-top:1px dashed var(--linha);font-size:14.5px;color:var(--tinta-suave)">
+            📚 <b>Alinhamento curricular (BNCC):</b> EF06CI05 — organização básica das células; EF06CI06 — níveis de organização
+            dos seres vivos; competências de investigação científica (hipóteses, observação, registro, cálculo e comunicação de resultados).</p>
         </div>
-
-        <h3>Para que servem os corantes?</h3>
-        <p>
-          A maioria das células é quase transparente: sem corante, veríamos pouco mais que contornos. Os
-          <strong>corantes</strong> se ligam a algumas estruturas mais do que a outras e aumentam o
-          <strong>contraste</strong>. O <strong>lugol</strong> (solução de iodo) deixa as células da cebola amareladas
-          e o núcleo bem marcado; o <strong>azul de metileno</strong> tinge fortemente o núcleo das células da bochecha;
-          no sangue, corantes especiais deixam as hemácias rosadas e o núcleo dos glóbulos brancos roxo.
-          A Elódea não precisa de corante: seus cloroplastos já são verdes por causa da clorofila.
-        </p>
-
-        <div class="caixa caixa--curiosidade">
-          <span class="caixa__titulo">Você sabia?</span>
-          <p>
-            Em 1665, o inglês <strong>Robert Hooke</strong> observou uma fatia fina de cortiça em um microscópio
-            construído por ele e viu pequenos compartimentos vazios, que lembravam as celas de um mosteiro. Chamou-os
-            de <em>cells</em> (“celas”, em latim <em>cellulae</em>) — daí vem a palavra <strong>célula</strong>.
-            Na verdade, ele viu só as paredes de células mortas. Poucos anos depois, o holandês
-            <strong>Antonie van Leeuwenhoek</strong>, com microscópios de uma única lente que aumentavam cerca de
-            200 vezes, foi o primeiro a ver seres vivos microscópicos em gotas de água, que chamou de
-            “animálculos”, além de glóbulos vermelhos do sangue e bactérias.
-          </p>
+        <div class="cartao">
+          <h3>🧭 O caminho da prática</h3>
+          <ol style="margin:0;padding-left:20px">
+            <li><b>Preparação</b> — você está aqui. Registre suas hipóteses no fim desta página.</li>
+            <li><b>Teoria</b> — conheça o microscópio, as células e os exemplos resolvidos.</li>
+            <li><b>Prática</b> — um assistente vai guiar você missão por missão no microscópio.</li>
+            <li><b>Resultados</b> — suas observações, o quadro comparativo e o cálculo do tamanho de uma célula.</li>
+            <li><b>Avaliação</b> — questões com dica e correção na hora.</li>
+            <li><b>Relatório</b> — tudo reunido; você só completa a conclusão.</li>
+          </ol>
         </div>
+      </div>
 
-        <div class="caixa caixa--atencao">
-          <span class="caixa__titulo">Uso correto e segurança</span>
-          <p>
-            <strong>Comece sempre pela objetiva de menor aumento (4×).</strong> Nela é mais fácil encontrar a amostra
-            e focalizar. <strong>Nunca</strong> suba a platina (ou desça a objetiva) enquanto olha pela ocular: olhe de
-            lado e aproxime com cuidado, depois focalize afastando. Assim a lente não bate na lâmina. Lâminas e
-            lamínulas são de vidro fino: segure-as pelas bordas, não as aperte e avise o professor se alguma quebrar
-            — não recolha cacos com as mãos. Ao terminar, volte para a objetiva de 4×, abaixe a platina e desligue a luz.
-          </p>
+      <h3>🧰 Materiais da bancada</h3>
+      <p>Estes são os materiais de uma aula de microscopia. Na bancada virtual, as lâminas já estão preparadas para você.</p>
+      <div class="grade-3">
+        <div class="material">
+          <svg viewBox="0 0 72 72" aria-hidden="true"><rect x="14" y="58" width="44" height="8" rx="3" fill="#3b4557"/><path d="M22 60 C 16 46, 20 30, 32 20 L 38 23 C 28 32, 26 46, 30 60 Z" fill="#cbd5e1" stroke="#94a3b8"/><g transform="translate(40 20) rotate(32)"><rect x="-5" y="-16" width="10" height="16" rx="2" fill="#e2e8f0" stroke="#94a3b8"/><rect x="-4" y="-22" width="8" height="7" rx="1" fill="#334155"/></g><rect x="28" y="19" width="26" height="11" rx="4" fill="#e2e8f0" stroke="#94a3b8"/><rect x="38" y="30" width="6" height="10" rx="1" fill="#e2e8f0" stroke="#64748b"/><rect x="26" y="44" width="34" height="4" rx="1" fill="#1f2937"/><circle cx="41" cy="55" r="3" fill="#fde68a"/><circle cx="26" cy="47" r="4" fill="#334155"/></svg>
+          <strong>Microscópio óptico</strong><span>ocular de 10× e objetivas de 4×, 10×, 40× e 100×</span>
         </div>
-      </section>
+        <div class="material">
+          <svg viewBox="0 0 72 72" aria-hidden="true"><rect x="6" y="26" width="52" height="16" rx="2" fill="#dff3fb" stroke="#7fb3cc" stroke-width="1.5" transform="rotate(-8 32 34)"/><rect x="14" y="36" width="52" height="16" rx="2" fill="#e8f7fd" stroke="#7fb3cc" stroke-width="1.5"/><rect x="32" y="37.5" width="13" height="13" fill="#f5fcff" stroke="#9cc9dc"/><ellipse cx="38.5" cy="44" rx="4" ry="3" fill="#e9c77f"/></svg>
+          <strong>Lâminas e lamínulas</strong><span>vidros finos: a amostra fica entre a lâmina e a lamínula</span>
+        </div>
+        <div class="material">
+          <svg viewBox="0 0 72 72" aria-hidden="true"><rect x="31" y="8" width="10" height="16" rx="5" fill="#dc2626"/><path d="M32 24 h8 v26 l-4 8 l-4 -8 Z" fill="#e0f2fe" stroke="#7fb3cc" stroke-width="1.5"/><path d="M33 36 h6 v14 l-3 6 l-3 -6 Z" fill="#93c5fd"/><path d="M36 60 c-3 4 -3 6 0 7 c3 -1 3 -3 0 -7 Z" fill="#60a5fa"/></svg>
+          <strong>Conta-gotas</strong><span>para pingar água ou corante sobre a amostra</span>
+        </div>
+        <div class="material">
+          <svg viewBox="0 0 72 72" aria-hidden="true"><rect x="10" y="26" width="22" height="34" rx="4" fill="#b45309"/><rect x="14" y="18" width="14" height="9" rx="2" fill="#1f2937"/><rect x="12" y="38" width="18" height="10" fill="#fef3c7"/><rect x="40" y="26" width="22" height="34" rx="4" fill="#1d4ed8"/><rect x="44" y="18" width="14" height="9" rx="2" fill="#1f2937"/><rect x="42" y="38" width="18" height="10" fill="#dbeafe"/></svg>
+          <strong>Corantes</strong><span>lugol (iodo, amarelo-castanho) e azul de metileno</span>
+        </div>
+        <div class="material">
+          <svg viewBox="0 0 72 72" aria-hidden="true"><rect x="22" y="28" width="28" height="32" rx="5" fill="#fbbf24" opacity=".85" stroke="#b45309" stroke-width="1.5"/><path d="M30 28 v-8 h12 v8" fill="#1f2937"/><rect x="33" y="10" width="6" height="11" rx="2" fill="#1f2937"/><rect x="26" y="40" width="20" height="9" fill="#fffbeb"/><path d="M58 40 c-4 6 -4 9 0 10 c4 -1 4 -4 0 -10 Z" fill="#f59e0b"/></svg>
+          <strong>Óleo de imersão</strong><span>usado somente com a objetiva de 100×</span>
+        </div>
+        <div class="material">
+          <svg viewBox="0 0 72 72" aria-hidden="true"><path d="M20 10 L34 60 L38 60 L26 10 Z" fill="#94a3b8" stroke="#64748b"/><path d="M52 10 L38 60 L34 60 L46 10 Z" fill="#cbd5e1" stroke="#64748b"/><circle cx="36" cy="60" r="3" fill="#64748b"/></svg>
+          <strong>Pinça</strong><span>para pegar a amostra e baixar a lamínula</span>
+        </div>
+        <div class="material">
+          <svg viewBox="0 0 72 72" aria-hidden="true"><rect x="12" y="20" width="44" height="40" rx="2" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5" transform="rotate(-6 34 40)"/><path d="M16 16 H52 L60 24 V58 H16 Z" fill="#fff" stroke="#cbd5e1" stroke-width="1.5"/><path d="M52 16 V24 H60" fill="#e2e8f0" stroke="#cbd5e1" stroke-width="1.5"/><g stroke="#e2e8f0" stroke-width="1.5"><path d="M22 30h30M22 38h30M22 46h30"/></g></svg>
+          <strong>Papel absorvente</strong><span>tira o excesso de líquido e limpa o óleo das lentes</span>
+        </div>
+      </div>
 
-      <!-- 4. EXPERIMENTO -->
-      <section class="secao" id="experimento">
-        <h2><span class="num">04</span> Experimento</h2>
-        <p>
-          A bancada abaixo simula um microscópio com ocular de 10×. O círculo claro é o <strong>campo de visão</strong>:
-          o que você veria olhando pela ocular. No canto, a lâmina aparece vista de cima, como a olho nu.
-        </p>
+      <div class="caixa caixa--atencao">
+        <span class="caixa__icone">⚠️</span>
+        <div>
+          <span class="caixa__titulo">Cuidados com o microscópio (valem também para um laboratório real)</span>
+          <p><b>Comece sempre pela objetiva de menor aumento (4×).</b> Com ela é mais fácil encontrar a amostra e focalizar.</p>
+          <p><b>Nunca desça a objetiva (ou suba a platina) olhando pela ocular.</b> Olhe de lado, aproxime com cuidado e só então
+            focalize, afastando. Assim a lente não bate na lâmina.</p>
+          <p><b>Lâminas e lamínulas são de vidro fino.</b> Segure-as pelas bordas, não aperte e, se alguma quebrar, avise o professor —
+            nunca recolha cacos com as mãos. Carregue o microscópio com uma mão no braço e a outra sob a base.</p>
+        </div>
+      </div>
 
-        <div class="bancada">
-          <div class="bancada__tela" id="tela-wrap">
-            <canvas id="tela" tabindex="0" aria-label="Campo de visão do microscópio. Arraste para mover a lâmina; use as setas do teclado."></canvas>
-            <div class="bancada__leitura" aria-live="polite">
-              <span>Aumento total: <b id="l-aumento">40×</b></span>
-              <span>Campo: <b id="l-campo">≈ 4,5 mm</b></span>
-              <span>Imagem: <b id="l-foco">—</b></span>
-            </div>
-            <p class="dica-tela">Arraste sobre a imagem para <strong>empurrar a lâmina</strong>, como se seus dedos estivessem nela. Observe para onde a imagem vai!</p>
-            <div class="avisos" id="avisos" aria-live="polite"></div>
+      <h3>💭 Suas hipóteses</h3>
+      <p>Uma <b>hipótese</b> é uma previsão que você faz <b>antes</b> do experimento, com base no que já sabe. Escreva o que você acha
+        que vai acontecer e clique em “Guardar hipótese”. Não existe resposta errada aqui: no relatório, você vai comparar suas
+        hipóteses com o que descobriu.</p>
+      <div id="hipoteses-lista"></div>
+    </section>
+
+    <!-- ===================== 2. TEORIA ===================== -->
+    <section class="etapa" id="teoria" data-titulo="Teoria">
+      <div class="etapa__cabeca">
+        <p class="etapa__rotulo">Etapa 2 de 6</p>
+        <h2>Entendendo o microscópio e as células</h2>
+        <p class="etapa__intro">Leia com calma. Os exemplos resolvidos mostram, passo a passo, as contas que você vai fazer depois.</p>
+      </div>
+
+      <h3 style="margin-top:0">O que é o microscópio óptico?</h3>
+      <p>O <b>microscópio óptico</b> (ou microscópio de luz) usa lentes para formar uma imagem ampliada de coisas muito pequenas.
+        A luz de uma lâmpada atravessa uma amostra bem fina, colocada sobre uma <b>lâmina</b> de vidro e coberta por uma
+        <b>lamínula</b>. Depois, a luz passa por duas lentes que ampliam a imagem: a <b>objetiva</b> (perto da amostra) e a
+        <b>ocular</b> (perto do olho).</p>
+
+      <figure class="figura figura--rolar">
+        <svg viewBox="0 0 600 470" role="img" aria-label="Esquema de um microscópio óptico com suas partes identificadas" font-family="Plus Jakarta Sans, system-ui, sans-serif" font-size="15">
+          <path d="M345 414 C 395 350, 395 240, 318 192" fill="none" stroke="#cbd5e1" stroke-width="30" stroke-linecap="round"/>
+          <rect x="170" y="410" width="250" height="36" rx="10" fill="#475569" stroke="#1a2233" stroke-width="1.5"/>
+          <rect x="252" y="394" width="36" height="16" rx="3" fill="#e2e8f0" stroke="#1a2233" stroke-width="1.5"/>
+          <circle cx="270" cy="392" r="7" fill="#fcd34d" stroke="#b45309" stroke-width="1"/>
+          <path d="M270 382 L270 372 M262 384 L256 377 M278 384 L284 377" stroke="#f59e0b" stroke-width="1.5"/>
+          <rect x="240" y="362" width="60" height="7" rx="2" fill="#cbd5e1" stroke="#1a2233" stroke-width="1.5"/>
+          <path d="M300 366 L320 372" stroke="#16a34a" stroke-width="3" stroke-linecap="round"/>
+          <rect x="246" y="338" width="48" height="24" rx="3" fill="#94a3b8" stroke="#1a2233" stroke-width="1.5"/>
+          <rect x="175" y="318" width="200" height="14" rx="2" fill="#1f2937" stroke="#1a2233" stroke-width="1.5"/>
+          <rect x="210" y="312" width="110" height="6" fill="#bae6fd" stroke="#6aa9c4" stroke-width="1"/>
+          <path d="M188 314 L232 309 M352 314 L308 309" stroke="#64748b" stroke-width="3.5" stroke-linecap="round"/>
+          <g stroke="#1a2233" stroke-width="1.5">
+            <g transform="rotate(20 243 220)"><rect x="236" y="220" width="15" height="34" rx="2" fill="#f1f5f9"/><rect x="236" y="236" width="15" height="4" fill="#dc2626"/></g>
+            <g transform="rotate(-20 297 220)"><rect x="290" y="220" width="15" height="40" rx="2" fill="#f1f5f9"/><rect x="290" y="238" width="15" height="4" fill="#eab308"/></g>
+            <rect x="261" y="220" width="18" height="58" rx="2" fill="#f1f5f9"/>
+            <rect x="261" y="244" width="18" height="4" fill="#0ea5e9"/>
+            <rect x="264" y="278" width="12" height="8" rx="1" fill="#cbd5e1"/>
+          </g>
+          <path d="M232 204 L308 204 L296 222 L244 222 Z" fill="#94a3b8" stroke="#1a2233" stroke-width="1.5"/>
+          <rect x="228" y="180" width="92" height="26" rx="6" fill="#f1f5f9" stroke="#1a2233" stroke-width="1.5"/>
+          <rect x="228" y="194" width="92" height="4" fill="#16a34a"/>
+          <path d="M243 187 L267 177 L227 85 L203 95 Z" fill="#f1f5f9" stroke="#1a2233" stroke-width="1.5"/>
+          <path d="M207 94 L223 86 L209 54 L193 62 Z" fill="#334155" stroke="#1a2233" stroke-width="1.5"/>
+          <path d="M190 63 L212 52" stroke="#0f172a" stroke-width="4" stroke-linecap="round"/>
+          <circle cx="380" cy="298" r="22" fill="#334155" stroke="#1a2233" stroke-width="1.5"/>
+          <circle cx="380" cy="298" r="10" fill="#94a3b8" stroke="#1a2233" stroke-width="1.5"/>
+          <g stroke="#8a94a6" stroke-width="1">
+            <path d="M156 58 L198 62"/><path d="M156 126 L221 130"/><path d="M156 206 L238 212"/><path d="M156 256 L258 262"/>
+            <path d="M156 298 L196 312"/><path d="M156 330 L178 326"/><path d="M156 352 L246 350"/><path d="M156 376 L240 366"/>
+            <path d="M156 402 L252 402"/><path d="M434 222 L372 237"/><path d="M434 280 L401 292"/><path d="M434 322 L386 304"/><path d="M434 434 L412 430"/>
+          </g>
+          <g fill="#1a2233" font-weight="600">
+            <text x="150" y="63" text-anchor="end">Ocular</text>
+            <text x="150" y="131" text-anchor="end">Tubo</text>
+            <text x="150" y="211" text-anchor="end">Revólver</text>
+            <text x="150" y="261" text-anchor="end">Objetivas</text>
+            <text x="150" y="303" text-anchor="end">Pinças</text>
+            <text x="150" y="335" text-anchor="end">Platina</text>
+            <text x="150" y="357" text-anchor="end">Condensador</text>
+            <text x="150" y="381" text-anchor="end">Diafragma</text>
+            <text x="150" y="407" text-anchor="end">Fonte de luz</text>
+            <text x="440" y="227">Braço</text>
+            <text x="440" y="285">Macrométrico</text>
+            <text x="440" y="327">Micrométrico</text>
+            <text x="440" y="439">Base</text>
+          </g>
+        </svg>
+        <figcaption>As partes do microscópio óptico. A faixa colorida em cada objetiva indica o seu aumento: vermelha 4×, amarela 10×, azul 40× e branca 100×.</figcaption>
+      </figure>
+
+      <dl class="partes">
+        <div><dt>Ocular</dt><dd>lente por onde você olha; em geral aumenta 10×.</dd></div>
+        <div><dt>Tubo</dt><dd>liga a ocular às objetivas e conduz a luz.</dd></div>
+        <div><dt>Revólver</dt><dd>peça giratória onde ficam as objetivas; girando, você troca de objetiva.</dd></div>
+        <div><dt>Objetivas</dt><dd>lentes perto da amostra: 4×, 10×, 40× e 100×.</dd></div>
+        <div><dt>Platina</dt><dd>mesa onde a lâmina é apoiada; tem um furo por onde passa a luz.</dd></div>
+        <div><dt>Pinças</dt><dd>prendem a lâmina na platina.</dd></div>
+        <div><dt>Condensador</dt><dd>lentes sob a platina que concentram a luz na amostra.</dd></div>
+        <div><dt>Diafragma</dt><dd>abertura ajustável que controla a quantidade de luz e o contraste.</dd></div>
+        <div><dt>Fonte de luz</dt><dd>lâmpada que ilumina a amostra por baixo.</dd></div>
+        <div><dt>Macrométrico</dt><dd>parafuso grande: sobe e desce a platina rápido, para o foco inicial em pequeno aumento.</dd></div>
+        <div><dt>Micrométrico</dt><dd>parafuso pequeno: movimentos finos, para deixar a imagem bem nítida.</dd></div>
+        <div><dt>Braço e base</dt><dd>sustentam o aparelho; é por eles que se carrega o microscópio.</dd></div>
+      </dl>
+
+      <h3>Quanto o microscópio aumenta?</h3>
+      <p>A imagem é ampliada duas vezes: primeiro pela objetiva, depois pela ocular. Por isso, o <b>aumento total</b> é a multiplicação dos dois aumentos:</p>
+      <div class="formula">\[ \text{aumento total} = \text{aumento da ocular} \times \text{aumento da objetiva} \]<small>um aumento de 400× significa que a imagem parece 400 vezes maior que o objeto</small></div>
+
+      <div class="exemplo">
+        <span class="exemplo__titulo">✏️ Exemplo resolvido 1 — calculando o aumento total</span>
+        <p style="margin-top:0">Um estudante usa a ocular de <b>10×</b> e a objetiva de <b>40×</b>. Qual é o aumento total?</p>
+        <ol>
+          <li>Escreva a regra: \( \text{aumento total} = \text{ocular} \times \text{objetiva} \)</li>
+          <li>Substitua os valores: \( 10 \times 40 = 400 \)</li>
+          <li><b>Resposta:</b> o aumento total é <b>400×</b>. Com a objetiva de 100×, seria \( 10 \times 100 = 1000\times \).</li>
+        </ol>
+      </div>
+
+      <p>Mas atenção: quanto maior o aumento, <b>menor é a região da lâmina que você enxerga</b>. Essa região redonda se chama
+        <b>campo de visão</b>. Com mais aumento, a imagem também fica <b>mais escura</b>, porque a luz que passa por uma área pequena
+        precisa se espalhar por uma imagem grande.</p>
+      <div class="comparacao">
+        <table>
+          <thead><tr><th>Objetiva</th><th>Aumento total (ocular de 10×)</th><th>Diâmetro do campo de visão</th></tr></thead>
+          <tbody>
+            <tr><td>4×</td><td>40×</td><td>4,5 mm = 4500 µm</td></tr>
+            <tr><td>10×</td><td>100×</td><td>1,8 mm = 1800 µm</td></tr>
+            <tr><td>40×</td><td>400×</td><td>0,45 mm = 450 µm</td></tr>
+            <tr><td>100× (com óleo)</td><td>1000×</td><td>0,18 mm = 180 µm</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Repare: de 100× para 400× o aumento ficou 4 vezes maior, e o diâmetro do campo ficou 4 vezes menor (\( 1{,}8 \div 4 = 0{,}45 \) mm).</p>
+
+      <h3>Uma unidade para coisas muito pequenas: o micrômetro</h3>
+      <p>O milímetro (mm) é grande demais para medir células. Usamos o <b>micrômetro</b>, cujo símbolo é <b>µm</b> (lê-se “mícron”).
+        Um milímetro dividido em mil partes iguais dá um micrômetro:</p>
+      <div class="formula">\[ 1\ \text{mm} = 1000\ \mu\text{m} \]<small>de mm para µm: multiplique por 1000 · de µm para mm: divida por 1000</small></div>
+
+      <div class="exemplo">
+        <span class="exemplo__titulo">✏️ Exemplo resolvido 2 — convertendo mm e µm</span>
+        <ol>
+          <li>Campo de 1,8 mm em micrômetros: \( 1{,}8 \times 1000 = 1800\ \mu\text{m} \)</li>
+          <li>Campo de 0,45 mm em micrômetros: \( 0{,}45 \times 1000 = 450\ \mu\text{m} \)</li>
+          <li>Uma célula de 300 µm em milímetros: \( 300 \div 1000 = 0{,}3\ \text{mm} \)</li>
+          <li><b>Conclusão:</b> uma célula de cebola tem cerca de 0,3 mm — três décimos de milímetro. Por isso mal dá para vê-la sem microscópio.</li>
+        </ol>
+      </div>
+
+      <h3>Como estimar o tamanho de uma célula</h3>
+      <p>Se você sabe o diâmetro do campo de visão, pode descobrir o tamanho de uma célula: conte quantas células cabem,
+        enfileiradas, de uma borda à outra do campo, e divida.</p>
+      <div class="formula">\[ \text{tamanho da célula} \approx \frac{\text{diâmetro do campo}}{\text{número de células no diâmetro}} \]</div>
+
+      <div class="exemplo">
+        <span class="exemplo__titulo">✏️ Exemplo resolvido 3 — estimando o tamanho de uma célula de cebola</span>
+        <p style="margin-top:0">Com a objetiva de <b>10×</b>, o campo mede <b>1,8 mm</b>. Contando ao longo do diâmetro, cabem cerca de <b>6 células</b> de cebola. Qual é o comprimento de uma célula?</p>
+        <ol>
+          <li>Converta o campo para micrômetros: \( 1{,}8\ \text{mm} = 1{,}8 \times 1000 = 1800\ \mu\text{m} \)</li>
+          <li>Divida pelo número de células: \( \dfrac{1800\ \mu\text{m}}{6} = 300\ \mu\text{m} \)</li>
+          <li><b>Resposta:</b> cada célula mede cerca de <b>300 µm</b> (ou 0,3 mm) de comprimento.</li>
+        </ol>
+        <p style="margin-bottom:0">Na etapa de Resultados, a bancada faz essa mesma conta com a <b>sua</b> contagem.</p>
+      </div>
+
+      <div class="caixa caixa--pense">
+        <span class="caixa__icone">🔄</span>
+        <div><span class="caixa__titulo">Por que a imagem aparece invertida?</span>
+          <p>A objetiva forma uma imagem <b>invertida</b> da amostra: de cabeça para baixo e trocada entre direita e esquerda (como se
+            fosse girada meia volta, 180°). A ocular funciona como uma lupa: amplia essa imagem, mas não a desvira. Por isso, ao empurrar
+            a lâmina para a direita, a imagem vai para a esquerda. Você vai comprovar isso com a letra “e”!</p></div>
+      </div>
+
+      <h3>A teoria celular</h3>
+      <p>As observações feitas com microscópios levaram os cientistas, no século XIX, à <b>teoria celular</b>. Ela diz que:</p>
+      <ul>
+        <li>todos os seres vivos são formados por uma ou mais células;</li>
+        <li>a célula é a menor unidade de estrutura e de funcionamento dos seres vivos;</li>
+        <li>toda célula surge de outra célula que já existia, por divisão.</li>
+      </ul>
+
+      <h3>Célula vegetal × célula animal</h3>
+      <p>Toda célula tem <b>membrana plasmática</b> (o envoltório), <b>citoplasma</b> (o interior) e material genético — que, nas
+        plantas e nos animais, fica guardado no <b>núcleo</b>. Mas há diferenças importantes:</p>
+      <div class="comparacao">
+        <table>
+          <thead><tr><th>Estrutura</th><th>Célula vegetal</th><th>Célula animal</th></tr></thead>
+          <tbody>
+            <tr><td>Membrana plasmática</td><td class="sim">Tem</td><td class="sim">Tem</td></tr>
+            <tr><td>Núcleo e citoplasma</td><td class="sim">Tem</td><td class="sim">Tem</td></tr>
+            <tr><td>Parede celular</td><td><span class="sim">Tem</span> — feita de celulose, dá forma firme, quase sempre geométrica</td><td><span class="nao">Não tem</span> — a forma é mais arredondada ou irregular</td></tr>
+            <tr><td>Cloroplastos</td><td><span class="sim">Tem</span> nas partes verdes que recebem luz</td><td class="nao">Não tem</td></tr>
+            <tr><td>Vacúolo</td><td>Um vacúolo central grande</td><td>Pequenos ou ausentes</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Para que servem os corantes?</h3>
+      <p>A maioria das células é quase transparente: sem corante, veríamos pouco mais que contornos. Os <b>corantes</b> se prendem mais
+        a algumas estruturas do que a outras e aumentam o <b>contraste</b>. O <b>lugol</b> (uma solução de iodo) deixa as células da cebola
+        amareladas e o núcleo bem marcado; o <b>azul de metileno</b> tinge de azul o núcleo das células da bochecha; no sangue, corantes
+        especiais deixam as hemácias rosadas e o núcleo dos glóbulos brancos roxo. A Elódea não precisa de corante: seus cloroplastos já
+        são verdes por causa da clorofila.</p>
+
+      <h3>📖 Palavras importantes</h3>
+      <dl class="glossario">
+        <div><dt>Célula</dt><dd>A menor parte de um ser vivo que ainda está viva.</dd></div>
+        <div><dt>Membrana plasmática</dt><dd>Película fina que envolve a célula e controla o que entra e sai.</dd></div>
+        <div><dt>Citoplasma</dt><dd>Todo o interior da célula, entre a membrana e o núcleo.</dd></div>
+        <div><dt>Núcleo</dt><dd>Guarda o material genético e comanda a célula.</dd></div>
+        <div><dt>Parede celular</dt><dd>Camada firme de celulose por fora da membrana das células vegetais.</dd></div>
+        <div><dt>Cloroplasto</dt><dd>Estrutura verde onde a planta faz fotossíntese.</dd></div>
+        <div><dt>Vacúolo</dt><dd>Bolsa cheia de líquido; nas plantas, costuma ocupar quase toda a célula.</dd></div>
+        <div><dt>Campo de visão</dt><dd>O círculo iluminado que você vê pela ocular.</dd></div>
+        <div><dt>Aumento</dt><dd>Quantas vezes a imagem parece maior que o objeto real.</dd></div>
+        <div><dt>Micrômetro (µm)</dt><dd>A milésima parte do milímetro: 1 mm = 1000 µm.</dd></div>
+        <div><dt>Foco</dt><dd>A distância certa entre a amostra e a objetiva, em que a imagem fica nítida.</dd></div>
+        <div><dt>Corante</dt><dd>Substância que tinge partes da célula e aumenta o contraste.</dd></div>
+      </dl>
+
+      <details class="aprofundamento">
+        <summary>Aprofundamento <span>(opcional) — aumento não é tudo: resolução e óleo de imersão</span></summary>
+        <div class="aprofundamento__corpo">
+          <p><b>Resolução</b> é a capacidade de mostrar separados dois pontos muito próximos. Um microscópio pode aumentar muito e, mesmo
+            assim, mostrar só um borrão maior: isso se chama <i>aumento vazio</i>. O que limita a resolução é a própria luz, que se comporta
+            como onda. A menor distância que ainda dá para distinguir é, aproximadamente:</p>
+          <div class="formula">\[ d \approx \frac{\lambda}{2\,\text{AN}} \]<small>λ: comprimento de onda da luz (cerca de 0,55 µm para a luz verde) · AN: abertura numérica da objetiva</small></div>
+          <p>Com uma objetiva de 100× a óleo (AN ≈ 1,25), \( d \approx \dfrac{0{,}55}{2 \times 1{,}25} \approx 0{,}22\ \mu\text{m} \). Por isso o
+            microscópio óptico mostra bactérias (cerca de 1 µm), mas não mostra vírus nem ribossomos, que são menores — para eles, usa-se o
+            microscópio eletrônico.</p>
+          <p><b>Por que o óleo ajuda?</b> Quando a luz passa de um material para outro, ela se desvia (refração). Cada material tem um
+            <b>índice de refração</b>: ar ≈ 1,00; vidro ≈ 1,52; óleo de imersão ≈ 1,515. Sem óleo, a luz sai do vidro da lamínula para o ar e
+            se desvia tanto que boa parte dela não entra na pequena lente da objetiva de 100×: a imagem fica escura e borrada. O óleo tem quase
+            o mesmo índice do vidro, então a luz segue quase reta do vidro até a lente. Mais luz — e mais detalhes — chegam à objetiva.</p>
+        </div>
+      </details>
+
+      <div class="caixa caixa--curiosidade">
+        <span class="caixa__icone">📜</span>
+        <div><span class="caixa__titulo">Você sabia?</span>
+          <p>Em 1665, o inglês <b>Robert Hooke</b> observou uma fatia fina de cortiça em um microscópio construído por ele e viu pequenos
+            compartimentos vazios, que lembravam as celas de um mosteiro. Chamou-os de <i>cells</i> (do latim <i>cellula</i>, “pequena cela”) —
+            daí vem a palavra <b>célula</b>. Na verdade, ele viu só as paredes de células mortas.</p>
+          <p>Poucos anos depois, o holandês <b>Antonie van Leeuwenhoek</b>, com microscópios de uma única lente que aumentavam cerca de 200 vezes,
+            foi o primeiro a ver seres vivos microscópicos em gotas de água, que chamou de “animálculos”, além de glóbulos vermelhos do sangue e bactérias.</p></div>
+      </div>
+    </section>
+
+    <!-- ===================== 3. PRÁTICA ===================== -->
+    <section class="etapa" id="pratica" data-titulo="Prática">
+      <div class="etapa__cabeca">
+        <p class="etapa__rotulo">Etapa 3 de 6</p>
+        <h2>No microscópio</h2>
+        <p class="etapa__intro">Primeiro, veja como usar o microscópio. Depois, siga as missões do assistente: ele diz o que fazer e marca sozinho cada missão concluída.</p>
+      </div>
+
+      <h3 style="margin-top:0">🕹️ Como usar o microscópio</h3>
+      <ol class="guia-uso">
+        <li><b>Escolha a lâmina</b>No painel <i>Lâmina</i>, escolha a amostra. Ela já vem presa na platina, com lamínula.</li>
+        <li><b>Comece pela objetiva de 4×</b>É a de menor aumento: mostra a maior parte da lâmina e é a mais fácil de focalizar.</li>
+        <li><b>Foque com o macrométrico</b>Arraste o parafuso grande para cima ou para baixo (ou use o painel) até a imagem aparecer.</li>
+        <li><b>Ajuste fino com o micrométrico</b>Use o parafuso pequeno para deixar a imagem bem nítida.</li>
+        <li><b>Aumente e registre</b>Gire o revólver para a próxima objetiva, corrija o foco com o micrométrico e clique em <i>Registrar observação</i>.</li>
+      </ol>
+
+      <div class="assistente" id="assistente" aria-live="polite"></div>
+
+      <div class="laboratorio">
+        <div>
+          <div class="cena">
+            <canvas id="cena" tabindex="0" aria-label="Microscópio sobre a bancada e, ao lado, o campo de visão visto pela ocular. Arraste a imagem para mover a lâmina; arraste os parafusos para focalizar; clique nas objetivas para trocá-las."></canvas>
+            <div class="cena__dica" id="dica"></div>
           </div>
 
-          <div class="bancada__controles">
-            <h4>Controles</h4>
+          <div class="caixa">
+            <span class="caixa__icone">👆</span>
+            <div><span class="caixa__titulo">Mexendo direto no microscópio</span>
+              <p>Arraste o parafuso <b>macro</b> ou o <b>micro</b> para cima (sobe a platina) ou para baixo (desce a platina). Clique em uma
+                objetiva para girar o revólver. Arraste sobre o campo de visão para <b>empurrar a lâmina</b>, como se seus dedos estivessem
+                nela — e repare para onde a imagem vai! O quadro “lâmina vista de cima” mostra onde a lâmina está.</p></div>
+          </div>
+          <div class="caixa caixa--atencao">
+            <span class="caixa__icone">⚠️</span>
+            <div><span class="caixa__titulo">Macrométrico só em pequeno aumento</span>
+              <p>Com as objetivas de 4× e 10×, a faixa em que a imagem fica nítida é larga, e o macrométrico funciona bem. Com as de 40× e 100×,
+                essa faixa tem só alguns micrômetros e a lente fica muito perto da lâmina: um toque no macrométrico passa direto pelo foco e pode
+                fazer a lente bater no vidro. <b>Em 400× e 1000×, use apenas o micrométrico.</b> Como o microscópio é <i>parafocal</i>, ao trocar
+                de objetiva a imagem continua quase focalizada.</p></div>
+          </div>
+          <div class="caixa">
+            <span class="caixa__icone">🫧</span>
+            <div><span class="caixa__titulo">Não confunda</span>
+              <p>Círculos com borda preta e grossa e centro claro são <b>bolhas de ar</b> presas sob a lamínula, não células. Elas aparecem
+                com frequência em preparações de verdade — procure alguma nas lâminas úmidas!</p></div>
+          </div>
+        </div>
+
+        <aside class="painel">
+          <div class="painel__bloco" data-realce="lamina">
+            <h4>🧫 Lâmina</h4>
             <label class="controle">
-              <span class="controle__topo">Lâmina</span>
+              <span class="controle__topo">Amostra</span>
               <select id="c-lamina">
                 <option value="cebola">Epiderme de cebola (lugol)</option>
                 <option value="bucal">Mucosa bucal (azul de metileno)</option>
@@ -323,24 +540,33 @@
                 <option value="letra">Letra “e” de jornal</option>
               </select>
             </label>
+            <label class="marcar"><input type="checkbox" id="c-oleo"> Pingar óleo de imersão na lâmina</label>
             <div class="controle">
-              <span class="controle__topo">Objetiva (revólver)</span>
-              <div class="revolver" id="c-objetiva" role="group" aria-label="Objetiva">
-                <button class="botao" type="button" data-obj="4" aria-pressed="true">4×</button>
-                <button class="botao" type="button" data-obj="10" aria-pressed="false">10×</button>
-                <button class="botao" type="button" data-obj="40" aria-pressed="false">40×</button>
-                <button class="botao" type="button" data-obj="100" aria-pressed="false">100×</button>
+              <span class="controle__topo">Empurrar a lâmina</span>
+              <div class="linha-controles">
+                <div class="cruzeta">
+                  <span></span><button type="button" data-mover="0,-1" aria-label="Empurrar a lâmina para trás">↑</button><span></span>
+                  <button type="button" data-mover="-1,0" aria-label="Empurrar a lâmina para a esquerda">←</button>
+                  <button type="button" id="b-centro" aria-label="Voltar ao centro da lâmina" title="Centro da lâmina">⌖</button>
+                  <button type="button" data-mover="1,0" aria-label="Empurrar a lâmina para a direita">→</button>
+                  <span></span><button type="button" data-mover="0,1" aria-label="Puxar a lâmina para a frente">↓</button><span></span>
+                </div>
+                <span style="flex:1;min-width:120px;font-size:13px;color:var(--tinta-suave)">As setas mostram para onde você empurra a <b>lâmina</b>. ⌖ volta ao centro.</span>
               </div>
             </div>
-            <label class="marcar"><input type="checkbox" id="c-oleo"> Óleo de imersão sobre a lâmina</label>
-            <label class="controle">
-              <span class="controle__topo">Foco macrométrico <output id="o-macro"></output></span>
-              <input id="c-macro" type="range" min="0" max="100" step="0.1" value="42">
-            </label>
-            <label class="controle">
-              <span class="controle__topo">Foco micrométrico <output id="o-micro"></output></span>
-              <input id="c-micro" type="range" min="-60" max="60" step="0.25" value="0">
-            </label>
+          </div>
+
+          <div class="painel__bloco" data-realce="revolver luz">
+            <h4>🔭 Objetiva e luz</h4>
+            <div class="controle">
+              <span class="controle__topo">Objetiva (revólver)</span>
+              <div class="opcoes opcoes--revolver" id="c-obj" role="group" aria-label="Objetiva">
+                <button type="button" data-valor="4" aria-pressed="true">4×</button>
+                <button type="button" data-valor="10">10×</button>
+                <button type="button" data-valor="40">40×</button>
+                <button type="button" data-valor="100">100×</button>
+              </div>
+            </div>
             <label class="controle">
               <span class="controle__topo">Intensidade da luz <output id="o-luz"></output></span>
               <input id="c-luz" type="range" min="0" max="100" step="1" value="65">
@@ -349,209 +575,234 @@
               <span class="controle__topo">Abertura do diafragma <output id="o-diaf"></output></span>
               <input id="c-diaf" type="range" min="0" max="100" step="1" value="60">
             </label>
+          </div>
+
+          <div class="painel__bloco" data-realce="macro micro">
+            <h4>🎯 Foco</h4>
             <div class="controle">
-              <span class="controle__topo">Mover a lâmina</span>
-              <div class="cruzeta">
-                <span></span><button class="botao" type="button" data-mover="0,-1" aria-label="Empurrar a lâmina para trás">↑</button><span></span>
-                <button class="botao" type="button" data-mover="-1,0" aria-label="Empurrar a lâmina para a esquerda">←</button>
-                <button class="botao" type="button" id="b-centro" aria-label="Voltar ao centro da lâmina" title="Centro da lâmina">⌖</button>
-                <button class="botao" type="button" data-mover="1,0" aria-label="Empurrar a lâmina para a direita">→</button>
-                <span></span><button class="botao" type="button" data-mover="0,1" aria-label="Puxar a lâmina para frente">↓</button><span></span>
+              <label class="controle__topo" for="c-macro">Macrométrico (altura da platina) <output id="o-macro"></output></label>
+              <div class="ajuste">
+                <button type="button" data-ajuste="macro,-1" aria-label="Descer a platina (macrométrico)">▼</button>
+                <input id="c-macro" type="range" min="0" max="100" step="0.1" value="42">
+                <button type="button" data-ajuste="macro,1" aria-label="Subir a platina (macrométrico)">▲</button>
               </div>
             </div>
-            <button class="botao botao--primario" id="b-registrar" type="button">Registrar observação</button>
-            <p id="aviso-registro" class="mono" style="margin:0;font-size:12px;color:var(--tinta-suave)">
-              Focalize a imagem antes de registrar.
-            </p>
+            <div class="controle">
+              <label class="controle__topo" for="c-micro">Micrométrico (ajuste fino) <output id="o-micro"></output></label>
+              <div class="ajuste">
+                <button type="button" data-ajuste="micro,-1" aria-label="Descer a platina (micrométrico)">▼</button>
+                <input id="c-micro" type="range" min="-200" max="200" step="0.5" value="0">
+                <button type="button" data-ajuste="micro,1" aria-label="Subir a platina (micrométrico)">▲</button>
+              </div>
+            </div>
+            <div class="leituras">
+              <div class="leitura"><span>Aumento total</span><b id="l-aumento">40×</b></div>
+              <div class="leitura"><span>Campo de visão</span><b id="l-campo">4,5 mm</b></div>
+              <div class="leitura leitura--larga"><span>Imagem</span><b id="l-imagem">—</b></div>
+            </div>
+            <p class="mensagem" id="f-msg"></p>
           </div>
-        </div>
 
-        <div class="caixa caixa--atencao">
-          <span class="caixa__titulo">Macrométrico só em pequeno aumento</span>
-          <p>
-            O parafuso macrométrico move a platina em passos grandes. Com as objetivas de 4× e 10×, a faixa em que
-            a imagem fica nítida é larga, e ele funciona bem. Com as de 40× e 100×, essa faixa tem só alguns
-            micrômetros: um toque no macrométrico passa direto pelo foco — e, como essas objetivas ficam muito
-            perto da lâmina, pode fazer a lente bater nela. <strong>Em 400× e 1000×, use apenas o micrométrico.</strong>
-            Como o microscópio é <em>parafocal</em>, ao trocar de objetiva a imagem continua quase focalizada.
-          </p>
-        </div>
+          <div class="painel__bloco" data-realce="registrar">
+            <h4>📝 Registrar observação</h4>
+            <label class="controle">
+              <span class="controle__topo">Sua anotação (opcional)</span>
+              <input class="campo" id="r-nota" type="text" maxlength="120" placeholder="Ex.: núcleo bem visível, células em fileiras">
+            </label>
+            <button class="botao botao--primario botao--largo" id="b-registrar" type="button">Registrar observação</button>
+            <p class="mensagem" id="r-msg">Focalize a imagem antes de registrar.</p>
+          </div>
 
-        <div class="caixa caixa--pense">
-          <span class="caixa__titulo">Pense</span>
-          <p>
-            Empurre a lâmina para a direita. Para que lado a imagem se move? As lentes do microscópio formam uma imagem
-            <strong>invertida</strong>: de cabeça para baixo e trocada entre direita e esquerda (girada 180°). Por isso,
-            ao mover a lâmina para um lado, a imagem vai para o lado oposto. Na lâmina da letra “e”, compare a letra no
-            desenho da lâmina (canto da tela) com a letra que aparece no campo.
-          </p>
-        </div>
+          <div class="painel__bloco" data-realce="contar">
+            <h4>📏 Estimar o tamanho de uma célula</h4>
+            <label class="marcar"><input type="checkbox" id="c-linha" checked> Mostrar a linha do diâmetro do campo</label>
+            <label class="controle">
+              <span class="controle__topo">Células que cabem no diâmetro</span>
+              <input class="campo mono" id="r-n" type="number" min="1" max="200" step="1" placeholder="conte na linha">
+            </label>
+            <p class="mensagem" id="r-previa">Use a cebola na objetiva de 10× e conte as células ao longo da linha.</p>
+            <button class="botao botao--largo" id="b-contar" type="button" style="margin-top:8px">Registrar contagem</button>
+            <p class="mensagem" id="c-msg"></p>
+          </div>
+        </aside>
+      </div>
+    </section>
 
-        <h3>Procedimento</h3>
-        <ol class="procedimento">
-          <li>
-            <strong>Focalizando a cebola.</strong> Com a lâmina de cebola e a objetiva de <strong>4×</strong>, gire o
-            macrométrico até a imagem ficar nítida e registre a observação. Passe para <strong>10×</strong> e corrija o
-            foco com o micrométrico. Depois vá para <strong>40×</strong> usando <strong>só</strong> o micrométrico. Registre
-            em cada aumento. Ajuste a luz quando a imagem escurecer.
-          </li>
-          <li>
-            <strong>Célula animal.</strong> Troque para a mucosa bucal. Encontre células (elas ficam soltas, espalhadas),
-            observe em 40× e registre. Compare com a cebola: qual estrutura não aparece aqui?
-          </li>
-          <li>
-            <strong>Cloroplastos.</strong> Observe a folha de Elódea em 4× (procure a borda da folha) e depois em 40×.
-            Identifique os cloroplastos e observe por alguns segundos: eles se movem? Registre.
-          </li>
-          <li>
-            <strong>Sangue.</strong> Observe o sangue em 10× e em 40×. Depois passe para 100× <em>sem</em> óleo e veja o que
-            acontece; em seguida, marque o óleo de imersão. Distinga hemácias, leucócitos e plaquetas e registre.
-          </li>
-          <li>
-            <strong>Tamanho de uma célula.</strong> Volte à cebola em 10× (campo de 1,8 mm). Conte quantas células cabem,
-            no sentido do comprimento, de uma borda à outra do campo. Use a contagem para responder à questão 06.
-          </li>
-          <li>
-            <strong>Imagem invertida.</strong> Escolha a lâmina da letra “e” em 4×. A letra aparece como você esperava?
-            Empurre a lâmina para a direita e para trás e anote para onde a imagem se move.
-          </li>
+    <!-- ===================== 4. RESULTADOS ===================== -->
+    <section class="etapa" id="resultados" data-titulo="Resultados">
+      <div class="etapa__cabeca">
+        <p class="etapa__rotulo">Etapa 4 de 6</p>
+        <h2>Resultados e análise</h2>
+        <p class="etapa__intro">Suas observações estão organizadas aqui. Siga o roteiro de análise para comparar as células e calcular o tamanho de uma célula.</p>
+      </div>
+
+      <div class="exemplo" style="margin-top:0">
+        <span class="exemplo__titulo">🧭 Roteiro de análise</span>
+        <ol>
+          <li><b>Confira a tabela.</b> Veja se registrou todas as lâminas. Se algo ficou errado, apague a linha no × e observe de novo.</li>
+          <li><b>Compare os aumentos.</b> Nas linhas da cebola, veja como o campo de visão diminui quando o aumento cresce.</li>
+          <li><b>Compare as células.</b> O quadro comparativo foi montado com as lâminas que você observou. O que só aparece nas células vegetais?</li>
+          <li><b>Calcule o tamanho.</b> Confira o cálculo do tamanho da célula de cebola, feito com a sua contagem.</li>
+          <li><b>Reflita.</b> Responda à pergunta da caixa “Pense” no fim da página.</li>
         </ol>
+      </div>
 
-        <div class="caixa">
-          <span class="caixa__titulo">Não confunda</span>
-          <p>
-            Círculos com borda preta e grossa e centro claro são <strong>bolhas de ar</strong> presas sob a lamínula,
-            não células. Elas aparecem com frequência em preparações de verdade — procure alguma nas lâminas úmidas!
-          </p>
+      <h3>Tabela de observações</h3>
+      <div id="tabela"></div>
+
+      <h3>Quadro comparativo (montado com as suas observações)</h3>
+      <p style="margin-top:0">Cada coluna é preenchida quando você registra a lâmina no aumento necessário para ver aquela estrutura.</p>
+      <div id="comparativo"></div>
+
+      <h3>Tamanho de uma célula de cebola</h3>
+      <div class="exemplo" id="calculo"></div>
+
+      <div class="caixa caixa--pense">
+        <span class="caixa__icone">🤔</span>
+        <div><span class="caixa__titulo">Por que o resultado é uma estimativa, e não um valor exato?</span>
+          <p>As células não têm todas o mesmo tamanho, e é difícil contar as que ficam cortadas pela borda do campo. Além disso, o diâmetro
+            do campo também é um valor aproximado. Por isso, cientistas repetem a contagem em vários lugares da lâmina e fazem a média.
+            Um resultado entre 250 e 350 µm é ótimo para a célula de cebola!</p></div>
+      </div>
+    </section>
+
+    <!-- ===================== 5. AVALIAÇÃO ===================== -->
+    <section class="etapa" id="avaliacao" data-titulo="Avaliação">
+      <div class="etapa__cabeca">
+        <p class="etapa__rotulo">Etapa 5 de 6</p>
+        <h2>Avaliação</h2>
+        <p class="etapa__intro">Responda às questões. Se travar, clique em <b>💡 Ver dica</b>. As objetivas são corrigidas na hora, com explicação;
+          nas dissertativas, escreva sua resposta antes de comparar com a resposta-modelo.</p>
+      </div>
+      <div id="questoes-lista"></div>
+    </section>
+
+    <!-- ===================== 6. RELATÓRIO ===================== -->
+    <section class="etapa" id="relatorio" data-etapa="relatorio" data-titulo="Relatório">
+      <div class="etapa__cabeca">
+        <p class="etapa__rotulo">Etapa 6 de 6</p>
+        <h2>Relatório da prática</h2>
+        <p class="etapa__intro">O relatório já vem preenchido com suas hipóteses, observações e cálculo. Complete a identificação e escreva a conclusão
+          seguindo o roteiro. Depois, clique em <b>Imprimir / salvar PDF</b> para entregar.</p>
+      </div>
+
+      <div class="relatorio">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+          <div>
+            <div style="font-size:13px;font-weight:700;color:var(--cor-area);letter-spacing:.06em">RELATÓRIO DE PRÁTICA · BIOLOGIA</div>
+            <div style="font-size:26px;font-weight:800">Microscópio Virtual</div>
+          </div>
+          <button class="botao botao--primario nao-imprimir" type="button" data-imprimir>⎙ Imprimir / salvar PDF</button>
         </div>
-      </section>
-
-      <!-- 5. REGISTRO -->
-      <section class="secao" id="registro">
-        <h2><span class="num">05</span> Registro e análise</h2>
-        <h3>Tabela de observações</h3>
-        <div id="tabela"></div>
-
-        <h3>Estimando o tamanho de uma célula</h3>
-        <p>
-          Se você conhece o diâmetro do campo de visão, pode estimar o tamanho de uma célula: basta contar quantas
-          células cabem, enfileiradas, de uma borda à outra do campo, e dividir.
-        </p>
-        <div class="formula">
-          tamanho da célula ≈ diâmetro do campo ÷ número de células
-          <small>converta para micrômetros: 1 mm = 1 000 µm</small>
+        <div class="relatorio__cabeca" style="margin-top:18px">
+          <label>Nome<input class="campo" data-rel="nome"></label>
+          <label>Turma<input class="campo" data-rel="turma"></label>
+          <label>Professor(a)<input class="campo" data-rel="professor"></label>
+          <label>Data<input class="campo" data-rel="data" type="date"></label>
         </div>
-        <p>
-          Exemplo: em 400×, o campo mede 0,45 mm = 450 µm. Se couberem cerca de 8 células enfileiradas, cada uma mede
-          aproximadamente 450 ÷ 8 ≈ 56 µm. A barra de escala desenhada no campo ajuda a conferir sua estimativa.
-        </p>
-        <div class="caixa caixa--pense">
-          <span class="caixa__titulo">Pense</span>
-          <p>
-            Por que essa medida é uma <em>estimativa</em> e não um valor exato? Pense no tamanho variável das células
-            e na dificuldade de contar as que ficam cortadas pela borda do campo.
-          </p>
+
+        <h3>1. Objetivo</h3>
+        <p>Aprender a usar o microscópio óptico, observar e comparar células vegetais (cebola e Elódea), células animais (mucosa bucal) e
+          células do sangue, e estimar o tamanho de uma célula a partir do diâmetro do campo de visão.</p>
+
+        <h3>2. Hipóteses</h3>
+        <div id="rel-hipoteses"></div>
+
+        <h3>3. Observações registradas</h3>
+        <div id="rel-dados"></div>
+
+        <h3>4. Comparação das células e tamanho estimado</h3>
+        <div id="rel-comparativo"></div>
+        <p id="rel-tamanho"></p>
+        <p style="margin-bottom:4px"><b>Desenhos:</b> desenhe, nos círculos, o que você viu em uma célula de cebola e em uma célula da bochecha (400×), indicando as partes.</p>
+        <div class="desenho-caixa">
+          <div>Cebola · 400×</div>
+          <div>Mucosa bucal · 400×</div>
         </div>
-      </section>
 
-      <!-- 6. QUESTÕES -->
-      <section class="secao" id="questoes">
-        <h2><span class="num">06</span> Questões</h2>
-        <p>Responda às questões. As objetivas são corrigidas na hora, com explicação.</p>
-        <div id="questoes-lista"></div>
-      </section>
+        <h3>5. Avaliação</h3>
+        <p id="rel-avaliacao"></p>
 
-      <!-- 7. CONCLUSÃO -->
-      <section class="secao" id="conclusao">
-        <h2><span class="num">07</span> Conclusão</h2>
-        <p>
-          Volte às suas hipóteses da seção 2. Quais foram confirmadas pelas observações? Quais precisaram ser
-          revistas? Mudar de ideia diante de evidências é exatamente o que a ciência faz.
-        </p>
-        <h3>Resumo</h3>
-        <ul>
-          <li>O <strong>aumento total</strong> é o produto do aumento da ocular pelo da objetiva.</li>
-          <li>Quanto maior o aumento, <strong>menor o campo de visão</strong>, mais escura a imagem e mais estreita a
-            faixa de foco. Por isso começamos pela menor objetiva e, em grande aumento, usamos só o micrométrico.</li>
-          <li>O microscópio forma uma <strong>imagem invertida</strong>: a imagem se move no sentido oposto ao da lâmina.</li>
-          <li>Células vegetais têm <strong>parede celular</strong>, vacúolo central grande e, nas partes verdes,
-            <strong>cloroplastos</strong>; células animais não têm parede celular.</li>
-          <li>As hemácias humanas maduras <strong>não têm núcleo</strong>; os leucócitos têm núcleo, que fica roxo com o corante.</li>
-          <li>Corantes aumentam o contraste de estruturas quase transparentes, como o núcleo.</li>
-        </ul>
-        <h3>Para ir além</h3>
-        <ul>
-          <li>Monte um “microscópio” caseiro: uma gota de água sobre um plástico transparente funciona como lente de
-            aumento. Observe letras de jornal e a tela do celular.</li>
-          <li>Pesquise sobre o <em>microscópio eletrônico</em>: por que ele consegue mostrar estruturas que o
-            microscópio óptico não mostra, como os ribossomos e os vírus?</li>
-          <li>Em aves, répteis e anfíbios, as hemácias têm núcleo. Pesquise imagens de sangue de galinha ou de sapo e
-            compare com o sangue humano.</li>
-        </ul>
-        <div class="botoes nao-imprimir">
-          <button class="botao botao--primario" type="button" onclick="window.print()">⎙ Imprimir relatório</button>
+        <h3>6. Conclusão</h3>
+        <div class="orientacao nao-imprimir">
+          <b>Roteiro para escrever sua conclusão</b> (um parágrafo curto para cada item):
+          <ol style="margin:6px 0 0;padding-left:20px">
+            <li>Que diferenças você observou entre as células vegetais e as animais? Cite as estruturas que viu em cada lâmina.</li>
+            <li>O que aconteceu com o campo de visão, o tamanho das células e o brilho da imagem quando você aumentou o aumento?</li>
+            <li>Qual tamanho você estimou para a célula de cebola? Ficou perto de 300 µm? Por que esse valor é uma estimativa?</li>
+            <li>Suas hipóteses se confirmaram? Se não, o que você pensava e o que descobriu?</li>
+          </ol>
         </div>
-      </section>
-    </main>
-  </div>
+        <textarea class="campo" data-rel="conclusao" rows="8" placeholder="Escreva aqui a sua conclusão…"></textarea>
+      </div>
+    </section>
 
-  <footer class="lab-rodape"><p></p></footer>
+  </main>
 
-  <script src="../_comum/lab.js"></script>
+  <footer class="rodape-lab"><div class="rodape-lab__dentro"></div></footer>
+
+  <script src="../_comum/bancada.js"></script>
   <script>
   (function () {
     "use strict";
-    Lab.iniciar({ id: "microscopio" });
+    Lab.iniciar({ id: "microscopio3" });
     const { fmt } = Lab;
     const $ = (id) => document.getElementById(id);
     const TAU = Math.PI * 2;
+    const armazem = Lab.armazenamento;
+    // número pronto para LaTeX: vírgula decimal {,} e espaço fino como separador de milhar
+    const tex = (x, casas) => fmt(x, casas).replace(",", "{,}").replace(/\./g, "\\,");
 
-    /* ---------- Óptica ----------
-     * campo: diâmetro do campo de visão (µm, número de campo 18 mm)
-     * zf: altura da platina em que a imagem fica nítida (µm) — quase igual em todas (parafocal)
-     * prof: faixa de foco usada na simulação (µm); dt: distância de trabalho (µm)
+    /* ====================== Óptica ======================
+     * campo: diâmetro do campo de visão (µm) · zf: altura da platina com a imagem nítida (µm, quase igual em todas: parafocal)
+     * prof: faixa de foco usada na simulação (µm) · dt: distância de trabalho (µm) · luz: fração de luz que chega à imagem
      */
     const OCULAR = 10;
     const OBJ = {
-      4:   { campo: 4500, zf: 10000, prof: 60,  dt: 17000, luz: 1.0,  escala: 1000, rotulo: "1 mm" },
-      10:  { campo: 1800, zf: 10020, prof: 15,  dt: 7000,  luz: 0.9,  escala: 500,  rotulo: "500 µm" },
-      40:  { campo: 450,  zf: 9990,  prof: 3,   dt: 600,   luz: 0.74, escala: 100,  rotulo: "100 µm" },
-      100: { campo: 180,  zf: 10004, prof: 1.5, dt: 150,   luz: 0.6,  escala: 50,   rotulo: "50 µm" },
+      4:   { campo: 4500, zf: 10000, prof: 60,  dt: 17000, luz: 1.0,  escala: 1000, rotulo: "1 mm", cor: "#dc2626" },
+      10:  { campo: 1800, zf: 10020, prof: 15,  dt: 7000,  luz: 0.9,  escala: 500,  rotulo: "500 µm", cor: "#eab308" },
+      40:  { campo: 450,  zf: 9990,  prof: 3,   dt: 600,   luz: 0.74, escala: 100,  rotulo: "100 µm", cor: "#0ea5e9" },
+      100: { campo: 180,  zf: 10004, prof: 1.5, dt: 150,   luz: 0.6,  escala: 50,   rotulo: "50 µm", cor: "#f8fafc" },
     };
+    const LISTA_OBJ = [4, 10, 40, 100];
 
     const LAMINAS = {
-      cebola: { nome: "Epiderme de cebola", fundo: "rgb(247,242,226)", estruturas: {
+      cebola: { nome: "Epiderme de cebola", fundo: "rgb(247,242,226)", mapa: "rgba(224,190,110,0.95)", estruturas: {
         4: "células alongadas lado a lado, como tijolos",
         10: "células, parede celular, núcleo (ponto escuro)",
         40: "parede celular, núcleo com nucléolos, vacúolo, citoplasma",
         100: "parede celular, núcleo com nucléolos, grânulos no citoplasma" } },
-      bucal: { nome: "Mucosa bucal", fundo: "rgb(246,247,248)", estruturas: {
+      bucal: { nome: "Mucosa bucal", fundo: "rgb(246,247,248)", mapa: "rgba(120,160,225,0.75)", estruturas: {
         4: "pontinhos azulados espalhados (células isoladas)",
         10: "células achatadas e irregulares, núcleo",
         40: "membrana plasmática, citoplasma, núcleo central; sem parede celular",
         100: "núcleo, citoplasma granuloso, membrana; bactérias da boca" } },
-      elodea: { nome: "Folha de Elódea", fundo: "rgb(244,247,238)", estruturas: {
+      elodea: { nome: "Folha de Elódea", fundo: "rgb(244,247,238)", mapa: "rgba(110,180,80,0.95)", estruturas: {
         4: "folha verde formada por fileiras de células",
         10: "células retangulares, parede celular, pontos verdes",
         40: "parede celular, cloroplastos, ciclose (cloroplastos em movimento)",
         100: "cloroplastos em detalhe, parede celular, ciclose" } },
-      sangue: { nome: "Sangue humano", fundo: "rgb(247,239,236)", estruturas: {
+      sangue: { nome: "Sangue humano", fundo: "rgb(247,239,236)", mapa: "rgba(225,120,120,0.7)", estruturas: {
         4: "mancha rosada; células pequenas demais para distinguir",
         10: "muitos pontinhos rosados e alguns pontos roxos",
         40: "hemácias (discos sem núcleo), leucócitos com núcleo roxo",
         100: "hemácias com centro claro, leucócitos com núcleo lobulado, plaquetas" } },
-      letra: { nome: "Letra “e”", fundo: "rgb(236,230,214)", estruturas: {
+      letra: { nome: "Letra “e”", fundo: "rgb(236,230,214)", mapa: "rgba(240,234,218,0.95)", estruturas: {
         4: "letra “e” invertida (girada 180°), fibras do papel",
         10: "parte da letra, tinta sobre as fibras do papel",
         40: "fibras de papel e manchas de tinta",
         100: "fibras de papel (aumento exagerado para esta amostra)" } },
     };
 
-    const estado = { lamina: "cebola", obj: 4, cx: 0, cy: 0, t: 0, macroAlto: false };
+    const estado = { lamina: "cebola", obj: 4, cx: 0, cy: 0, t: 0, macroAlto: false, movidoLetra: 0 };
     const cLamina = $("c-lamina"), cOleo = $("c-oleo"), cMacro = $("c-macro"), cMicro = $("c-micro"),
-      cLuz = $("c-luz"), cDiaf = $("c-diaf");
+      cLuz = $("c-luz"), cDiaf = $("c-diaf"), cLinha = $("c-linha");
 
-    const alturaPlatina = () => +cMacro.value * 200 + +cMicro.value;
+    // progresso do aluno usado pelo assistente
+    const marcos = armazem.ler("bancada:microscopio3:marcos", { moveuLetra: false });
+    const marcar = (k) => { if (!marcos[k]) { marcos[k] = true; armazem.gravar("bancada:microscopio3:marcos", marcos); atualizarAssistente(); } };
+
+    const alturaPlatina = () => +cMacro.value * 200 + +cMicro.value; // µm
 
     function filtros() {
       const o = OBJ[estado.obj];
@@ -564,10 +815,11 @@
       if (semOleo) { blur += 5; brilho *= 0.55; contraste *= 0.65; }
       contraste *= 1 - Math.min(0.45, blur / 50);
       const colisao = alturaPlatina() > o.zf + o.dt;
-      return { blur, brilho, contraste, semOleo, colisao };
+      return { blur, brilho, contraste, semOleo, colisao, dz };
     }
+    const podeRegistrar = (f) => !f.colisao && !f.semOleo && f.blur < 1.5 && f.brilho >= 0.35;
 
-    /* ---------- Números pseudoaleatórios (a lâmina é sempre a mesma) ---------- */
+    /* ====================== Números pseudoaleatórios (a lâmina é sempre a mesma) ====================== */
     function h32(x, y, z) {
       let h = Math.imul(x | 0, 0x27d4eb2d) ^ Math.imul((y | 0) + 0x9e37, 0x165667b1) ^ Math.imul((z | 0) + 0x85eb, 0xc2b2ae3d);
       h = Math.imul(h ^ (h >>> 15), 0x85ebca6b);
@@ -603,7 +855,7 @@
       for (let ty = c; ty <= d; ty++) for (let tx = a; tx <= b; tx++) fn(tx, ty);
     }
 
-    /* ---------- Células em fileiras (cebola e Elódea) ---------- */
+    /* ====================== Células em fileiras (cebola e Elódea) ====================== */
     const P_CEBOLA = { RH: 75, L: 300, jit: 0.45, incl: 16, a1: 5, a2: 3, e1: 350, e2: 130, semente: 11, passo: 45 };
     const P_ELODEA = { RH: 28, L: 95, jit: 0.4, incl: 5, a1: 1.2, a2: 0.6, e1: 160, e2: 60, semente: 23, passo: 30 };
 
@@ -653,7 +905,7 @@
       c.closePath();
     }
 
-    /* ---------- Bolhas de ar (preparações úmidas) ---------- */
+    /* ====================== Bolhas de ar (preparações úmidas) ====================== */
     function bolhas(tx, ty, semente) {
       return emCache(`bo:${semente}:${tx}:${ty}`, () => {
         const r = aleatorio(h32(tx, ty, semente));
@@ -675,7 +927,7 @@
       });
     }
 
-    /* ---------- Cebola ---------- */
+    /* ====================== Cebola ====================== */
     function dentroCebola(x, y) {
       const a = Math.atan2(y / 3200, x / 4200);
       return Math.hypot(x / 4200, y / 3200) < 1 + 0.06 * Math.sin(a * 7) + 0.04 * Math.sin(a * 13 + 1);
@@ -729,7 +981,7 @@
       desenharBolhas(c, v, 401);
     }
 
-    /* ---------- Elódea ---------- */
+    /* ====================== Elódea ====================== */
     const bordaFolha = (x) => 860 + 30 * Math.sin(x / 260) + 12 * Math.sin(x / 70);
     const VEL_CICLOSE = 5; // µm/s
 
@@ -791,7 +1043,7 @@
       desenharBolhas(c, v, 403);
     }
 
-    /* ---------- Mucosa bucal ---------- */
+    /* ====================== Mucosa bucal ====================== */
     const T_BUC = 220;
     function celulasBucais(tx, ty) {
       return emCache(`b:${tx}:${ty}`, () => {
@@ -877,7 +1129,7 @@
       desenharBolhas(c, v, 402);
     }
 
-    /* ---------- Sangue ---------- */
+    /* ====================== Sangue ====================== */
     const T_RBC = 60, T_WBC = 400;
     const RAIO_WBC = { neutrofilo: 6.2, linfocito: 4.6, monocito: 8, eosinofilo: 6.5 };
     function leucocitos(tx, ty) {
@@ -1008,7 +1260,7 @@
       });
     }
 
-    /* ---------- Letra "e" ---------- */
+    /* ====================== Letra "e" ====================== */
     function fibras(tx, ty) {
       return emCache(`f:${tx}:${ty}`, () => {
         const r = aleatorio(h32(tx, ty, 601)), T = 500, lista = [];
@@ -1051,7 +1303,7 @@
 
     const DESENHO = { cebola: desenharCebola, elodea: desenharElodea, bucal: desenharBucal, sangue: desenharSangue, letra: desenharLetra };
 
-    /* ---------- Sprites (dependem da escala) ---------- */
+    /* ====================== Sprites (dependem da escala) ====================== */
     let sprites = null, spritesChave = "";
     function obterSprites(k) {
       const chave = k.toFixed(4);
@@ -1083,24 +1335,17 @@
       return sprites;
     }
 
-    /* ---------- Desenho ---------- */
-    const tela = $("tela"), ctx = tela.getContext("2d");
+    /* ====================== Campo de visão (imagens fora da tela) ====================== */
     const nitido = document.createElement("canvas"), nctx = nitido.getContext("2d");
+    const visao = document.createElement("canvas"), vctx = visao.getContext("2d");
     const temp = document.createElement("canvas"), tctx = temp.getContext("2d");
     const suportaFiltro = typeof CanvasRenderingContext2D !== "undefined" && "filter" in CanvasRenderingContext2D.prototype;
     const MARGEM = 40;
-    let W = 0, H = 0, dpr = 1, R = 100, escala = 0.1, precisaNitido = true, pedido = false;
+    let precisaNitido = true, versaoNitido = 0, visaoChave = "", sujo = true;
+    let escala = 0.1; // px (CSS) por µm no campo de visão
+    const pedir = (nitidoTambem) => { if (nitidoTambem) precisaNitido = true; sujo = true; };
 
-    function geometria() {
-      dpr = window.devicePixelRatio || 1;
-      W = tela.clientWidth; H = tela.clientHeight;
-      const bw = Math.round(W * dpr), bh = Math.round(H * dpr);
-      if (tela.width !== bw || tela.height !== bh) { tela.width = bw; tela.height = bh; precisaNitido = true; }
-      R = Math.max(60, Math.min(W, H) / 2 - 12);
-      escala = 2 * R / OBJ[estado.obj].campo; // px (CSS) por µm
-    }
-
-    function renderizarNitido() {
+    function renderizarNitido(R, dpr) {
       const D = Math.ceil((2 * R + 2 * MARGEM) * dpr);
       if (nitido.width !== D || nitido.height !== D) { nitido.width = D; nitido.height = D; }
       const k = escala * dpr;
@@ -1116,193 +1361,453 @@
       DESENHO[estado.lamina](nctx, v, obterSprites(k));
       nctx.setTransform(1, 0, 0, 1, 0, 0);
       precisaNitido = false;
+      versaoNitido++;
     }
 
-    function desenhar() {
-      geometria();
-      if (!W || !H) return;
-      if (precisaNitido) renderizarNitido();
-      const f = filtros();
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
-      ctx.fillStyle = "#050505";
-      ctx.fillRect(0, 0, tela.width, tela.height);
-      const ox = W / 2 * dpr, oy = H / 2 * dpr, r = R * dpr, D = nitido.width;
-      ctx.save();
-      ctx.beginPath(); ctx.arc(ox, oy, r, 0, TAU); ctx.clip();
+    // compõe o campo (com desfoque, brilho e contraste) numa imagem própria; só refaz quando algo muda
+    function comporVisao(R, dpr, f) {
+      const D = Math.ceil(2 * R * dpr);
+      const filtro = `blur(${(f.blur * dpr).toFixed(2)}px) brightness(${f.brilho.toFixed(3)}) contrast(${f.contraste.toFixed(3)})`;
+      const chave = filtro + "|" + versaoNitido + "|" + D;
+      if (chave === visaoChave) return;
+      visaoChave = chave;
+      if (visao.width !== D || visao.height !== D) { visao.width = D; visao.height = D; }
+      const c = vctx, o = D / 2, r = D / 2, N = nitido.width;
+      c.setTransform(1, 0, 0, 1, 0, 0);
+      c.clearRect(0, 0, D, D);
+      c.save();
+      c.beginPath(); c.arc(o, o, r, 0, TAU); c.clip();
+      c.fillStyle = "#111"; c.fillRect(0, 0, D, D);
       if (suportaFiltro) {
-        ctx.filter = `blur(${(f.blur * dpr).toFixed(2)}px) brightness(${f.brilho.toFixed(3)}) contrast(${f.contraste.toFixed(3)})`;
-        ctx.drawImage(nitido, ox - D / 2, oy - D / 2);
-        ctx.filter = "none";
+        c.filter = filtro;
+        c.drawImage(nitido, o - N / 2, o - N / 2);
+        c.filter = "none";
       } else {
         let fonte = nitido;
         if (f.blur > 0.4) {
-          const lado = Math.max(8, Math.round(D / (1 + f.blur * dpr / 2)));
+          const lado = Math.max(8, Math.round(N / (1 + f.blur * dpr / 2)));
           temp.width = temp.height = lado;
           tctx.drawImage(nitido, 0, 0, lado, lado);
           fonte = temp;
         }
-        ctx.drawImage(fonte, ox - D / 2, oy - D / 2, D, D);
-        if (f.brilho < 1) { ctx.fillStyle = `rgba(0,0,0,${Math.min(1, 1 - f.brilho)})`; ctx.fillRect(ox - r, oy - r, 2 * r, 2 * r); }
-        else { ctx.fillStyle = `rgba(255,255,255,${Math.min(0.8, (f.brilho - 1) * 0.6)})`; ctx.fillRect(ox - r, oy - r, 2 * r, 2 * r); }
+        c.drawImage(fonte, o - N / 2, o - N / 2, N, N);
+        if (f.brilho < 1) { c.fillStyle = `rgba(0,0,0,${Math.min(1, 1 - f.brilho)})`; c.fillRect(0, 0, D, D); }
+        else { c.fillStyle = `rgba(255,255,255,${Math.min(0.8, (f.brilho - 1) * 0.6)})`; c.fillRect(0, 0, D, D); }
       }
-      const vin = ctx.createRadialGradient(ox, oy, r * 0.6, ox, oy, r);
+      const vin = c.createRadialGradient(o, o, r * 0.6, o, o, r);
       vin.addColorStop(0, "rgba(0,0,0,0)"); vin.addColorStop(1, "rgba(0,0,0,0.42)");
-      ctx.fillStyle = vin; ctx.fillRect(ox - r, oy - r, 2 * r, 2 * r);
-      ctx.restore();
-
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      desenharEscala();
-      desenharMapa();
-      if (f.colisao) {
-        ctx.font = '600 14px "IBM Plex Sans", system-ui, sans-serif';
-        ctx.textAlign = "center"; ctx.textBaseline = "middle";
-        const txt = "A objetiva encostou na lamínula!";
-        const lw = ctx.measureText(txt).width + 24;
-        ctx.fillStyle = "rgba(179,38,30,0.92)";
-        ctx.fillRect(W / 2 - lw / 2, H / 2 - 16, lw, 32);
-        ctx.fillStyle = "#fff"; ctx.fillText(txt, W / 2, H / 2);
-      }
+      c.fillStyle = vin; c.fillRect(0, 0, D, D);
+      c.restore();
     }
 
-    function desenharEscala() {
+    /* ====================== Cena: bancada, microscópio e ocular ====================== */
+    const cena = $("cena"), ctx = cena.getContext("2d");
+    let geo = null, rot = 0, destaque = null;
+    const hits = { macro: null, micro: null, revolver: null, objetivas: [], visao: null };
+
+    function roundRect(c, x, y, w, h, r) {
+      c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r);
+      c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath();
+    }
+
+    function calcularGeometria(w, h) {
+      const largo = w >= 620;
+      if (largo) {
+        const colW = Math.min(300, Math.max(230, w * 0.34));
+        const bancadaY = h - 58;
+        const R = Math.max(90, Math.min((w - colW) / 2 - 24, (h - 104) / 2));
+        const vx = colW + (w - colW) / 2, vy = 38 + R;
+        const cartao = { x: 14, y: 14, w: Math.min(colW - 28, 200), h: 138 };
+        const topo = cartao.y + cartao.h + 12;
+        const s = Math.max(0.5, Math.min((colW - 40) / 220, (bancadaY - topo) / 320));
+        const ox = Math.max(46 - 43 * s, (colW - 220 * s) / 2 + 6);
+        return { w, h, largo, bancadaY, R, vx, vy, cartao, mic: { ox, oy: bancadaY - 320 * s, s } };
+      }
+      const R = Math.max(80, Math.min(w / 2 - 14, (h - 260) / 2));
+      const vx = w / 2, vy = 14 + R;
+      const bancadaY = h - 70;
+      const topo = vy + R + 16;
+      const s = Math.max(0.4, Math.min(0.66, (bancadaY - topo) / 320, (w * 0.42) / 220));
+      const ox = Math.max(46 - 43 * s, 8);
+      const cx = ox + 214 * s + 10;
+      const cartao = { x: cx, y: topo + 4, w: Math.max(120, Math.min(220, w - cx - 10)), h: 138 };
+      return { w, h, largo, bancadaY, R, vx, vy, cartao, mic: { ox, oy: bancadaY - 320 * s, s } };
+    }
+
+    // posições (em coordenadas locais do desenho do microscópio: 220 × 320, eixo óptico em x = 128)
+    const EIXO = 128, PIVO_Y = 128;
+    const pontaObjetiva = (obj) => 195.5 - OBJ[obj].dt * 0.0014;       // ponta da objetiva (y local)
+    function topoPlatina() {
+      const ativa = pontaObjetiva(estado.obj);
+      const y = 214 - (alturaPlatina() / 200) * 0.28;                    // 0,28 unidade a cada 200 µm
+      return Math.max(y, ativa + 4.5);                                  // a lamínula não atravessa a lente
+    }
+
+    function desenharFundo(w, h, bancadaY) {
+      const parede = ctx.createLinearGradient(0, 0, 0, bancadaY);
+      parede.addColorStop(0, "#eaf5ee"); parede.addColorStop(1, "#f7fbf8");
+      ctx.fillStyle = parede; ctx.fillRect(0, 0, w, bancadaY);
+      ctx.strokeStyle = "rgba(22, 163, 74, 0.06)"; ctx.lineWidth = 1;
+      for (let y = bancadaY - 60; y > 0; y -= 60) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
+      for (let x = 30; x < w; x += 60) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, bancadaY); ctx.stroke(); }
+      const tampo = ctx.createLinearGradient(0, bancadaY, 0, h);
+      tampo.addColorStop(0, "#e4c49c"); tampo.addColorStop(0.18, "#d3ab7c"); tampo.addColorStop(0.2, "#a97c4f"); tampo.addColorStop(1, "#8d6440");
+      ctx.fillStyle = tampo; ctx.fillRect(0, bancadaY, w, h - bancadaY);
+      ctx.strokeStyle = "rgba(120, 80, 40, 0.18)";
+      for (let i = 0; i < 5; i++) { ctx.beginPath(); ctx.moveTo(0, bancadaY + 4 + i * 3.2); ctx.bezierCurveTo(w * 0.3, bancadaY + 2 + i * 3.4, w * 0.6, bancadaY + 6 + i * 3, w, bancadaY + 3 + i * 3.3); ctx.stroke(); }
+    }
+
+    function anelDestaque(c, x, y, r) {
+      c.save();
+      c.strokeStyle = "rgba(22, 163, 74, 0.85)"; c.lineWidth = 2.5; c.setLineDash([5, 4]);
+      c.beginPath(); c.arc(x, y, r, 0, TAU); c.stroke();
+      c.fillStyle = "rgba(22, 163, 74, 0.10)"; c.fill();
+      c.restore();
+    }
+
+    function desenharObjetiva(c, obj, ang, frente) {
+      const L = pontaObjetiva(obj) - (PIVO_Y + 2);
+      c.save();
+      c.translate(EIXO, PIVO_Y); c.rotate(ang);
+      c.globalAlpha = frente ? 1 : 0.55;
+      const corpo = c.createLinearGradient(-8, 0, 8, 0);
+      corpo.addColorStop(0, "#9aa6b8"); corpo.addColorStop(0.45, "#f8fafc"); corpo.addColorStop(1, "#8793a6");
+      c.fillStyle = corpo; roundRect(c, -8, 2, 16, L - 8, 3); c.fill();
+      c.strokeStyle = "#64748b"; c.lineWidth = 0.8; c.stroke();
+      c.fillStyle = OBJ[obj].cor; c.fillRect(-8, 2 + L * 0.34, 16, 4);
+      if (obj === 100) { c.strokeStyle = "#1f2937"; c.lineWidth = 0.8; c.strokeRect(-8, 2 + L * 0.34, 16, 4); }
+      c.fillStyle = "#cbd5e1"; roundRect(c, -5, L - 7, 10, 9, 2); c.fill();
+      c.strokeStyle = "#64748b"; c.stroke();
+      c.fillStyle = "#1e293b"; c.fillRect(-3, L + 0.5, 6, 1.5);
+      c.restore();
+      const ponta = { x: EIXO + Math.sin(-ang) * (L + 2), y: PIVO_Y + Math.cos(ang) * (L + 2) };
+      return ponta;
+    }
+
+    function desenharMicroscopio(m, f) {
+      const c = ctx, { ox, oy, s } = m;
+      const I = +cLuz.value / 100, d = +cDiaf.value / 100;
+      const sy = topoPlatina();
+      const desliz = Math.max(-10, Math.min(10, -estado.cx / 1000)); // a lâmina se move com o empurrão (1 unidade ≈ 1 mm)
+      const tipAtiva = pontaObjetiva(estado.obj);
+      c.save(); c.translate(ox, oy); c.scale(s, s);
+
+      // sombra e base
+      c.fillStyle = "rgba(60, 35, 10, 0.22)";
+      c.beginPath(); c.ellipse(106, 320, 100, 6, 0, 0, TAU); c.fill();
+      const base = c.createLinearGradient(0, 292, 0, 320);
+      base.addColorStop(0, "#56627a"); base.addColorStop(1, "#262e3d");
+      c.fillStyle = base; roundRect(c, 14, 292, 180, 28, 9); c.fill();
+      c.fillStyle = I > 0.01 ? "#22c55e" : "#475569";
+      c.beginPath(); c.arc(34, 306, 3, 0, TAU); c.fill();
+
+      // lâmpada e feixe de luz
+      if (I > 0.01) {
+        const brilhoL = c.createRadialGradient(EIXO, 283, 2, EIXO, 283, 34);
+        brilhoL.addColorStop(0, `rgba(253, 224, 71, ${0.55 * I})`); brilhoL.addColorStop(1, "rgba(253, 224, 71, 0)");
+        c.fillStyle = brilhoL; c.beginPath(); c.arc(EIXO, 283, 34, 0, TAU); c.fill();
+        c.fillStyle = `rgba(253, 230, 138, ${0.32 * I})`;
+        c.beginPath(); c.moveTo(EIXO - 10, 282); c.lineTo(EIXO + 10, 282); c.lineTo(EIXO + 7, sy + 27); c.lineTo(EIXO - 7, sy + 27); c.closePath(); c.fill();
+        c.fillStyle = `rgba(253, 230, 138, ${0.35 * I * (0.35 + 0.65 * d)})`;
+        c.beginPath(); c.moveTo(EIXO - 3.5, sy - 4.5); c.lineTo(EIXO + 3.5, sy - 4.5); c.lineTo(EIXO + 2.5, tipAtiva); c.lineTo(EIXO - 2.5, tipAtiva); c.closePath(); c.fill();
+      }
+      c.fillStyle = "#94a3b8"; roundRect(c, EIXO - 17, 281, 34, 12, 4); c.fill();
+      c.fillStyle = I > 0.01 ? `rgb(255, ${236 - 20 * (1 - I) | 0}, ${150 + 60 * I | 0})` : "#64748b";
+      c.beginPath(); c.ellipse(EIXO, 282, 11, 3, 0, 0, TAU); c.fill();
+
+      // braço
+      const braco = c.createLinearGradient(20, 0, 100, 0);
+      braco.addColorStop(0, "#aab4c3"); braco.addColorStop(0.4, "#f1f5f9"); braco.addColorStop(1, "#b6c0cf");
+      c.fillStyle = braco;
+      c.beginPath(); c.moveTo(28, 296); c.bezierCurveTo(12, 236, 22, 150, 62, 96); c.lineTo(96, 104); c.bezierCurveTo(64, 150, 62, 230, 80, 296); c.closePath(); c.fill();
+      c.strokeStyle = "#8793a6"; c.lineWidth = 1; c.stroke();
+
+      // tubo e ocular (inclinados para o campo de visão)
+      c.save();
+      c.translate(118, 94); c.rotate(0.6);
+      const tubo = c.createLinearGradient(-11, 0, 11, 0);
+      tubo.addColorStop(0, "#aab4c3"); tubo.addColorStop(0.45, "#f8fafc"); tubo.addColorStop(1, "#aab4c3");
+      c.fillStyle = tubo; roundRect(c, -11, -64, 22, 66, 3); c.fill(); c.strokeStyle = "#8793a6"; c.stroke();
+      c.fillStyle = "#334155"; roundRect(c, -8, -88, 16, 26, 2); c.fill();
+      c.fillStyle = "#0f172a"; roundRect(c, -10, -93, 20, 7, 2); c.fill();
+      c.restore();
+
+      // objetivas de trás (giradas no revólver)
+      const ordem = LISTA_OBJ.map((obj, i) => ({ obj, ang: (i - rot) * 0.8 })).filter((o) => Math.abs(o.ang) < 1.75)
+        .sort((a, b) => Math.abs(b.ang) - Math.abs(a.ang));
+      const frente = ordem[ordem.length - 1];
+      hits.objetivas = [];
+      for (const o of ordem) {
+        if (o === frente) continue;
+        const p = desenharObjetiva(c, o.obj, o.ang, false);
+        hits.objetivas.push({ obj: o.obj, x: ox + p.x * s, y: oy + p.y * s, x0: ox + EIXO * s, y0: oy + PIVO_Y * s });
+      }
+
+      // cabeça e revólver
+      const cabeca = c.createLinearGradient(0, 84, 0, 124);
+      cabeca.addColorStop(0, "#f8fafc"); cabeca.addColorStop(1, "#c3ccd8");
+      c.fillStyle = cabeca; roundRect(c, 58, 84, 104, 40, 12); c.fill();
+      c.strokeStyle = "#8793a6"; c.stroke();
+      c.fillStyle = "#16a34a"; c.fillRect(58, 104, 104, 4);
+      c.fillStyle = "#64748b"; c.beginPath(); c.ellipse(EIXO, PIVO_Y, 30, 7, 0, 0, TAU); c.fill();
+      c.fillStyle = "#94a3b8"; c.beginPath(); c.ellipse(EIXO, PIVO_Y - 2, 26, 4.5, 0, 0, TAU); c.fill();
+
+      // suporte da platina, platina, condensador e diafragma
+      c.fillStyle = "#475569"; roundRect(c, 58, sy - 2, 42, 20, 4); c.fill();
+      c.fillStyle = "#1f2937"; roundRect(c, 64, sy, 146, 8, 2); c.fill();
+      c.fillStyle = "#475569"; c.fillRect(64, sy, 146, 1.5);
+      c.fillStyle = "#475569"; roundRect(c, EIXO - 13, sy + 8, 26, 14, 3); c.fill();
+      c.fillStyle = "#bae6fd"; c.fillRect(EIXO - 9, sy + 8, 18, 2);
+      c.fillStyle = "#334155"; roundRect(c, EIXO - 20, sy + 22, 40, 5, 2); c.fill();
+      c.fillStyle = "#16a34a"; c.beginPath(); c.arc(EIXO - 15 + 30 * d, sy + 29, 2.4, 0, TAU); c.fill();
+
+      // lâmina, amostra, lamínula e pinças
+      const lx = EIXO + desliz;
+      c.fillStyle = "rgba(186, 230, 253, 0.9)"; c.fillRect(lx - 44, sy - 3, 88, 3);
+      c.strokeStyle = "rgba(14, 116, 144, 0.55)"; c.lineWidth = 0.6; c.strokeRect(lx - 44, sy - 3, 88, 3);
+      c.fillStyle = LAMINAS[estado.lamina].mapa;
+      c.beginPath(); c.ellipse(lx, sy - 3.2, estado.lamina === "letra" ? 5 : 11, 1.3, 0, 0, TAU); c.fill();
+      c.fillStyle = "rgba(224, 242, 254, 0.95)"; c.fillRect(lx - 12, sy - 4.6, 24, 1.6);
+      c.strokeStyle = "rgba(14, 116, 144, 0.45)"; c.strokeRect(lx - 12, sy - 4.6, 24, 1.6);
+      c.strokeStyle = "#94a3b8"; c.lineWidth = 2.4; c.lineCap = "round";
+      c.beginPath(); c.moveTo(EIXO - 64, sy - 0.5); c.lineTo(EIXO - 38, sy - 3.4); c.moveTo(EIXO + 72, sy - 0.5); c.lineTo(EIXO + 46, sy - 3.4); c.stroke();
+      c.lineCap = "butt";
+      if (cOleo.checked) {
+        c.fillStyle = "rgba(245, 190, 60, 0.85)";
+        c.beginPath(); c.ellipse(EIXO, sy - 5.2, 5, 1.6, 0, 0, TAU); c.fill();
+        if (estado.obj === 100 && Math.abs(rot - 3) < 0.05) c.fillRect(EIXO - 4, tipAtiva, 8, Math.max(0, sy - 4.6 - tipAtiva));
+      }
+
+      // objetiva da frente
+      if (frente) {
+        const p = desenharObjetiva(c, frente.obj, frente.ang, true);
+        hits.objetivas.push({ obj: frente.obj, x: ox + p.x * s, y: oy + p.y * s, x0: ox + EIXO * s, y0: oy + PIVO_Y * s });
+        if (f.colisao) { c.fillStyle = "rgba(220, 38, 38, 0.85)"; c.beginPath(); c.arc(p.x, p.y, 6, 0, TAU); c.fill(); }
+      }
+
+      // parafusos de foco (giram conforme a altura da platina)
+      const parafuso = (x, y, r, ang) => {
+        const g = c.createRadialGradient(x - r * 0.3, y - r * 0.3, r * 0.1, x, y, r);
+        g.addColorStop(0, "#64748b"); g.addColorStop(1, "#1e293b");
+        c.fillStyle = g; c.beginPath(); c.arc(x, y, r, 0, TAU); c.fill();
+        c.strokeStyle = "rgba(226, 232, 240, 0.55)"; c.lineWidth = 1.2;
+        for (let k = 0; k < 12; k++) {
+          const a = ang + k * Math.PI / 6;
+          c.beginPath(); c.moveTo(x + Math.cos(a) * r * 0.62, y + Math.sin(a) * r * 0.62); c.lineTo(x + Math.cos(a) * r * 0.93, y + Math.sin(a) * r * 0.93); c.stroke();
+        }
+        c.fillStyle = "#94a3b8"; c.beginPath(); c.arc(x, y, r * 0.34, 0, TAU); c.fill();
+      };
+      parafuso(58, 222, 15, +cMacro.value * 0.25);
+      parafuso(58, 258, 9, +cMicro.value * 0.06);
+      c.restore();
+
+      // pontos de interação, em coordenadas da tela
+      hits.macro = { x: ox + 58 * s, y: oy + 222 * s, r: Math.max(20, 17 * s) };
+      hits.micro = { x: ox + 58 * s, y: oy + 258 * s, r: Math.max(16, 11 * s) };
+      hits.revolver = { x: ox + EIXO * s, y: oy + (PIVO_Y + 20) * s, r: Math.max(22, 34 * s) };
+      hits.ocular = { x: ox + (118 + Math.sin(0.6) * 92) * s, y: oy + (94 - Math.cos(0.6) * 92) * s };
+      hits.lamina = { x: ox + EIXO * s, y: oy + (sy - 3) * s, r: Math.max(18, 46 * s) };
+      hits.lampada = { x: ox + EIXO * s, y: oy + 283 * s, r: Math.max(16, 20 * s) };
+
+      // rótulos
+      ctx.font = '700 11px "Plus Jakarta Sans", sans-serif'; ctx.textAlign = "right"; ctx.textBaseline = "middle";
+      const rotulo = (t, x, y) => {
+        const lw = ctx.measureText(t).width + 10;
+        ctx.fillStyle = "rgba(255,255,255,0.88)"; roundRect(ctx, x - lw, y - 9, lw, 18, 9); ctx.fill();
+        ctx.fillStyle = "#1a2233"; ctx.fillText(t, x - 5, y + 0.5);
+      };
+      rotulo("macro", hits.macro.x - 15 * s - 4, hits.macro.y);
+      rotulo("micro", hits.micro.x - 9 * s - 4, hits.micro.y);
+      const pf = hits.objetivas[hits.objetivas.length - 1];
+      if (pf) {
+        ctx.textAlign = "left"; ctx.font = '700 12px "JetBrains Mono", monospace';
+        const t = estado.obj + "×", lw = ctx.measureText(t).width + 10, xL = ox + (EIXO + 12) * s, yL = (pf.y0 + pf.y) / 2 + 4;
+        ctx.fillStyle = "rgba(255,255,255,0.9)"; roundRect(ctx, xL, yL - 9, lw, 18, 6); ctx.fill();
+        ctx.fillStyle = "#15803d"; ctx.fillText(t, xL + 5, yL + 0.5);
+      }
+
+      // destaque do próximo passo
+      if (destaque === "macro") anelDestaque(ctx, hits.macro.x, hits.macro.y, hits.macro.r + 4);
+      else if (destaque === "micro") anelDestaque(ctx, hits.micro.x, hits.micro.y, hits.micro.r + 4);
+      else if (destaque === "revolver") anelDestaque(ctx, hits.revolver.x, hits.revolver.y, hits.revolver.r + 4);
+      else if (destaque === "luz") anelDestaque(ctx, hits.lampada.x, hits.lampada.y, hits.lampada.r + 4);
+      else if (destaque === "lamina") anelDestaque(ctx, hits.lamina.x, hits.lamina.y, hits.lamina.r);
+    }
+
+    function desenharCartao(g) {
+      const { x, y, w, h } = g.cartao, o = OBJ[estado.obj];
+      ctx.fillStyle = "rgba(255,255,255,0.94)"; roundRect(ctx, x, y, w, h, 12); ctx.fill();
+      ctx.strokeStyle = "#e2e7f0"; ctx.lineWidth = 1; ctx.stroke();
+      ctx.textAlign = "left"; ctx.textBaseline = "top";
+      ctx.fillStyle = "#5a6579"; ctx.font = '700 10px "Plus Jakarta Sans", sans-serif';
+      ctx.fillText("AUMENTO TOTAL", x + 12, y + 10); ctx.fillText("CAMPO", x + w * 0.58, y + 10);
+      ctx.fillStyle = "#1a2233"; ctx.font = '700 17px "JetBrains Mono", monospace';
+      ctx.fillText(OCULAR * estado.obj + "×", x + 12, y + 24);
+      ctx.fillText(fmt(o.campo / 1000, o.campo < 1000 ? 2 : 1) + " mm", x + w * 0.58, y + 24);
+      // lâmina vista de cima (sem inversão): a objetiva fica parada, a lâmina se move
+      const mx0 = x + 10, my0 = y + 52, mw = w - 20, mh = h - 74;
+      ctx.save();
+      ctx.fillStyle = "#eef2f7"; roundRect(ctx, mx0, my0, mw, mh, 8); ctx.fill(); ctx.clip();
+      const sc = Math.min(1.6, mw / 90), mcx = mx0 + mw / 2, mcy = my0 + mh / 2;
+      const px = (X) => mcx + (X - estado.cx) / 1000 * sc, py = (Y) => mcy + (Y - estado.cy) / 1000 * sc;
+      ctx.fillStyle = "rgba(186, 230, 253, 0.85)"; ctx.strokeStyle = "rgba(14, 116, 144, 0.6)";
+      ctx.fillRect(px(-37500), py(-12500), 75 * sc, 25 * sc); ctx.strokeRect(px(-37500), py(-12500), 75 * sc, 25 * sc);
+      ctx.fillStyle = "rgba(255,255,255,0.55)"; ctx.fillRect(px(-11000), py(-11000), 22 * sc, 22 * sc);
+      ctx.strokeStyle = "rgba(14, 116, 144, 0.35)"; ctx.strokeRect(px(-11000), py(-11000), 22 * sc, 22 * sc);
+      const lam = estado.lamina;
+      ctx.fillStyle = LAMINAS[lam].mapa; ctx.beginPath();
+      if (lam === "cebola") { ctx.ellipse(px(0), py(0), 4.2 * sc, 3.2 * sc, 0, 0, TAU); ctx.fill(); }
+      else if (lam === "bucal") { ctx.ellipse(px(0), py(0), 8 * sc, 6 * sc, 0.3, 0, TAU); ctx.fill(); }
+      else if (lam === "elodea") { ctx.fillRect(px(-10500), py(-860), 21 * sc, 1.72 * sc); }
+      else if (lam === "sangue") { ctx.ellipse(px(0), py(0), 10 * sc, 7 * sc, 0, 0, TAU); ctx.fill(); }
+      else {
+        ctx.fillRect(px(-6000), py(-6000), 12 * sc, 12 * sc);
+        ctx.fillStyle = "#1a2233"; ctx.font = "bold 13px Georgia, serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+        ctx.fillText("e", px(0), py(0) + 0.5);
+      }
+      ctx.restore();
+      ctx.strokeStyle = "#16a34a"; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.arc(mcx, mcy, Math.max(2.5, o.campo / 2000 * Math.min(1.6, mw / 90)), 0, TAU); ctx.stroke();
+      ctx.fillStyle = "#5a6579"; ctx.font = '600 10.5px "Plus Jakarta Sans", sans-serif'; ctx.textAlign = "center"; ctx.textBaseline = "bottom";
+      ctx.fillText("lâmina vista de cima", x + w / 2, y + h - 6);
+    }
+
+    function desenharOcular(g, f, dpr) {
+      const { vx, vy, R } = g;
+      // linhas que ligam a ocular do microscópio ao campo de visão
+      if (g.largo && hits.ocular) {
+        ctx.save();
+        ctx.strokeStyle = "rgba(22, 163, 74, 0.45)"; ctx.lineWidth = 1.5; ctx.setLineDash([5, 6]);
+        for (const a of [Math.PI * 1.18, Math.PI * 0.86]) {
+          ctx.beginPath(); ctx.moveTo(hits.ocular.x, hits.ocular.y); ctx.lineTo(vx + Math.cos(a) * (R + 12), vy + Math.sin(a) * (R + 12)); ctx.stroke();
+        }
+        ctx.restore();
+        ctx.fillStyle = "#15803d"; ctx.font = '800 10.5px "Plus Jakarta Sans", sans-serif'; ctx.textAlign = "center"; ctx.textBaseline = "top";
+        ctx.fillText("O QUE VOCÊ VÊ PELA OCULAR", vx, Math.max(4, vy - R - 30));
+      }
+      // anel da ocular
+      ctx.save();
+      ctx.shadowColor = "rgba(26, 34, 51, 0.35)"; ctx.shadowBlur = 18; ctx.shadowOffsetY = 6;
+      const anel = ctx.createRadialGradient(vx, vy, R, vx, vy, R + 12);
+      anel.addColorStop(0, "#0b1120"); anel.addColorStop(0.6, "#334155"); anel.addColorStop(1, "#1e293b");
+      ctx.fillStyle = anel; ctx.beginPath(); ctx.arc(vx, vy, R + 11, 0, TAU); ctx.fill();
+      ctx.restore();
+      comporVisao(R, dpr, f);
+      ctx.drawImage(visao, vx - R, vy - R, 2 * R, 2 * R);
+      if (destaque === "visao") { ctx.save(); ctx.strokeStyle = "rgba(34, 197, 94, 0.9)"; ctx.lineWidth = 3; ctx.setLineDash([8, 6]); ctx.beginPath(); ctx.arc(vx, vy, R + 5, 0, TAU); ctx.stroke(); ctx.restore(); }
+
+      // linha do diâmetro (para contar células)
       const o = OBJ[estado.obj];
-      const L = o.escala * escala, x = W / 2 - L / 2, y = H / 2 + R * 0.8;
+      if (cLinha.checked) {
+        ctx.save();
+        ctx.beginPath(); ctx.arc(vx, vy, R, 0, TAU); ctx.clip();
+        ctx.strokeStyle = "rgba(255,255,255,0.9)"; ctx.lineWidth = 4;
+        ctx.beginPath(); ctx.moveTo(vx - R, vy); ctx.lineTo(vx + R, vy); ctx.stroke();
+        ctx.strokeStyle = "#dc2626"; ctx.lineWidth = 1.6;
+        ctx.beginPath(); ctx.moveTo(vx - R, vy); ctx.lineTo(vx + R, vy); ctx.stroke();
+        ctx.restore();
+        ctx.font = '700 11.5px "JetBrains Mono", monospace'; ctx.textAlign = "center"; ctx.textBaseline = "bottom";
+        const t = "diâmetro = " + fmt(o.campo / 1000, o.campo < 1000 ? 2 : 1) + " mm";
+        ctx.lineWidth = 3; ctx.strokeStyle = "rgba(255,255,255,0.9)"; ctx.lineJoin = "round";
+        ctx.strokeText(t, vx, vy - 6); ctx.fillStyle = "#b91c1c"; ctx.fillText(t, vx, vy - 6);
+      }
+      // barra de escala
+      const L = o.escala * escala, x = vx - L / 2, y = vy + R * 0.8;
       ctx.lineCap = "butt";
       ctx.strokeStyle = "rgba(255,255,255,0.85)"; ctx.lineWidth = 6;
       ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + L, y); ctx.stroke();
       ctx.strokeStyle = "#111"; ctx.lineWidth = 3;
       ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + L, y); ctx.stroke();
-      ctx.font = '500 12px "IBM Plex Mono", ui-monospace, monospace';
-      ctx.textAlign = "center"; ctx.textBaseline = "bottom";
+      ctx.font = '700 12px "JetBrains Mono", monospace'; ctx.textAlign = "center"; ctx.textBaseline = "bottom";
       ctx.lineWidth = 3; ctx.strokeStyle = "rgba(255,255,255,0.85)"; ctx.lineJoin = "round";
-      ctx.strokeText(o.rotulo, W / 2, y - 5);
-      ctx.fillStyle = "#111"; ctx.fillText(o.rotulo, W / 2, y - 5);
-    }
+      ctx.strokeText(o.rotulo, vx, y - 5); ctx.fillStyle = "#111"; ctx.fillText(o.rotulo, vx, y - 5);
 
-    // Lâmina vista de cima (sem inversão): a objetiva fica fixa, a lâmina se move
-    function desenharMapa() {
-      const sc = 1.25; // px por mm
-      const mx = W - 72, my = H - 34;
-      const lx = mx - (estado.cx / 1000 + 37.5) * sc, ly = my - (estado.cy / 1000 + 12.5) * sc;
-      const px = (X) => lx + (X / 1000 + 37.5) * sc, py = (Y) => ly + (Y / 1000 + 12.5) * sc;
-      ctx.save();
-      ctx.beginPath(); ctx.rect(W - 140, H - 74, 136, 70); ctx.clip();
-      ctx.fillStyle = "rgba(210,230,240,0.28)"; ctx.strokeStyle = "rgba(220,235,245,0.7)"; ctx.lineWidth = 1;
-      ctx.fillRect(lx, ly, 75 * sc, 25 * sc); ctx.strokeRect(lx, ly, 75 * sc, 25 * sc);
-      ctx.fillStyle = "rgba(255,255,255,0.12)"; ctx.fillRect(px(-11000), py(-11000), 22 * sc, 22 * sc);
-      ctx.strokeStyle = "rgba(255,255,255,0.35)"; ctx.strokeRect(px(-11000), py(-11000), 22 * sc, 22 * sc);
-      const lam = estado.lamina;
-      ctx.beginPath();
-      if (lam === "cebola") { ctx.fillStyle = "rgba(224,190,110,0.9)"; ctx.ellipse(px(0), py(0), 4.2 * sc, 3.2 * sc, 0, 0, TAU); ctx.fill(); }
-      else if (lam === "bucal") { ctx.fillStyle = "rgba(120,160,225,0.6)"; ctx.ellipse(px(0), py(0), 8 * sc, 6 * sc, 0.3, 0, TAU); ctx.fill(); }
-      else if (lam === "elodea") { ctx.fillStyle = "rgba(110,180,80,0.95)"; ctx.fillRect(px(-10500), py(-860), 21 * sc, 1.72 * sc); }
-      else if (lam === "sangue") { ctx.fillStyle = "rgba(225,120,120,0.6)"; ctx.ellipse(px(0), py(0), 10 * sc, 7 * sc, 0, 0, TAU); ctx.fill(); }
-      else {
-        ctx.fillStyle = "rgba(240,234,218,0.9)"; ctx.fillRect(px(-6000), py(-6000), 12 * sc, 12 * sc);
-        ctx.fillStyle = "#222"; ctx.font = 'bold 12px Georgia, serif'; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-        ctx.fillText("e", px(0), py(0) + 0.5);
+      if (f.colisao) {
+        ctx.font = '700 14px "Plus Jakarta Sans", sans-serif'; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+        const txt = "A objetiva encostou na lamínula!", lw = ctx.measureText(txt).width + 24;
+        ctx.fillStyle = "rgba(185, 28, 28, 0.92)"; roundRect(ctx, vx - lw / 2, vy - 17, lw, 34, 10); ctx.fill();
+        ctx.fillStyle = "#fff"; ctx.fillText(txt, vx, vy);
       }
-      ctx.restore();
-      // campo de visão (posição fixa da objetiva)
-      ctx.strokeStyle = Lab.cor("--destaque") || "#e8774f"; ctx.lineWidth = 1.5;
-      ctx.beginPath(); ctx.arc(mx, my, Math.max(2.5, OBJ[estado.obj].campo / 2000 * sc), 0, TAU); ctx.stroke();
-      ctx.fillStyle = "rgba(255,255,255,0.75)";
-      ctx.font = '11px "IBM Plex Sans", system-ui, sans-serif';
-      ctx.textAlign = "center"; ctx.textBaseline = "bottom";
-      ctx.fillText("lâmina vista de cima", mx, H - 56);
     }
 
-    function pedirDesenho(nitidoTambem) {
-      if (nitidoTambem) precisaNitido = true;
-      if (pedido) return;
-      pedido = true;
-      requestAnimationFrame(() => { pedido = false; desenhar(); });
+    function desenharCena() {
+      const dpr = window.devicePixelRatio || 1;
+      const w = cena.clientWidth, h = cena.clientHeight;
+      if (!w || !h) return;
+      if (cena.width !== Math.round(w * dpr) || cena.height !== Math.round(h * dpr)) { cena.width = Math.round(w * dpr); cena.height = Math.round(h * dpr); }
+      const g = calcularGeometria(w, h);
+      if (!geo || geo.R !== g.R) precisaNitido = true;
+      geo = g;
+      escala = 2 * g.R / OBJ[estado.obj].campo;
+      if (precisaNitido || nitido.width !== Math.ceil((2 * g.R + 2 * MARGEM) * dpr)) renderizarNitido(g.R, dpr);
+      const f = filtros();
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      desenharFundo(w, h, g.bancadaY);
+      desenharMicroscopio(g.mic, f);
+      desenharOcular(g, f, dpr);
+      desenharCartao(g);
+      hits.visao = { x: g.vx, y: g.vy, r: g.R };
     }
 
-    /* ---------- Ciclose (animação só quando visível) ---------- */
-    let visivel = true, animando = false, tAnterior = 0;
-    const deveAnimar = () => estado.lamina === "elodea" && estado.obj >= 40 && visivel && !document.hidden;
-    function laco(agora) {
-      if (!deveAnimar()) { animando = false; return; }
-      if (agora - tAnterior > 33) {
-        estado.t += Math.min(0.1, (agora - tAnterior) / 1000);
-        tAnterior = agora;
-        precisaNitido = true;
-        desenhar();
-      }
-      requestAnimationFrame(laco);
-    }
-    function verificarAnimacao() {
-      if (deveAnimar() && !animando) { animando = true; tAnterior = performance.now(); requestAnimationFrame(laco); }
-    }
-    if ("IntersectionObserver" in window) {
-      new IntersectionObserver((e) => { visivel = e[0].isIntersecting; verificarAnimacao(); }).observe(tela);
-    }
-    document.addEventListener("visibilitychange", verificarAnimacao);
-
-    /* ---------- Interface ---------- */
-    function atualizarInterface() {
-      const o = OBJ[estado.obj], f = filtros();
-      $("o-macro").textContent = fmt(+cMacro.value * 0.2, 2) + " mm";
-      const mi = +cMicro.value;
-      $("o-micro").textContent = (mi > 0 ? "+" : mi < 0 ? "−" : "") + fmt(Math.abs(mi), 2) + " µm";
-      $("o-luz").textContent = cLuz.value + "%";
-      $("o-diaf").textContent = cDiaf.value + "%";
-      $("l-aumento").textContent = OCULAR * estado.obj + "×";
-      $("l-campo").textContent = "≈ " + fmt(o.campo / 1000, o.campo < 1000 ? 2 : 1) + " mm";
-      let foco;
-      if (f.colisao) foco = "lente na lâmina!";
-      else if (f.semOleo) foco = "escura e borrada";
-      else if (f.blur < 0.7) foco = "nítida";
-      else if (f.blur < 2.5) foco = "quase nítida";
-      else foco = "desfocada";
-      if (!f.colisao && !f.semOleo && f.brilho < 0.45) foco += " · escura";
-      else if (!f.colisao && f.brilho > 1.35) foco += " · clara demais";
-      $("l-foco").textContent = foco;
-
-      const avisos = [];
-      if (f.colisao) avisos.push(["atencao", "Objetiva encostou na lamínula", "Em um microscópio real, isso pode quebrar a lâmina e riscar a lente. Abaixe a platina com o macrométrico."]);
-      if (f.semOleo) avisos.push(["atencao", "Falta óleo de imersão", "A objetiva de 100× precisa de uma gota de óleo entre a lente e a lâmina. Sem ele, a luz se desvia ao passar pelo ar e a imagem fica escura e borrada."]);
-      if (cOleo.checked && estado.obj !== 100) avisos.push(["atencao", "Óleo sobre a lâmina", "O óleo é usado só com a objetiva de 100×. As objetivas secas (4×, 10× e 40×) não devem tocar nele — limpe a lâmina antes de usá-las."]);
-      if (estado.macroAlto && estado.obj >= 40) avisos.push(["atencao", "Use o micrométrico", `Em ${OCULAR * estado.obj}×, cada passo do macrométrico move a platina 20 µm, mas a faixa de foco tem só uns ${fmt(o.prof, 1)} µm.`]);
-      $("avisos").innerHTML = avisos.map(([tipo, titulo, txt]) =>
-        `<div class="caixa caixa--${tipo}"><span class="caixa__titulo">${titulo}</span><p>${txt}</p></div>`).join("");
-
-      document.querySelectorAll("#c-objetiva [data-obj]").forEach((b) => b.setAttribute("aria-pressed", String(+b.dataset.obj === estado.obj)));
-    }
-
+    /* ====================== Interação na cena ====================== */
     function moverLamina(dxUm, dyUm) {
-      // empurrar a lâmina para a direita diminui cx: a imagem vai para a esquerda
+      // empurrar a lâmina para a direita diminui cx: a imagem vai para a esquerda (imagem invertida)
       const lim = 10000;
+      const ax = estado.cx, ay = estado.cy;
       estado.cx = Math.max(-lim, Math.min(lim, estado.cx - dxUm));
       estado.cy = Math.max(-lim, Math.min(lim, estado.cy - dyUm));
-      pedirDesenho(true);
+      if (estado.lamina === "letra") {
+        estado.movidoLetra += Math.hypot(estado.cx - ax, estado.cy - ay);
+        if (estado.movidoLetra > 600) marcar("moveuLetra");
+      }
+      pedir(true);
+    }
+
+    function pontoCanvas(e) { const b = cena.getBoundingClientRect(); return { x: e.clientX - b.left, y: e.clientY - b.top }; }
+    const perto = (q, h, extra = 0) => h && Math.hypot(q.x - h.x, q.y - h.y) <= h.r + extra;
+    function alvoToque(q) {
+      if (perto(q, hits.macro, 4)) return "macro";
+      if (perto(q, hits.micro, 4)) return "micro";
+      for (const o of hits.objetivas.slice().reverse()) {
+        // distância até o eixo da objetiva
+        const vx = o.x - o.x0, vy = o.y - o.y0, L2 = vx * vx + vy * vy || 1;
+        const t = Math.max(0, Math.min(1, ((q.x - o.x0) * vx + (q.y - o.y0) * vy) / L2));
+        if (Math.hypot(q.x - (o.x0 + t * vx), q.y - (o.y0 + t * vy)) < 12 && t > 0.15) return "obj:" + o.obj;
+      }
+      if (perto(q, hits.revolver)) return "revolver";
+      if (perto(q, hits.visao)) return "visao";
+      return null;
     }
 
     let arrasto = null;
-    tela.addEventListener("pointerdown", (e) => {
-      arrasto = { x: e.clientX, y: e.clientY };
-      try { tela.setPointerCapture(e.pointerId); } catch (_) {}
-      tela.style.cursor = "grabbing";
+    cena.addEventListener("pointerdown", (e) => {
+      if (!geo) return;
+      const q = pontoCanvas(e), alvo = alvoToque(q);
+      if (!alvo) return;
+      if (alvo.startsWith("obj:") && +alvo.slice(4) !== estado.obj) { escolherObjetiva(+alvo.slice(4)); return; }
+      if (alvo === "revolver" || alvo.startsWith("obj:")) { escolherObjetiva(LISTA_OBJ[(LISTA_OBJ.indexOf(estado.obj) + 1) % 4]); return; }
+      arrasto = { alvo, x: e.clientX, y: e.clientY };
+      try { cena.setPointerCapture(e.pointerId); } catch (_) {}
+      cena.style.cursor = "grabbing";
+      e.preventDefault();
     });
-    tela.addEventListener("pointermove", (e) => {
-      if (!arrasto) return;
+    cena.addEventListener("pointermove", (e) => {
+      if (!geo) return;
+      if (!arrasto) {
+        const a = alvoToque(pontoCanvas(e));
+        cena.style.cursor = !a ? "default" : a === "visao" ? "grab" : a.startsWith("obj:") || a === "revolver" ? "pointer" : "ns-resize";
+        return;
+      }
       const dx = e.clientX - arrasto.x, dy = e.clientY - arrasto.y;
-      arrasto = { x: e.clientX, y: e.clientY };
-      moverLamina(dx / escala, dy / escala);
+      arrasto.x = e.clientX; arrasto.y = e.clientY;
+      if (arrasto.alvo === "visao") moverLamina(dx / escala, dy / escala);
+      else if (arrasto.alvo === "macro") { cMacro.value = Math.max(0, Math.min(100, +cMacro.value - dy * 0.25)); aoMudarMacro(); }
+      else if (arrasto.alvo === "micro") { cMicro.value = Math.max(-200, Math.min(200, +cMicro.value - dy * 0.5)); aoMudarMicro(); }
     });
-    const soltar = () => { arrasto = null; tela.style.cursor = "grab"; };
-    tela.addEventListener("pointerup", soltar);
-    tela.addEventListener("pointercancel", soltar);
-    tela.style.cursor = "grab";
-
-    const passoLamina = () => OBJ[estado.obj].campo * 0.15;
-    document.querySelectorAll("[data-mover]").forEach((b) => b.addEventListener("click", () => {
-      const [dx, dy] = b.dataset.mover.split(",").map(Number);
-      moverLamina(dx * passoLamina(), dy * passoLamina());
-    }));
-    $("b-centro").addEventListener("click", () => { estado.cx = 0; estado.cy = 0; pedirDesenho(true); });
-    tela.addEventListener("keydown", (e) => {
+    const largar = () => { arrasto = null; cena.style.cursor = "default"; };
+    cena.addEventListener("pointerup", largar);
+    cena.addEventListener("pointercancel", largar);
+    cena.addEventListener("keydown", (e) => {
       const mapa = { ArrowRight: [1, 0], ArrowLeft: [-1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] };
       const m = mapa[e.key];
       if (!m) return;
@@ -1310,164 +1815,448 @@
       moverLamina(m[0] * passoLamina(), m[1] * passoLamina());
     });
 
-    document.querySelectorAll("#c-objetiva [data-obj]").forEach((b) => b.addEventListener("click", () => {
-      estado.obj = +b.dataset.obj;
-      estado.macroAlto = false;
-      atualizarInterface(); pedirDesenho(true); verificarAnimacao();
+    /* ====================== Controles do painel ====================== */
+    const passoLamina = () => OBJ[estado.obj].campo * 0.15;
+    document.querySelectorAll("[data-mover]").forEach((b) => b.addEventListener("click", () => {
+      const [dx, dy] = b.dataset.mover.split(",").map(Number);
+      moverLamina(dx * passoLamina(), dy * passoLamina());
     }));
-    cLamina.addEventListener("change", () => {
-      estado.lamina = cLamina.value; estado.cx = 0; estado.cy = 0;
-      pedirDesenho(true); verificarAnimacao();
-    });
-    cMacro.addEventListener("input", () => { if (estado.obj >= 40) estado.macroAlto = true; atualizarInterface(); pedirDesenho(false); });
-    cMicro.addEventListener("input", () => { estado.macroAlto = false; atualizarInterface(); pedirDesenho(false); });
-    [cLuz, cDiaf, cOleo].forEach((c) => c.addEventListener("input", () => { atualizarInterface(); pedirDesenho(false); }));
-    cOleo.addEventListener("change", () => { atualizarInterface(); pedirDesenho(false); });
-    document.addEventListener("lab:tema", () => pedirDesenho(false));
-    if (window.ResizeObserver) new ResizeObserver(() => pedirDesenho(true)).observe(tela);
-    else window.addEventListener("resize", () => pedirDesenho(true));
+    $("b-centro").addEventListener("click", () => { estado.cx = 0; estado.cy = 0; pedir(true); });
 
-    /* ---------- Tabela ---------- */
-    const tabela = Lab.tabela($("tabela"), {
-      nomeArquivo: "microscopio-observacoes",
-      colunas: [
-        { chave: "lamina", titulo: "Lâmina" },
-        { chave: "objetiva", titulo: "Objetiva" },
-        { chave: "aumento", titulo: "Aumento total" },
-        { chave: "campo", titulo: "Campo (mm)" },
-        { chave: "estruturas", titulo: "Estruturas visíveis" },
-      ],
+    function escolherObjetiva(obj) {
+      if (obj === estado.obj) return;
+      estado.obj = obj;
+      estado.macroAlto = false;
+      if (geo) escala = 2 * geo.R / OBJ[obj].campo;
+      $("c-obj").querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(+x.dataset.valor === obj)));
+      atualizarInterface(); pedir(true);
+    }
+    $("c-obj").addEventListener("click", (e) => {
+      const b = e.target.closest("button[data-valor]");
+      if (b) escolherObjetiva(+b.dataset.valor);
     });
+    cLamina.addEventListener("change", () => {
+      estado.lamina = cLamina.value; estado.cx = 0; estado.cy = 0; estado.movidoLetra = 0;
+      cOleo.checked = false; // lâmina nova, sem óleo
+      atualizarInterface(); pedir(true);
+    });
+    function aoMudarMacro() { if (estado.obj >= 40) estado.macroAlto = true; atualizarInterface(); pedir(false); }
+    function aoMudarMicro() { estado.macroAlto = false; atualizarInterface(); pedir(false); }
+    cMacro.addEventListener("input", aoMudarMacro);
+    cMicro.addEventListener("input", aoMudarMicro);
+    document.querySelectorAll("[data-ajuste]").forEach((b) => b.addEventListener("click", () => {
+      const [qual, sinal] = b.dataset.ajuste.split(",");
+      if (qual === "macro") { cMacro.value = Math.max(0, Math.min(100, +cMacro.value + 0.5 * +sinal)); aoMudarMacro(); }
+      else { cMicro.value = Math.max(-200, Math.min(200, +cMicro.value + 1 * +sinal)); aoMudarMicro(); }
+    }));
+    [cLuz, cDiaf].forEach((c) => c.addEventListener("input", () => { atualizarInterface(); pedir(false); }));
+    cOleo.addEventListener("change", () => { atualizarInterface(); pedir(false); });
+    cLinha.addEventListener("change", () => pedir(false));
+
+    function textoImagem(f) {
+      let t;
+      if (f.colisao) t = "lente na lâmina!";
+      else if (f.semOleo) t = "escura e borrada";
+      else if (f.blur < 0.7) t = "nítida";
+      else if (f.blur < 1.5) t = "quase nítida";
+      else t = "desfocada";
+      if (!f.colisao && !f.semOleo && f.brilho < 0.35) t += " · escura";
+      else if (!f.colisao && f.brilho > 1.35) t += " · clara demais";
+      return t;
+    }
+
+    function atualizarInterface() {
+      const o = OBJ[estado.obj], f = filtros();
+      $("o-macro").textContent = fmt(+cMacro.value * 0.2, 2) + " mm";
+      const mi = +cMicro.value;
+      $("o-micro").textContent = (mi > 0 ? "+" : mi < 0 ? "−" : "") + fmt(Math.abs(mi), 1) + " µm";
+      $("o-luz").textContent = cLuz.value + "%";
+      $("o-diaf").textContent = cDiaf.value + "%";
+      $("l-aumento").textContent = OCULAR * estado.obj + "×";
+      $("l-campo").textContent = fmt(o.campo / 1000, o.campo < 1000 ? 2 : 1) + " mm";
+      $("l-imagem").textContent = textoImagem(f);
+      const avisos = [];
+      if (f.colisao) avisos.push("⚠️ A objetiva encostou na lamínula. Num microscópio real, isso quebra a lâmina e risca a lente. Baixe a platina com o macrométrico.");
+      if (f.semOleo) avisos.push("💧 A objetiva de 100× precisa de uma gota de óleo de imersão. Sem ele, a luz se desvia ao passar pelo ar e a imagem fica escura e borrada.");
+      if (cOleo.checked && estado.obj !== 100) avisos.push("🧻 O óleo é usado só com a objetiva de 100×. As objetivas de 4×, 10× e 40× não devem tocar nele.");
+      if (estado.macroAlto && estado.obj >= 40) avisos.push(`🎯 Em ${OCULAR * estado.obj}×, use o micrométrico: cada passo do macrométrico move a platina 20 µm, mas a faixa de foco tem só uns ${fmt(o.prof, 1)} µm.`);
+      $("f-msg").textContent = avisos.join(" ");
+      $("f-msg").className = "mensagem" + (avisos.length ? " erro" : "");
+      atualizarPreviaContagem();
+    }
+
+    /* ====================== Dica contextual na bancada ====================== */
+    function textoDica() {
+      const f = filtros(), o = OBJ[estado.obj];
+      const sobe = f.dz < 0;
+      const focarMacro = (antes) => [`🔄 ${antes || ""}Gire o macrométrico para ${sobe ? "subir" : "baixar"} a platina até a imagem ficar nítida`, "macro"];
+      if (f.colisao) return ["⚠️ A objetiva encostou na lâmina! Gire o macrométrico para baixar a platina", "macro"];
+      const a = alvoAtual();
+      if (a && estado.lamina !== a.lam) return [`🧫 Troque a lâmina para “${LAMINAS[a.lam].nome}” no painel Lâmina`, "lamina"];
+      if (a && estado.obj !== a.obj) {
+        if (estado.obj < a.obj && estado.obj <= 10 && f.blur >= 1.5 && !f.semOleo) return focarMacro("Primeiro foque neste aumento: ");
+        return [`🔭 Agora gire o revólver para a objetiva de ${a.obj}× (clique nela ou use o painel)`, "revolver"];
+      }
+      if (f.semOleo) return ["💧 Pingue o óleo de imersão (painel Lâmina): a objetiva de 100× precisa dele", "lamina"];
+      if (f.brilho < 0.35) return ["💡 A imagem está escura: aumente a luz ou abra o diafragma", "luz"];
+      if (f.blur >= 1.5) {
+        if (estado.obj <= 10 && Math.abs(f.dz) > 3 * o.prof) return focarMacro();
+        if (estado.obj <= 10) return [`🎯 Quase lá! Gire o micrométrico (ajuste fino) para ${sobe ? "subir" : "baixar"} a platina até a imagem ficar nítida`, "micro"];
+        if (Math.abs(f.dz) > 200) return ["↩️ Muito fora de foco: volte para a objetiva de 10× e foque de novo com o macrométrico", "revolver"];
+        return [`🎯 Gire só o micrométrico (ajuste fino) para ${sobe ? "subir" : "baixar"} a platina até a imagem ficar nítida`, "micro"];
+      }
+      if (cOleo.checked && estado.obj < 100) return ["🧻 Há óleo na lâmina: desmarque o óleo (limpe a lâmina) antes de usar objetivas secas", "lamina"];
+      if (!a) return ["✅ Imagem nítida! Explore à vontade: troque lâminas e aumentos", null];
+      if (a.tipo === "mover") return ["👆 Arraste a imagem para empurrar a lâmina: para onde a letra vai?", "visao"];
+      if (a.tipo === "contagem") return ["📏 Conte as células ao longo da linha vermelha e registre no painel “Estimar o tamanho”", "contar"];
+      return ["📝 Imagem nítida! Clique em “Registrar observação”", "registrar"];
+    }
+
+    function aplicarDica() {
+      const [texto, alvo] = textoDica();
+      if ($("dica").textContent !== texto) $("dica").textContent = texto;
+      if (alvo !== destaque) {
+        destaque = alvo; sujo = true;
+        document.querySelectorAll("[data-realce]").forEach((el) => el.classList.toggle("realce", !!alvo && el.dataset.realce.split(" ").includes(alvo)));
+      }
+    }
+
+    /* ====================== Laço ====================== */
+    let anterior = performance.now(), acumCiclose = 0;
+    function quadro(agora) {
+      const dt = Math.min((agora - anterior) / 1000, 0.1);
+      anterior = agora;
+      if ($("pratica").classList.contains("ativa") && !document.hidden) {
+        const alvoRot = LISTA_OBJ.indexOf(estado.obj);
+        if (rot !== alvoRot) {
+          rot += (alvoRot - rot) * Math.min(1, dt * 9);
+          if (Math.abs(rot - alvoRot) < 0.004) rot = alvoRot;
+          sujo = true;
+        }
+        if (estado.lamina === "elodea" && estado.obj >= 40) {
+          estado.t += dt; acumCiclose += dt;
+          if (acumCiclose > 0.04) { acumCiclose = 0; pedir(true); }
+        }
+        aplicarDica();
+        if (sujo) { sujo = false; desenharCena(); }
+      }
+      requestAnimationFrame(quadro);
+    }
+    if (window.ResizeObserver) new ResizeObserver(() => pedir(true)).observe(cena);
+    else window.addEventListener("resize", () => pedir(true));
+    document.addEventListener("lab:etapa", () => pedir(true));
+
+    /* ====================== Registro ====================== */
+    function avisar(el, texto, tipo) { const m = $(el); m.textContent = texto; m.className = "mensagem " + (tipo || ""); }
+    function erroRegistro(f) {
+      if (f.colisao) return "A objetiva está encostada na lâmina. Baixe a platina antes de observar.";
+      if (f.semOleo) return "Sem óleo de imersão, a imagem em 1000× fica escura e borrada. Pingue o óleo.";
+      if (f.blur >= 1.5) return "A imagem está desfocada. Ajuste o foco antes de registrar.";
+      if (f.brilho < 0.35) return "A imagem está escura demais. Aumente a luz ou abra o diafragma.";
+      return "";
+    }
+    const linhaBase = () => {
+      const o = OBJ[estado.obj];
+      return { lamina: LAMINAS[estado.lamina].nome, lam: estado.lamina, obj: estado.obj, objetiva: estado.obj + "×",
+        aumento: OCULAR * estado.obj + "×", campo: o.campo / 1000 };
+    };
 
     $("b-registrar").addEventListener("click", () => {
-      const f = filtros(), aviso = $("aviso-registro");
-      let erro = "";
-      if (f.colisao) erro = "A objetiva está encostada na lâmina. Abaixe a platina antes de observar.";
-      else if (f.semOleo) erro = "Sem óleo de imersão, a imagem em 1000× fica escura e borrada. Marque o óleo.";
-      else if (f.blur > 1.5) erro = "A imagem está desfocada. Ajuste o foco antes de registrar.";
-      else if (f.brilho < 0.35) erro = "A imagem está escura demais. Aumente a luz ou abra o diafragma.";
-      if (erro) { aviso.textContent = erro; aviso.style.color = "var(--errado)"; return; }
-      const o = OBJ[estado.obj], lam = LAMINAS[estado.lamina];
-      tabela.adicionar({
-        lamina: lam.nome,
-        objetiva: estado.obj + "×",
-        aumento: OCULAR * estado.obj + "×",
-        campo: fmt(o.campo / 1000, 2),
-        estruturas: lam.estruturas[estado.obj],
-      });
-      aviso.textContent = "Observação registrada na tabela (seção 5).";
-      aviso.style.color = "var(--certo)";
+      const erro = erroRegistro(filtros());
+      if (erro) return avisar("r-msg", erro, "erro");
+      const nota = $("r-nota").value.trim();
+      tabela.adicionar({ ...linhaBase(), estruturas: LAMINAS[estado.lamina].estruturas[estado.obj], n: "—", tam: "—", nota: nota || "—" });
+      $("r-nota").value = "";
+      avisar("r-msg", `✓ Observação ${tabela.linhas().length} registrada: ${LAMINAS[estado.lamina].nome}, objetiva de ${estado.obj}× (aumento total de ${OCULAR * estado.obj}×).`, "ok");
     });
 
-    /* ---------- Hipóteses ---------- */
-    Lab.questoes($("hipoteses-lista"), [
-      {
-        tipo: "aberta",
-        enunciado: "<p>Ao trocar a objetiva de 10× para 40×, você vai ver <strong>mais</strong> ou <strong>menos</strong> células no campo? A imagem vai ficar mais clara ou mais escura?</p>",
-        modelo: "<p>Guarde sua hipótese! Você vai testá-la na etapa 1 do procedimento.</p>",
-      },
-      {
-        tipo: "aberta",
-        enunciado: "<p>Uma célula da sua bochecha e uma célula de cebola são iguais? Que diferenças você espera encontrar?</p>",
-        modelo: "<p>Guarde sua hipótese! Você vai testá-la nas etapas 1 e 2 do procedimento.</p>",
-      },
-      {
-        tipo: "aberta",
-        enunciado: "<p>Se você empurrar a lâmina para a <strong>direita</strong>, para que lado a imagem vai se mover no microscópio?</p>",
-        modelo: "<p>Guarde sua hipótese! Você vai testá-la na etapa 6 do procedimento.</p>",
-      },
+    function atualizarPreviaContagem() {
+      const n = Math.round(+$("r-n").value), o = OBJ[estado.obj];
+      $("r-previa").innerHTML = n > 0
+        ? `Tamanho \\( \\approx \\dfrac{${tex(o.campo, 0)}\\ \\mu\\text{m}}{${n}} = ${tex(o.campo / n, 0)}\\ \\mu\\text{m} \\)`
+        : `Com a cebola em 10×, conte quantas células cabem ao longo da linha vermelha, de uma borda à outra do campo.`;
+    }
+    $("r-n").addEventListener("input", atualizarPreviaContagem);
+
+    $("b-contar").addEventListener("click", () => {
+      const n = Math.round(+$("r-n").value);
+      if (estado.lamina !== "cebola") return avisar("c-msg", "Para esta estimativa, use a lâmina de epiderme de cebola.", "erro");
+      const erro = erroRegistro(filtros());
+      if (erro) return avisar("c-msg", erro, "erro");
+      if (!(n >= 1 && n <= 200)) return avisar("c-msg", "Digite quantas células você contou ao longo da linha (um número inteiro).", "erro");
+      const o = OBJ[estado.obj];
+      tabela.adicionar({ ...linhaBase(), estruturas: "contagem de células no diâmetro do campo", n, tam: o.campo / n, nota: "—" });
+      avisar("c-msg", `✓ Contagem registrada: ${n} células → cerca de ${fmt(o.campo / n, 0)} µm cada. Veja o cálculo na etapa Resultados.`, "ok");
+    });
+
+    /* ====================== Assistente de missões ====================== */
+    const reg = (lam, obj) => (ls) => ls.some((l) => l.lam === lam && l.obj === obj);
+    const MISSOES = [
+      { titulo: "Primeiro foco",
+        texto: "Vamos começar pelo jeito certo: menor aumento e foco com o parafuso grande.",
+        passos: ["No painel <i>Lâmina</i>, deixe a <b>Epiderme de cebola</b>. No revólver, deixe a objetiva de <b>4×</b>.",
+          "Arraste o parafuso <b>macro</b> para cima (ou use ▲ no painel <i>Foco</i>) até as células aparecerem nítidas.",
+          "Clique em <b>Registrar observação</b>."],
+        alvos: [{ lam: "cebola", obj: 4, tipo: "registro", ok: reg("cebola", 4) }],
+        observe: "Cada “tijolinho” é uma célula! As linhas que separam uma célula da outra são as paredes celulares." },
+      { titulo: "Aumente o zoom",
+        texto: "Agora aproxime: veja a mesma lâmina em 100× e em 400×.",
+        passos: ["Gire o revólver para a objetiva de <b>10×</b>. Deixe a imagem nítida com o <b>micrométrico</b> e registre.",
+          "Gire para a objetiva de <b>40×</b>. Use <b>só o micrométrico</b> para focar (se escurecer, aumente a luz) e registre."],
+        alvos: [{ lam: "cebola", obj: 10, tipo: "registro", ok: reg("cebola", 10) }, { lam: "cebola", obj: 40, tipo: "registro", ok: reg("cebola", 40) }],
+        progresso: (ls) => `${[reg("cebola", 10)(ls), reg("cebola", 40)(ls)].filter(Boolean).length} de 2 aumentos`,
+        observe: "Com mais aumento, você vê menos células, porém maiores, e a imagem fica mais escura. Em 400× aparecem o núcleo, com seus nucléolos, e o vacúolo." },
+      { titulo: "Célula animal",
+        texto: "Compare com uma célula do seu corpo: a mucosa da bochecha.",
+        passos: ["Troque a lâmina para <b>Mucosa bucal</b>.", "Em <b>40×</b>, deixe a imagem nítida com o micrométrico (se não encontrar células, empurre a lâmina) e registre."],
+        alvos: [{ lam: "bucal", obj: 40, tipo: "registro", ok: reg("bucal", 40) }],
+        observe: "As células da bochecha são soltas, achatadas e de forma irregular. Elas não têm parede celular — só a membrana plasmática. O núcleo ficou azul por causa do corante." },
+      { titulo: "Cloroplastos",
+        texto: "Uma folha verde, vista por dentro.",
+        passos: ["Troque a lâmina para <b>Folha de Elódea</b>.", "Em <b>40×</b>, deixe nítida e observe por alguns segundos. Depois, registre."],
+        alvos: [{ lam: "elodea", obj: 40, tipo: "registro", ok: reg("elodea", 40) }],
+        observe: "Os grãos verdes são cloroplastos, onde a planta faz fotossíntese. Eles se movem junto com o citoplasma: esse movimento se chama ciclose." },
+      { titulo: "Sangue",
+        texto: "Observe as células do sangue, com o maior aumento do microscópio.",
+        passos: ["Troque a lâmina para <b>Sangue humano</b>. Em <b>40×</b>, foque e registre.",
+          "Gire para a objetiva de <b>100×</b>. Veja como fica a imagem sem óleo; depois marque <b>Pingar óleo de imersão</b>, foque com o micrométrico e registre."],
+        alvos: [{ lam: "sangue", obj: 40, tipo: "registro", ok: reg("sangue", 40) }, { lam: "sangue", obj: 100, tipo: "registro", ok: reg("sangue", 100) }],
+        progresso: (ls) => `${[reg("sangue", 40)(ls), reg("sangue", 100)(ls)].filter(Boolean).length} de 2 aumentos`,
+        observe: "As hemácias são discos sem núcleo, com o centro mais claro. Os leucócitos, maiores e raros, têm núcleo roxo. Os pontinhos roxos soltos são plaquetas." },
+      { titulo: "A letra “e” — imagem invertida",
+        texto: "Será que o microscópio mostra as coisas “do jeito certo”?",
+        passos: ["Troque a lâmina para <b>Letra “e”</b> e use a objetiva de <b>4×</b>. Compare a letra no quadro “lâmina vista de cima” com a letra no campo de visão.",
+          "Arraste sobre o campo de visão (ou use as setas do painel) para <b>empurrar a lâmina</b> para a direita e para trás. Para onde a imagem vai?",
+          "Registre a observação — escreva na anotação o que você descobriu."],
+        alvos: [{ lam: "letra", obj: 4, tipo: "mover", ok: () => marcos.moveuLetra }, { lam: "letra", obj: 4, tipo: "registro", ok: (ls) => ls.some((l) => l.lam === "letra") }],
+        progresso: (ls) => `lâmina empurrada: ${marcos.moveuLetra ? "✓" : "ainda não"} · registro: ${ls.some((l) => l.lam === "letra") ? "✓" : "ainda não"}`,
+        observe: "A letra aparece de cabeça para baixo e espelhada, e se move para o lado oposto ao que você empurra a lâmina: o microscópio inverte a imagem (gira 180°)." },
+      { titulo: "Estime o tamanho de uma célula",
+        texto: "Use o campo de visão como régua!",
+        passos: ["Volte para a <b>Epiderme de cebola</b> na objetiva de <b>10×</b> (campo de 1,8 mm).",
+          "Conte quantas células cabem enfileiradas ao longo da <b>linha vermelha</b>, de uma borda à outra do campo (vale arredondar as células cortadas).",
+          "Digite o número no painel <i>Estimar o tamanho</i> e clique em <b>Registrar contagem</b>."],
+        alvos: [{ lam: "cebola", obj: 10, tipo: "contagem", ok: (ls) => ls.some((l) => l.lam === "cebola" && l.obj === 10 && typeof l.n === "number") }],
+        observe: "Veja na etapa <a href=\"#resultados\">Resultados</a> o cálculo do tamanho da célula feito com a sua contagem." },
+    ];
+    MISSOES.forEach((m) => { m.feita = (ls) => m.alvos.every((a) => a.ok(ls)); });
+    let missaoVista = null; // missão escolhida pelo aluno nos botões; null = a próxima pendente
+
+    function alvoAtual() {
+      if (!tabela) return null;
+      const ls = tabela.linhas();
+      const i = MISSOES.findIndex((m) => !m.feita(ls));
+      if (i === -1) return null;
+      return MISSOES[i].alvos.find((a) => !a.ok(ls)) || null;
+    }
+
+    function atualizarAssistente() {
+      if (!tabela) return;
+      const ls = tabela.linhas();
+      const estados = MISSOES.map((m) => m.feita(ls));
+      const feitas = estados.filter(Boolean).length;
+      const pendente = estados.indexOf(false);
+      const i = missaoVista ?? (pendente === -1 ? MISSOES.length - 1 : pendente);
+      const m = MISSOES[i];
+      const corpo = pendente === -1 && missaoVista === null
+        ? `<div class="parabens">🎉 Parabéns! Você concluiu todas as missões. Vá para a etapa <a href="#resultados">Resultados</a> para analisar suas observações.</div>`
+        : `<div class="missao-atual">
+            <div class="missao-atual__num">${estados[i] ? "✓" : i + 1}</div>
+            <div>
+              ${!estados[i] && i > 0 && estados[i - 1] ? `<div class="observe" style="margin:0 0 12px;border-left-color:var(--certo)">✓ <b>Missão ${i} concluída! O que observar:</b> ${MISSOES[i - 1].observe}</div>` : ""}
+              <h4>Missão ${i + 1}: ${m.titulo}</h4>
+              <p>${m.texto}</p>
+              <ol>${m.passos.map((p) => `<li>${p}</li>`).join("")}</ol>
+              ${m.progresso ? `<p style="margin-top:8px"><b>Progresso:</b> ${m.progresso(ls)}</p>` : ""}
+              ${estados[i] ? `<div class="observe">👀 <b>O que observar:</b> ${m.observe}</div>` : ""}
+            </div>
+          </div>`;
+      $("assistente").innerHTML = `
+        <div class="assistente__topo">
+          <p class="assistente__titulo">🤖 Assistente da prática</p>
+          <div class="assistente__progresso">${feitas} de ${MISSOES.length} missões
+            <div class="assistente__barra"><span style="width:${(feitas / MISSOES.length) * 100}%"></span></div></div>
+        </div>
+        ${corpo}
+        <ul class="missoes-lista">${MISSOES.map((mm, k) =>
+          `<li><button type="button" data-missao="${k}" class="${estados[k] ? "feita" : ""} ${k === i ? "atual" : ""}">${estados[k] ? "✓" : k + 1} ${mm.titulo}</button></li>`).join("")}</ul>`;
+    }
+    $("assistente").addEventListener("click", (e) => {
+      const b = e.target.closest("[data-missao]");
+      if (!b) return;
+      const k = +b.dataset.missao;
+      missaoVista = missaoVista === k ? null : k;
+      atualizarAssistente();
+    });
+
+    /* ====================== Resultados ====================== */
+    let tabela = null, pronto = false; // pronto: a tabela chama aoMudar já na criação
+    tabela = Lab.tabela($("tabela"), {
+      nomeArquivo: "microscopio-observacoes",
+      textoVazio: "Nenhuma observação ainda. Vá até a etapa <b>Prática</b> e siga as missões do assistente.",
+      colunas: [
+        { chave: "lamina", titulo: "Lâmina", texto: true },
+        { chave: "objetiva", titulo: "Objetiva" },
+        { chave: "aumento", titulo: "Aumento total" },
+        { chave: "campo", titulo: "Campo (mm)", casas: 2 },
+        { chave: "estruturas", titulo: "Estruturas visíveis", texto: true },
+        { chave: "n", titulo: "Células no diâmetro", casas: 0 },
+        { chave: "tam", titulo: "Tamanho estimado (µm)", casas: 0 },
+        { chave: "nota", titulo: "Anotação", texto: true },
+      ],
+      aoMudar: () => { if (pronto) { atualizarResultados(); atualizarAssistente(); } },
+    });
+
+    // quadro comparativo: [objetiva mínima para ver, texto, classe]
+    const COLUNAS_CMP = [["cebola", "Cebola (vegetal)"], ["elodea", "Elódea (vegetal)"], ["bucal", "Bochecha (animal)"], ["sangue", "Sangue (animal)"]];
+    const COMPARA = [
+      { nome: "Parede celular", cebola: [10, "✓ vista", "sim"], elodea: [10, "✓ vista", "sim"], bucal: [40, "✗ não tem", "nao"], sangue: [40, "✗ não tem", "nao"] },
+      { nome: "Núcleo", cebola: [10, "✓ visto (corado pelo lugol)", "sim"], elodea: [40, "difícil de ver sem corante", ""], bucal: [10, "✓ visto (azul)", "sim"], sangue: [40, "✗ nas hemácias · ✓ nos leucócitos", ""] },
+      { nome: "Cloroplastos", cebola: [40, "✗ não tem", "nao"], elodea: [40, "✓ muitos, verdes", "sim"], bucal: [40, "✗ não tem", "nao"], sangue: [40, "✗ não tem", "nao"] },
+      { nome: "Vacúolo central", cebola: [40, "✓ grande", "sim"], elodea: [40, "✓ grande (empurra os cloroplastos para a borda)", "sim"], bucal: [40, "✗ não visto", "nao"], sangue: [40, "✗ não tem", "nao"] },
+      { nome: "Forma", cebola: [4, "retangular, lado a lado", ""], elodea: [10, "retangular, lado a lado", ""], bucal: [10, "irregular, achatada, solta", ""], sangue: [40, "hemácias: discos redondos", ""] },
+    ];
+    function comparativoHTML() {
+      const ls = tabela.linhas();
+      const maior = {};
+      ls.forEach((l) => { maior[l.lam] = Math.max(maior[l.lam] || 0, l.obj); });
+      const cab = `<tr><th>Estrutura</th>${COLUNAS_CMP.map(([, n]) => `<th>${n}</th>`).join("")}</tr>`;
+      const linhas = COMPARA.map((r) => `<tr><td>${r.nome}</td>${COLUNAS_CMP.map(([k]) => {
+        const [min, txt, cls] = r[k];
+        return (maior[k] || 0) >= min ? `<td class="${cls}">${txt}</td>` : `<td class="falta">${maior[k] ? `observe em ${min}×` : "ainda não observada"}</td>`;
+      }).join("")}</tr>`).join("");
+      return `<div class="comparacao"><table><thead>${cab}</thead><tbody>${linhas}</tbody></table></div>`;
+    }
+
+    const TAM_REF = 300; // µm, comprimento típico da célula da epiderme de cebola
+    function ultimaContagem() {
+      const cs = tabela.linhas().filter((l) => typeof l.n === "number" && l.lam === "cebola");
+      return cs.length ? cs[cs.length - 1] : null;
+    }
+    function calculoHTML() {
+      const c = ultimaContagem();
+      if (!c) return `<span class="exemplo__titulo">🧮 O cálculo com os seus números</span>
+        <p style="margin:0">Ainda não há contagem. Faça a <b>missão 7</b> na etapa <a href="#pratica">Prática</a>: com a cebola em 10×, conte as células
+        ao longo da linha vermelha e clique em <i>Registrar contagem</i>. O cálculo aparecerá aqui, passo a passo.</p>`;
+      const campoUm = c.campo * 1000, tam = campoUm / c.n, dif = (tam - TAM_REF) / TAM_REF * 100;
+      const passos = [
+        `<li>Diâmetro do campo com a objetiva de ${c.obj}×, convertido para micrômetros: \\( ${tex(c.campo, c.campo < 1 ? 2 : 1)}\\ \\text{mm} \\times 1000 = ${tex(campoUm, 0)}\\ \\mu\\text{m} \\)</li>`,
+        `<li>Você contou <b>${c.n} células</b> ao longo do diâmetro. Divida: \\( \\dfrac{${tex(campoUm, 0)}\\ \\mu\\text{m}}{${c.n}} = ${tex(tam, 0)}\\ \\mu\\text{m} \\)</li>`,
+        `<li>Em milímetros: \\( ${tex(tam, 0)} \\div 1000 = ${tex(tam / 1000, 2)}\\ \\text{mm} \\)</li>`,
+        `<li>Compare com o valor típico (cerca de ${TAM_REF} µm): \\( \\text{diferença} = \\dfrac{${tex(tam, 0)} - ${TAM_REF}}{${TAM_REF}} \\times 100 = ${tex(dif, 0)}\\,\\% \\)
+          ${Math.abs(dif) <= 20 ? " — ótima estimativa! 🎉" : " — a diferença ficou grande. Conte de novo com calma, ao longo da linha vermelha, em outro lugar da lâmina."}</li>`,
+      ];
+      return `<span class="exemplo__titulo">🧮 O cálculo com os seus números</span><ol>${passos.join("")}</ol>
+        <div class="resultado-destaque"><span>Tamanho estimado de uma célula de cebola:</span><b>≈ ${fmt(tam, 0)} µm</b><span>(valor típico: cerca de ${TAM_REF} µm)</span></div>`;
+    }
+
+    function atualizarResultados() {
+      $("comparativo").innerHTML = comparativoHTML();
+      $("calculo").innerHTML = calculoHTML();
+    }
+
+    /* ====================== Hipóteses ====================== */
+    const guardar = { botao: "Guardar hipótese", rotuloModelo: "Hipótese guardada ✓" };
+    const hipoteses = Lab.questoes($("hipoteses-lista"), [
+      { ...guardar, tipo: "aberta",
+        enunciado: "<p><b>H1.</b> Ao trocar a objetiva de 10× para 40×, você vai ver <b>mais</b> ou <b>menos</b> células no campo de visão? A imagem vai ficar mais clara ou mais escura?</p>",
+        modelo: "<p>Você vai testar isso na missão 2 da prática.</p>" },
+      { ...guardar, tipo: "aberta",
+        enunciado: "<p><b>H2.</b> Uma célula da sua <b>bochecha</b> e uma célula de <b>cebola</b> são iguais? Que diferenças você espera encontrar?</p>",
+        modelo: "<p>Você vai testar isso nas missões 1, 3 e 4 da prática.</p>" },
+      { ...guardar, tipo: "aberta",
+        enunciado: "<p><b>H3.</b> Se você empurrar a lâmina para a <b>direita</b>, para que lado a imagem vai se mover no microscópio? A letra “e” vai aparecer do mesmo jeito que no papel?</p>",
+        modelo: "<p>Você vai testar isso na missão 6 da prática.</p>" },
     ], { chave: "hipoteses", semPlacar: true });
 
-    /* ---------- Questões ---------- */
+    /* ====================== Questões ====================== */
+    let relAvaliacao = "";
     Lab.questoes($("questoes-lista"), [
-      {
-        tipo: "numerica", nivel: "fácil",
-        enunciado: "<p>Um estudante observa uma lâmina usando uma ocular de <strong>10×</strong> e uma objetiva de <strong>40×</strong>. Qual é o aumento total?</p>",
+      { tipo: "numerica", nivel: "fácil",
+        enunciado: "<p>Um estudante observa uma lâmina com uma ocular de <b>10×</b> e uma objetiva de <b>40×</b>. Qual é o aumento total?</p>",
         resposta: 400, tolerancia: 0.001, unidade: "×",
-        explicacao: "O aumento total é o produto dos aumentos: 10 × 40 = 400×. A imagem parece 400 vezes maior que o objeto.",
-      },
-      {
-        tipo: "multipla", nivel: "fácil",
-        enunciado: "<p>Comparando a cebola com a mucosa bucal, qual estrutura aparece na célula vegetal, mas <strong>não</strong> na célula animal?</p>",
+        dica: "Veja o Exemplo resolvido 1 na etapa Teoria: multiplique o aumento da ocular pelo aumento da objetiva.",
+        explicacao: "O aumento total é o produto dos aumentos: \\( 10 \\times 40 = 400 \\). A imagem parece 400 vezes maior que o objeto." },
+      { tipo: "multipla", nivel: "fácil",
+        enunciado: "<p>Ao começar a observar uma lâmina nova, qual objetiva você deve usar primeiro?</p>",
+        alternativas: ["A de 100×, para ver tudo com detalhes", "A de 4×, a de menor aumento", "A de 40×", "Tanto faz"],
+        correta: 1, dica: "Releia a caixa de cuidados na etapa Preparação e o passo 2 de “Como usar o microscópio”.",
+        explicacao: "Na menor objetiva, o campo de visão é maior (4,5 mm), a imagem é mais clara e a faixa de foco é larga: fica fácil encontrar a amostra e focalizar. Além disso, ela trabalha longe da lâmina, sem risco de batida." },
+      { tipo: "multipla", nivel: "fácil",
+        enunciado: "<p>Comparando a cebola com a mucosa bucal, qual estrutura aparece na célula vegetal, mas <b>não</b> na célula animal?</p>",
         alternativas: ["Núcleo", "Membrana plasmática", "Citoplasma", "Parede celular"],
-        correta: 3,
-        explicacao: "A parede celular, feita principalmente de celulose, envolve a membrana das células vegetais e dá a elas forma rígida e geométrica. Núcleo, membrana e citoplasma existem nos dois tipos de célula. Cloroplastos e vacúolo central grande também são típicos de células vegetais.",
-      },
-      {
-        tipo: "multipla", nivel: "médio",
+        correta: 3, dica: "Olhe o quadro comparativo na etapa Resultados e compare a coluna da cebola com a da bochecha.",
+        explicacao: "A parede celular, feita principalmente de celulose, envolve a membrana das células vegetais e dá a elas forma firme e geométrica. Núcleo, membrana e citoplasma existem nos dois tipos de célula." },
+      { tipo: "multipla", nivel: "médio",
         enunciado: "<p>Ao trocar a objetiva de 10× para 40×, o que acontece com o campo de visão e com o brilho da imagem?</p>",
-        alternativas: [
-          "O campo aumenta e a imagem fica mais clara.",
-          "O campo diminui e a imagem fica mais escura.",
-          "O campo diminui e a imagem fica mais clara.",
-          "Nada muda: só as células ficam maiores.",
-        ],
-        correta: 1,
-        explicacao: "Com aumento 4 vezes maior, o diâmetro do campo fica 4 vezes menor (de 1,8 mm para 0,45 mm) — vemos menos células, porém maiores. A luz que passa por essa pequena área se espalha por uma imagem maior, e por isso é preciso aumentar a iluminação.",
-      },
-      {
-        tipo: "multipla", nivel: "médio",
-        enunciado: "<p>Uma célula interessante aparece no lado <strong>esquerdo</strong> do campo de visão. Para trazê-la ao centro, você deve empurrar a lâmina para:</p>",
-        alternativas: [
-          "a direita, porque a célula precisa ir para a direita.",
-          "a esquerda, porque a imagem se move no sentido oposto ao da lâmina.",
-          "cima, porque a imagem está de cabeça para baixo.",
-          "qualquer lado: o movimento da lâmina não muda a imagem.",
-        ],
-        correta: 1,
-        explicacao: "A imagem é invertida (girada 180°). Empurrando a lâmina para a esquerda, a imagem se desloca para a direita — ou seja, em direção ao centro. Regra prática: mova a lâmina para o mesmo lado em que a imagem está.",
-      },
-      {
-        tipo: "multipla", nivel: "médio",
-        enunciado: "<p>No esfregaço de sangue, as hemácias (glóbulos vermelhos) não mostram núcleo. Qual é a explicação correta?</p>",
-        alternativas: [
-          "O núcleo existe, mas é pequeno demais para o microscópio óptico.",
-          "O corante usado destrói o núcleo das hemácias.",
-          "Durante o amadurecimento, as hemácias humanas perdem o núcleo, o que deixa mais espaço para a hemoglobina, que transporta o oxigênio.",
-          "Hemácias não são células, são apenas gotas de hemoglobina.",
-        ],
-        correta: 2,
-        explicacao: "Nos mamíferos, as hemácias eliminam o núcleo ao amadurecer na medula óssea. Sobra mais espaço para a hemoglobina, e o formato de disco bicôncavo (com o centro mais fino, por isso mais claro) facilita as trocas de gases. Como não têm núcleo, não se dividem e vivem cerca de 120 dias. Os leucócitos, ao contrário, têm núcleo bem visível.",
-      },
-      {
-        tipo: "numerica", nivel: "desafio",
-        enunciado: "<p>Com a objetiva de 10×, o campo de visão tem <strong>1,8 mm</strong> de diâmetro. Um estudante contou que cabem cerca de <strong>6 células de cebola</strong>, enfileiradas no sentido do comprimento, de uma borda à outra do campo. Qual é o comprimento aproximado de uma célula, em micrômetros?</p>",
+        alternativas: ["O campo aumenta e a imagem fica mais clara.", "O campo diminui e a imagem fica mais escura.", "O campo diminui e a imagem fica mais clara.", "Nada muda: só as células ficam maiores."],
+        correta: 1, dica: "Lembre da missão 2 e da tabela de campos na Teoria: o que aconteceu com o número de células no campo e com a luz?",
+        explicacao: "Com aumento 4 vezes maior, o diâmetro do campo fica 4 vezes menor (de 1,8 mm para 0,45 mm): vemos menos células, porém maiores. A luz que passa por essa área pequena se espalha por uma imagem maior, e por isso é preciso aumentar a iluminação." },
+      { tipo: "multipla", nivel: "médio",
+        enunciado: "<p>Uma célula interessante aparece no lado <b>esquerdo</b> do campo de visão. Para trazê-la para o centro, você deve empurrar a lâmina para:</p>",
+        alternativas: ["a direita, porque a célula precisa ir para a direita.", "a esquerda, porque a imagem se move no sentido oposto ao da lâmina.", "cima, porque a imagem está de cabeça para baixo.", "qualquer lado: o movimento da lâmina não muda a imagem."],
+        correta: 1, dica: "Na missão 6, você empurrou a lâmina e viu a imagem ir para o lado oposto.",
+        explicacao: "A imagem é invertida (girada 180°). Empurrando a lâmina para a esquerda, a imagem se desloca para a direita — ou seja, em direção ao centro. Regra prática: mova a lâmina para o mesmo lado em que a imagem está." },
+      { tipo: "numerica", nivel: "desafio",
+        enunciado: "<p>Com a objetiva de 10×, o campo de visão tem <b>1,8 mm</b> de diâmetro. Um estudante contou que cabem cerca de <b>6 células de cebola</b>, enfileiradas, de uma borda à outra do campo. Qual é o comprimento aproximado de uma célula, em micrômetros?</p>",
         resposta: 300, tolerancia: 0.15, unidade: "µm",
-        explicacao: "Primeiro converta: 1,8 mm = 1 800 µm. Depois divida pelo número de células: 1 800 ÷ 6 = 300 µm (ou 0,3 mm). Confira na bancada: em 10×, as células de cebola ocupam cerca de 1/6 do diâmetro do campo.",
-      },
-      {
-        tipo: "multipla", nivel: "fácil",
+        dica: "Siga o Exemplo resolvido 3: primeiro converta 1,8 mm para micrômetros (multiplique por 1000); depois divida pelo número de células.",
+        explicacao: "Converta: \\( 1{,}8\\ \\text{mm} = 1800\\ \\mu\\text{m} \\). Depois divida: \\( 1800 \\div 6 = 300\\ \\mu\\text{m} \\) (ou 0,3 mm)." },
+      { tipo: "multipla", nivel: "fácil",
         enunciado: "<p>Por que usamos corantes, como o lugol e o azul de metileno, ao preparar lâminas?</p>",
-        alternativas: [
-          "Para matar os microrganismos da amostra.",
-          "Para aumentar o tamanho das células.",
-          "Para aumentar o contraste e destacar estruturas quase transparentes, como o núcleo.",
-          "Para que a lâmina não precise de luz.",
-        ],
-        correta: 2,
-        explicacao: "A maioria das estruturas celulares é quase transparente. Os corantes se fixam mais em algumas delas (o azul de metileno, por exemplo, tinge fortemente o núcleo), criando contraste. Eles não mudam o tamanho das células.",
-      },
-      {
-        tipo: "aberta", nivel: "reflexão",
+        alternativas: ["Para matar os microrganismos da amostra.", "Para aumentar o tamanho das células.", "Para aumentar o contraste e destacar estruturas quase transparentes, como o núcleo.", "Para que a lâmina não precise de luz."],
+        correta: 2, dica: "Releia “Para que servem os corantes?” na Teoria. Lembre como o núcleo apareceu nas lâminas coradas.",
+        explicacao: "A maioria das estruturas das células é quase transparente. Os corantes se prendem mais a algumas delas (o azul de metileno, por exemplo, tinge fortemente o núcleo), criando contraste. Eles não mudam o tamanho das células." },
+      { tipo: "multipla", nivel: "médio",
+        enunciado: "<p>No esfregaço de sangue, as hemácias (glóbulos vermelhos) não mostram núcleo. Qual é a explicação correta?</p>",
+        alternativas: ["O núcleo existe, mas é pequeno demais para o microscópio óptico.", "O corante usado destrói o núcleo das hemácias.", "Ao amadurecer, as hemácias humanas perdem o núcleo, o que deixa mais espaço para a hemoglobina, que transporta o oxigênio.", "Hemácias não são células, são apenas gotas de hemoglobina."],
+        correta: 2, dica: "Pense no que você viu na missão 5 e no quadro comparativo: quais células do sangue tinham núcleo?",
+        explicacao: "Nos mamíferos, as hemácias eliminam o núcleo ao amadurecer na medula óssea. Sobra mais espaço para a hemoglobina, e o formato de disco com o centro mais fino (por isso mais claro) facilita as trocas de gases. Sem núcleo, elas não se dividem e vivem cerca de 120 dias. Os leucócitos, ao contrário, têm núcleo bem visível." },
+      { tipo: "multipla", nivel: "desafio",
+        enunciado: "<p>Por que é preciso pingar <b>óleo de imersão</b> na lâmina para usar a objetiva de 100×?</p>",
+        alternativas: ["Para lubrificar o revólver.", "Para a lente não esquentar com a luz.", "Porque o óleo desvia a luz quase como o vidro; assim, mais luz entra na pequena lente da objetiva e a imagem fica clara e nítida.", "Para grudar a lamínula na lâmina."],
+        correta: 2, dica: "Na missão 5, compare a imagem em 1000× sem óleo e com óleo. Depois leia o Aprofundamento da etapa Teoria.",
+        explicacao: "Sem óleo, a luz sai do vidro para o ar e se desvia tanto que boa parte não entra na objetiva de 100×. O óleo tem quase o mesmo índice de refração do vidro (cerca de 1,52), então a luz segue quase reta até a lente." },
+      { tipo: "aberta", nivel: "reflexão",
         enunciado: "<p>A cebola e a Elódea são plantas, mas só as células da Elódea têm cloroplastos. Como você explica essa diferença?</p>",
-        modelo: "<p>Cloroplastos são as estruturas onde ocorre a fotossíntese, que depende de luz. A folha de Elódea fica exposta à luz e faz fotossíntese, por isso suas células têm muitos cloroplastos. As camadas do bulbo da cebola crescem embaixo da terra, no escuro, e servem para guardar reservas de alimento; suas células não fazem fotossíntese e não têm cloroplastos. Ou seja: ter parede celular é uma característica de toda célula vegetal, mas ter cloroplastos depende da função da célula.</p>",
-      },
-      {
-        tipo: "aberta", nivel: "reflexão",
+        dica: "Pense na função dos cloroplastos e onde cada parte da planta vive: a folha de Elódea recebe luz? E as camadas do bulbo da cebola, que crescem embaixo da terra?",
+        modelo: "<p>Cloroplastos são as estruturas onde ocorre a fotossíntese, que depende de luz. A folha de Elódea fica exposta à luz e faz fotossíntese, por isso suas células têm muitos cloroplastos. As camadas do bulbo da cebola crescem embaixo da terra, no escuro, e guardam reservas de alimento; suas células não fazem fotossíntese e não têm cloroplastos. Ou seja: ter parede celular é característica de toda célula vegetal, mas ter cloroplastos depende da função da célula.</p>" },
+      { tipo: "aberta", nivel: "reflexão",
         enunciado: "<p>Robert Hooke, em 1665, viu na cortiça apenas “caixinhas” vazias, sem núcleo nem citoplasma. Por que ele não viu essas estruturas?</p>",
-        modelo: "<p>A cortiça é um tecido formado por células mortas: o conteúdo delas (citoplasma e núcleo) já tinha desaparecido, restando só as paredes celulares — as “caixinhas” que ele viu. Além disso, o microscópio de Hooke tinha lentes de baixa qualidade e ele não usava corantes, que ajudam a destacar o núcleo. Só com células vivas, microscópios melhores e corantes foi possível descrever o interior das células.</p>",
-      },
+        dica: "Releia o “Você sabia?” da etapa Teoria. A cortiça é formada por células vivas ou mortas? E os microscópios de Hooke usavam corantes?",
+        modelo: "<p>A cortiça é um tecido formado por células mortas: o conteúdo delas (citoplasma e núcleo) já tinha desaparecido, restando só as paredes celulares — as “caixinhas” que ele viu. Além disso, o microscópio de Hooke tinha lentes simples e ele não usava corantes, que ajudam a destacar o núcleo. Só com células vivas, microscópios melhores e corantes foi possível descrever o interior das células.</p>" },
     ], {
-      aoAtualizar(acertos, total) {
-        $("progresso-texto").textContent = `${acertos} de ${total} questões corretas`;
-        $("progresso-barra").style.width = (total ? (acertos / total) * 100 : 0) + "%";
-      },
+      aoAtualizar(acertos, total) { relAvaliacao = `${acertos} de ${total} questões objetivas corretas.`; },
     });
 
-    /* ---------- Início ---------- */
+    /* ====================== Relatório ====================== */
+    document.querySelectorAll("[data-rel]").forEach((el) => {
+      const chave = "bancada:microscopio3:rel:" + el.dataset.rel;
+      el.value = armazem.ler(chave, el.dataset.rel === "data" ? new Date().toISOString().slice(0, 10) : "");
+      el.addEventListener("input", () => armazem.gravar(chave, el.value));
+    });
+
+    function montarRelatorio() {
+      const hs = hipoteses.respostas();
+      $("rel-hipoteses").innerHTML = hs.map((h) =>
+        `<p>${h.q.enunciado.replace(/<\/?p>/g, "")}<br><i>Minha hipótese:</i> ${h.valor ? Lab.escapar(h.valor) : '<span class="relatorio__vazio">não respondida</span>'}</p>`).join("");
+      $("rel-dados").innerHTML = tabela.html() || '<p class="relatorio__vazio">Nenhuma observação registrada.</p>';
+      $("rel-comparativo").innerHTML = comparativoHTML();
+      const c = ultimaContagem();
+      $("rel-tamanho").innerHTML = c
+        ? `<b>Tamanho estimado da célula de cebola:</b> \\( \\dfrac{${tex(c.campo * 1000, 0)}\\ \\mu\\text{m}}{${c.n}} \\approx ${tex(c.campo * 1000 / c.n, 0)}\\ \\mu\\text{m} \\) (valor típico: cerca de ${TAM_REF} µm).`
+        : '<span class="relatorio__vazio">Contagem de células ainda não registrada (missão 7).</span>';
+      $("rel-avaliacao").textContent = relAvaliacao || "Questões ainda não respondidas.";
+    }
+    document.addEventListener("lab:etapa", (e) => { if (e.detail === "relatorio") montarRelatorio(); });
+
+    /* ====================== Início ====================== */
+    pronto = true;
     atualizarInterface();
-    pedirDesenho(true);
-    verificarAnimacao();
+    atualizarResultados();
+    atualizarAssistente();
+    if ($("relatorio").classList.contains("ativa")) montarRelatorio();
+    requestAnimationFrame(quadro);
   })();
   </script>
 </body>

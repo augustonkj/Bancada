@@ -42,7 +42,7 @@ const PROJETOS = [
     cor: "#9333ea",
     duracao: "2 aulas",
     etiquetas: ["soluções", "pH", "indicadores", "estequiometria", "bureta"],
-    status: "em reformulação",
+    status: "pronto",
     ilustracao: `<svg viewBox="0 0 240 150" aria-hidden="true">
       <rect x="0" y="126" width="240" height="24" fill="#d9b48a"/><rect x="0" y="134" width="240" height="16" fill="#b88c5e"/>
       <rect x="60" y="10" width="5" height="116" rx="2" fill="#cbd5e1"/><rect x="40" y="118" width="60" height="8" rx="3" fill="#3b4557"/>
@@ -60,7 +60,7 @@ const PROJETOS = [
     cor: "#16a34a",
     duracao: "2 aulas",
     etiquetas: ["citologia", "microscopia", "células", "lâminas"],
-    status: "em reformulação",
+    status: "pronto",
     ilustracao: `<svg viewBox="0 0 240 150" aria-hidden="true">
       <rect x="0" y="126" width="240" height="24" fill="#d9b48a"/><rect x="0" y="134" width="240" height="16" fill="#b88c5e"/>
       <path d="M86 126 h64 v-8 h-64 z" fill="#3b4557"/><path d="M130 118 V60 q0-8 -8-8 h-6" fill="none" stroke="#475569" stroke-width="10" stroke-linecap="round"/>
