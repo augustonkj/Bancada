@@ -741,3 +741,12 @@ a { color: var(--cor-area-escura); text-underline-offset: 3px; }
   .missao-atual__num { width: 34px; height: 34px; font-size: 15px; border-radius: 10px; }
   .assistente { padding: 14px; }
 }
+
+/* ---------- Equações (KaTeX) ---------- */
+.formula { font-size: 21px; }
+.formula .katex-display { margin: 0; }
+.formula small { margin-top: 10px; }
+.katex { font-size: 1.08em; }
+.variaveis dt .katex { font-size: 1.15em; color: var(--cor-area-escura); }
+.exemplo li .katex, .retorno .katex, .questao__enunciado .katex { white-space: nowrap; }
+.katex-display { overflow-x: auto; overflow-y: hidden; padding: 4px 0; }

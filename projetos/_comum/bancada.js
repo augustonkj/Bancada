@@ -37,6 +37,9 @@
   const fmt = (n, casas = 2) =>
     Number.isFinite(n) ? n.toLocaleString("pt-BR", { minimumFractionDigits: casas, maximumFractionDigits: casas }) : "—";
 
+  // mesmo formato de fmt, mas com a vírgula protegida para uso dentro do LaTeX
+  const tex = (n, casas = 2) => fmt(n, casas).replace(",", "{,}");
+
   const lerNumero = (texto) => parseFloat(String(texto).trim().replace(/\s/g, "").replace(",", "."));
 
   const armazenamento = {
@@ -139,9 +142,56 @@
     document.dispatchEvent(new CustomEvent("lab:etapa", { detail: alvo.id }));
   }
 
+  /* ---------------- Equações (KaTeX) ----------------
+   * Escreva as equações em LaTeX: \( … \) na linha e \[ … \] em destaque.
+   * O conteúdo criado depois (questões, cálculos) é renderizado automaticamente.
+   */
+  const KATEX = "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/";
+  const DELIMITADORES = [{ left: "\\[", right: "\\]", display: true }, { left: "\\(", right: "\\)", display: false }];
+  let katexPronto = false;
+
+  function renderizarMat(el) {
+    if (!katexPronto || !el || !window.renderMathInElement) return;
+    window.renderMathInElement(el, {
+      delimiters: DELIMITADORES,
+      throwOnError: false,
+      ignoredTags: ["script", "noscript", "style", "textarea", "pre", "code", "option", "select", "input"],
+    });
+  }
+
+  function carregarKatex() {
+    const css = document.createElement("link");
+    css.rel = "stylesheet"; css.href = KATEX + "katex.min.css";
+    document.head.appendChild(css);
+    const carregar = (src) => new Promise((ok, erro) => {
+      const sc = document.createElement("script"); sc.src = src; sc.onload = ok; sc.onerror = erro;
+      document.head.appendChild(sc);
+    });
+    carregar(KATEX + "katex.min.js")
+      .then(() => carregar(KATEX + "contrib/auto-render.min.js"))
+      .then(() => {
+        katexPronto = true;
+        renderizarMat(document.body);
+        // renderiza o que for inserido depois; só há nova mutação se houver LaTeX a converter
+        let pendentes = new Set(), agendado = false;
+        new MutationObserver((muts) => {
+          muts.forEach((m) => {
+            const alvo = m.target.nodeType === 1 ? m.target : m.target.parentElement;
+            if (alvo && !alvo.closest(".katex")) pendentes.add(alvo);
+          });
+          if (!agendado) {
+            agendado = true;
+            requestAnimationFrame(() => { agendado = false; const els = pendentes; pendentes = new Set(); els.forEach((e) => e.isConnected && renderizarMat(e)); });
+          }
+        }).observe(document.body, { childList: true, subtree: true, characterData: true });
+      })
+      .catch(() => { /* sem internet: as equações ficam em texto LaTeX */ });
+  }
+
   /* ---------------- Início ---------------- */
   function iniciar({ id } = {}) {
     idLab = id || location.pathname;
+    carregarKatex();
 
     // seletor de público
     document.querySelectorAll(".seletor-publico").forEach((grupo) => {
@@ -610,7 +660,7 @@
   }
 
   window.Lab = {
-    iniciar, publico, aoMudarPublico, irPara, questoes, tabela, grafico, ajusteLinear,
-    fmt, lerNumero, escapar, cor, armazenamento, AUTOR, PUBLICOS,
+    iniciar, publico, aoMudarPublico, irPara, renderizarMat, questoes, tabela, grafico, ajusteLinear,
+    fmt, tex, lerNumero, escapar, cor, armazenamento, AUTOR, PUBLICOS,
   };
 })();
