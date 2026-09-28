@@ -123,30 +123,6 @@ h2 { margin: 0; font-size: clamp(28px, 4vw, 38px); font-weight: 800; letter-spac
 .bolha--2 { width: 90px; height: 90px; right: 8%; top: 0; background: #f3e8ff; }
 .bolha--3 { width: 70px; height: 70px; right: 30%; bottom: 20%; background: #dcfce7; }
 
-/* ---------- Público ---------- */
-.publico { padding: 56px 0 8px; }
-.publico__opcoes { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); gap: 14px; margin-top: 24px; }
-.publico__opcoes button {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 2px;
-  padding: 18px 20px;
-  font: inherit;
-  text-align: left;
-  color: var(--tinta);
-  background: var(--superficie);
-  border: 2px solid var(--linha);
-  border-radius: 18px;
-  cursor: pointer;
-  transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
-}
-.publico__opcoes button:hover { transform: translateY(-2px); box-shadow: var(--sombra); }
-.publico__opcoes button[aria-checked="true"] { border-color: var(--azul); background: #f5f9ff; box-shadow: 0 0 0 4px #dbeafe; }
-.publico__icone { font-size: 30px; margin-bottom: 6px; }
-.publico__opcoes b { font-size: 17px; }
-.publico__opcoes span:last-child { font-size: 14px; color: var(--tinta-suave); }
-
 /* ---------- Lista de laboratórios ---------- */
 #laboratorios { padding-top: 56px; padding-bottom: 72px; scroll-margin-top: 70px; }
 .lista-cabeca { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 20px; margin-bottom: 24px; }
@@ -226,12 +202,8 @@ h2 { margin: 0; font-size: clamp(28px, 4vw, 38px); font-weight: 800; letter-spac
 .lab__corpo { display: flex; flex-direction: column; flex: 1; gap: 10px; padding: 20px 22px 22px; }
 .lab__corpo h3 { margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -0.01em; }
 .lab__corpo p { margin: 0; color: var(--tinta-suave); font-size: 15.5px; }
-.lab__publicos { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
-.lab__publicos span { padding: 3px 10px; font-size: 12.5px; font-weight: 700; color: var(--tinta-suave); background: var(--superficie-2); border-radius: 999px; }
-.lab__publicos span.ativo { color: var(--cor); background: color-mix(in srgb, var(--cor) 12%, white); }
 .lab__rodape { display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 12px; font-size: 14px; color: var(--tinta-fraca); }
 .lab__entrar { font-weight: 800; color: var(--cor); }
-.lab--indisponivel { opacity: 0.6; }
 .vazio { padding: 40px 0; text-align: center; color: var(--tinta-suave); }
 
 /* ---------- Como funciona ---------- */
@@ -280,5 +252,5 @@ h2 { margin: 0; font-size: clamp(28px, 4vw, 38px); font-weight: 800; letter-spac
 }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .lab, .publico__opcoes button { transition: none; }
+  .lab { transition: none; }
 }

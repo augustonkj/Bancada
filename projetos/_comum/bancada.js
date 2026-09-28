@@ -219,6 +219,7 @@
    *  { tipo: "aberta", enunciado, modelo }
    *  publico: ["fund", "medio", ...]  (opcional; sem ele, aparece para todos)
    *  nivel: rótulo exibido no canto ("fácil", "desafio"…)
+ *  dica: texto de ajuda exibido pelo botão "Ver dica" (opcional)
    * opts: { chave, semPlacar, aoAtualizar(acertos, total) }
    */
   function questoes(el, listaCompleta, { aoAtualizar, chave: nomeChave = "questoes", semPlacar = false } = {}) {
@@ -242,16 +243,16 @@
               <span class="alternativa__letra">${letras[j]})</span>
               <span>${alt}</span>
             </label></li>`).join("")}</ul>
-            <div class="botoes"><button type="button" class="botao botao--primario" data-acao="verificar">Verificar resposta</button></div>`;
+            <div class="botoes"><button type="button" class="botao botao--primario" data-acao="verificar">Verificar resposta</button>${q.dica ? '<button type="button" class="botao" data-acao="dica">💡 Ver dica</button>' : ""}</div>`;
         } else if (q.tipo === "numerica") {
           corpo = `<div class="resposta-numerica">
               <input type="text" inputmode="decimal" placeholder="Sua resposta" aria-label="Resposta da questão ${i + 1}">
               ${q.unidade ? `<span class="mono">${escapar(q.unidade)}</span>` : ""}
             </div>
-            <div class="botoes"><button type="button" class="botao botao--primario" data-acao="verificar">Verificar resposta</button></div>`;
+            <div class="botoes"><button type="button" class="botao botao--primario" data-acao="verificar">Verificar resposta</button>${q.dica ? '<button type="button" class="botao" data-acao="dica">💡 Ver dica</button>' : ""}</div>`;
         } else {
           corpo = `<div class="resposta-aberta"><textarea placeholder="Escreva sua resposta com suas palavras…" aria-label="Resposta da questão ${i + 1}"></textarea></div>
-            <div class="botoes"><button type="button" class="botao" data-acao="modelo">${q.botao || "Comparar com a resposta-modelo"}</button></div>`;
+            <div class="botoes"><button type="button" class="botao" data-acao="modelo">${q.botao || "Comparar com a resposta-modelo"}</button>${q.dica ? '<button type="button" class="botao" data-acao="dica">💡 Ver dica</button>' : ""}</div>`;
         }
         return `<article class="questao" data-i="${i}">${cabeca}${enunciado}${corpo}<div class="retorno-area"></div></article>`;
       }).join("") + (semPlacar ? "" : `
@@ -335,6 +336,11 @@
 
       const art = botao.closest(".questao");
       const i = +art.dataset.i, q = lista[i];
+
+      if (botao.dataset.acao === "dica") {
+        art.querySelector(".retorno-area").innerHTML = `<div class="retorno retorno--modelo"><strong>💡 Dica</strong><p>${q.dica}</p></div>`;
+        return;
+      }
 
       if (q.tipo === "multipla") {
         const marcada = art.querySelector("input[type=radio]:checked");

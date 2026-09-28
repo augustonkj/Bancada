@@ -8,7 +8,6 @@
  *  link       (obrigatório) "projetos/<pasta>/" ou "https://..."
  *  cor        (opcional)    Cor da disciplina, ex.: "#2563eb"
  *  ilustracao (opcional)    SVG exibido no topo do cartão
- *  publicos   (opcional)    ["fund", "medio", "grad", "prof"]
  *  duracao    (opcional)    Ex.: "2 aulas"
  *  etiquetas  (opcional)    Palavras-chave para a busca
  *  status     (opcional)    "pronto", "em reformulação" ou "planejado"
@@ -22,7 +21,6 @@ const PROJETOS = [
     area: "Física",
     link: "projetos/pendulo/",
     cor: "#2563eb",
-    publicos: ["fund", "medio", "grad", "prof"],
     duracao: "2 aulas",
     etiquetas: ["mecânica", "oscilações", "gráficos", "gravidade", "cronômetro"],
     status: "pronto",
@@ -42,7 +40,6 @@ const PROJETOS = [
     area: "Química",
     link: "projetos/titulacao/",
     cor: "#9333ea",
-    publicos: ["medio"],
     duracao: "2 aulas",
     etiquetas: ["soluções", "pH", "indicadores", "estequiometria", "bureta"],
     status: "em reformulação",
@@ -61,7 +58,6 @@ const PROJETOS = [
     area: "Biologia",
     link: "projetos/microscopio/",
     cor: "#16a34a",
-    publicos: ["fund"],
     duracao: "2 aulas",
     etiquetas: ["citologia", "microscopia", "células", "lâminas"],
     status: "em reformulação",
