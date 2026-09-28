@@ -1,0 +1,1921 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Tipagem Sanguínea — Bancada</title>
+  <meta name="description" content="Laboratório virtual: identifique o tipo sanguíneo (ABO e Rh) com os soros anti-A, anti-B e anti-D e investigue a compatibilidade entre doadores e receptores.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23dc2626'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-family='Arial' font-weight='700' font-size='17' fill='white'%3EB%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../_comum/bancada.css">
+  <style>
+    /* ---- estilos só desta página ---- */
+    /* as cores derivadas precisam ser recalculadas onde --cor-area é definida (no body) */
+    body {
+      --cor-area-clara: color-mix(in srgb, var(--cor-area) 12%, white);
+      --cor-area-escura: color-mix(in srgb, var(--cor-area) 75%, black);
+      --anti-a: #2b5aa7; --anti-b: #c08d0e; --anti-d: #6d6f76;
+      --sangue: #a01c30; --sangue-vivo: #c1273c;
+    }
+    #pratica .cena__dica { white-space: normal; width: max-content; max-width: calc(100% - 24px); text-align: center; line-height: 1.35; }
+    .formula .katex-display { margin: 0; }
+
+    /* quadros (tabela ABO, resumo) */
+    .tp-quadro { overflow-x: auto; margin: 16px 0; background: var(--superficie); border: 1px solid var(--linha); border-radius: 14px; }
+    .tp-quadro table { width: 100%; border-collapse: collapse; font-size: 15px; }
+    .tp-quadro th, .tp-quadro td { padding: 10px 14px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--linha); }
+    .tp-quadro th { font-size: 13px; font-weight: 700; color: var(--tinta-suave); background: var(--superficie-2); }
+    .tp-quadro tbody tr:last-child td { border-bottom: 0; }
+    .tp-quadro td:first-child { font-weight: 800; white-space: nowrap; }
+    .tp-quadro--centro th, .tp-quadro--centro td { text-align: center; }
+
+    /* chips (cores dos soros: anti-A azul, anti-B amarelo, anti-D cinza) */
+    .tp-chip { display: inline-block; padding: 0 8px; border: 1.5px solid var(--linha); border-radius: 99px; font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 12.5px; font-weight: 700; line-height: 1.6; background: #fff; white-space: nowrap; }
+    .tp-chip.a { border-color: var(--anti-a); color: var(--anti-a); }
+    .tp-chip.b { border-color: var(--anti-b); color: #8a6608; }
+    .tp-chip.d { border-color: var(--anti-d); color: #4b4d53; }
+    .tp-chip.neutro { color: var(--tinta-fraca); border-style: dashed; }
+    .tp-chip.tipo { border-color: var(--cor-area); color: var(--cor-area-escura); }
+
+    /* abas das duas partes */
+    .tp-partes { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0 0 16px; }
+    .tp-partes button {
+      padding: 12px 16px; font: inherit; font-size: 15.5px; font-weight: 800; text-align: left; line-height: 1.3;
+      color: var(--tinta-suave); background: var(--superficie); border: 1.5px solid var(--linha); border-radius: 14px;
+      box-shadow: var(--sombra); cursor: pointer;
+    }
+    .tp-partes button small { display: block; margin-top: 2px; font-size: 13px; font-weight: 500; color: var(--tinta-fraca); }
+    .tp-partes button:hover { border-color: var(--tinta-fraca); }
+    .tp-partes button[aria-selected="true"] { color: var(--cor-area-escura); background: var(--cor-area-clara); border-color: var(--cor-area); }
+
+    /* cena: parede de azulejos + tampo de madeira */
+    .tp-cena { display: flex; flex-direction: column; }
+    .tp-parede {
+      position: relative; padding: 14px 18px 0;
+      background-color: #f8f4f2;
+      background-image: linear-gradient(rgba(220, 38, 38, 0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(220, 38, 38, 0.06) 1px, transparent 1px);
+      background-size: 56px 56px; background-position: -1px -1px;
+    }
+    .tp-tampo {
+      position: relative; padding: 18px 18px 68px;
+      background:
+        repeating-linear-gradient(178deg, rgba(120, 80, 40, 0.07) 0 2px, transparent 2px 11px),
+        linear-gradient(180deg, #e4c49c 0, #d6b083 12px, #c79e6f 13px, #b88c5e 55%, #a67a4d 100%);
+    }
+    .tp-cena-topo { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .tp-etiqueta { display: inline-flex; align-items: center; gap: 8px; padding: 5px 12px; font-size: 13.5px; font-weight: 700; background: rgba(255, 255, 255, 0.92); border: 1px solid var(--linha); border-radius: 999px; }
+    .tp-etiqueta b { font-family: "JetBrains Mono", ui-monospace, monospace; color: var(--cor-area-escura); }
+    .tp-etiqueta--suave { font-weight: 600; color: var(--tinta-suave); }
+
+    /* frascos de soro (botões) */
+    .tp-frascos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; align-items: end; padding: 0 13px; }
+    .tp-frasco { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 0; font: inherit; color: var(--tinta); background: none; border: 0; cursor: pointer; }
+    .tp-frasco svg { display: block; width: clamp(50px, 7vw, 70px); height: auto; filter: drop-shadow(0 6px 4px rgba(60, 35, 10, 0.28)); transition: transform 0.15s; transform-origin: 50% 85%; }
+    .tp-frasco:hover:not(:disabled) svg { transform: translateY(-4px); }
+    .tp-frasco__acao { padding: 2px 10px; font-size: 12.5px; font-weight: 700; white-space: nowrap; background: #fff; border: 1.5px solid var(--linha); border-radius: 999px; }
+    .tp-frasco.proximo .tp-frasco__acao { color: var(--cor-area-escura); border-color: var(--cor-area); animation: tp-pulso 1.6s ease-in-out infinite; }
+    .tp-frasco:disabled { cursor: default; }
+    .tp-frasco:disabled svg { opacity: 0.55; }
+    .tp-frasco:disabled .tp-frasco__acao { color: var(--certo); border-color: #bbe5c8; background: var(--certo-fundo); }
+    .tp-frasco:focus-visible { outline: 3px solid var(--cor-area); outline-offset: 3px; border-radius: 10px; }
+    .tp-frasco.pingando svg { animation: tp-inclinar 0.55s ease; }
+    @keyframes tp-inclinar { 0% { transform: none; } 45% { transform: translateY(-8px) rotate(-16deg); } 100% { transform: none; } }
+    @keyframes tp-pulso { 0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--cor-area) 45%, transparent); } 50% { box-shadow: 0 0 0 6px transparent; } }
+
+    /* lâmina de porcelana */
+    .tp-porcelana {
+      position: relative; padding: 12px;
+      background: linear-gradient(180deg, #ffffff, #f3efe9);
+      border: 1px solid #e3dccf; border-radius: 18px;
+      box-shadow: 0 16px 22px -12px rgba(60, 35, 10, 0.55), inset 0 1px 0 #fff;
+    }
+    .tp-pocos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .tp-poco { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0; }
+    .tp-poco svg { display: block; width: 100%; height: auto; }
+    .tp-poco__nome { font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 12.5px; font-weight: 700; }
+    .tp-poco__status { min-height: 18px; font-size: 11.5px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--tinta-fraca); text-align: center; }
+    .tp-poco__status.pos { color: var(--sangue); }
+    .tp-poco__status.neg { color: var(--certo); }
+
+    /* células e anticorpos no SVG (simulação original) */
+    .cel { transition: transform 1.05s cubic-bezier(0.25, 0.7, 0.3, 1); }
+    .miolo { transform-origin: center; }
+    .flutua .miolo { animation: deriva 5.2s ease-in-out infinite alternate; }
+    .granulado .miolo { animation: tremor 0.34s steps(2) infinite; }
+    @keyframes deriva { from { transform: translate(0, 0) rotate(0deg); } to { transform: translate(var(--dx, 4px), var(--dy, -5px)) rotate(9deg); } }
+    @keyframes tremor { 0% { transform: translate(0.7px, -0.5px); } 50% { transform: translate(-0.7px, 0.6px); } 100% { transform: translate(0.5px, 0.4px); } }
+    .anticorpo { opacity: 0; animation: surge 0.5s ease forwards; }
+    @keyframes surge { to { opacity: 1; } }
+    .pinga { animation: pingada 0.5s ease-in forwards; }
+    @keyframes pingada { from { transform: translateY(0); opacity: 1; } to { transform: translateY(74px); opacity: 0.15; } }
+
+    /* painel: leituras, grade de tipos, carimbo */
+    .tp-amostra { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+    .tp-amostra b { font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 20px; }
+    .tp-linhas { font-size: 14px; }
+    .tp-linha { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; padding: 6px 0; border-bottom: 1px dashed var(--linha); }
+    .tp-linha:last-child { border-bottom: 0; }
+    .tp-quem { min-width: 70px; font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 12px; font-weight: 700; color: var(--tinta-suave); }
+    .tp-pendente { color: var(--tinta-fraca); font-size: 13px; }
+    .tp-pos { color: var(--sangue); font-weight: 800; }
+    .tp-neg { color: var(--certo); font-weight: 700; }
+    .tp-tipos { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    .tp-tipo {
+      display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 8px 2px 6px;
+      font: inherit; font-size: 19px; font-weight: 800; color: var(--tinta);
+      background: #fff; border: 1.5px solid var(--linha); border-radius: 12px; cursor: pointer;
+      transition: transform 0.12s, border-color 0.12s, background-color 0.12s, color 0.12s;
+    }
+    .tp-tipo .gota { display: block; width: 11px; height: 15px; }
+    .tp-tipo .gota path { fill: var(--sangue-vivo); }
+    .tp-tipo:hover { transform: translateY(-2px); border-color: var(--cor-area); }
+    .tp-tipo:focus-visible { outline: 3px solid var(--cor-area); outline-offset: 2px; }
+    .tp-tipo[aria-pressed="true"] { color: #fff; background: var(--cor-area); border-color: transparent; box-shadow: 0 6px 14px -6px var(--cor-area); }
+    #grade-receptor .tp-tipo[aria-pressed="true"] { background: #1a2233; box-shadow: 0 6px 14px -6px #1a2233; }
+    .tp-tipo[aria-pressed="true"] .gota path, .tp-tipo.certo .gota path { fill: #fff; }
+    .tp-tipos.travado { pointer-events: none; }
+    .tp-tipo.certo { color: #fff; background: var(--certo); border-color: transparent; }
+    .tp-tipo.nega { border-color: var(--errado); animation: negada 0.4s ease; }
+    @keyframes negada { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 50% { transform: translateX(5px); } 75% { transform: translateX(-3px); } }
+    .tp-carimbo {
+      display: none; width: fit-content; margin: 14px auto 0; padding: 6px 18px 5px; text-align: center;
+      text-transform: uppercase; letter-spacing: 0.12em; background: rgba(255, 255, 255, 0.88);
+      border: 3.5px solid currentColor; border-radius: 8px; transform: rotate(-4deg);
+    }
+    .tp-carimbo strong { display: block; font-size: 22px; font-weight: 800; line-height: 1.15; }
+    .tp-carimbo span { display: block; margin-top: 1px; font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 10.5px; letter-spacing: 0.08em; }
+    .tp-carimbo.ok { display: block; color: var(--certo); }
+    .tp-carimbo.nao { display: block; color: #b91c1c; }
+    .tp-carimbo.info { display: block; color: var(--tinta); }
+    .tp-carimbo.bate { animation: carimbada 0.3s cubic-bezier(0.2, 1.6, 0.4, 1); }
+    @keyframes carimbada { from { transform: rotate(-4deg) scale(1.45); opacity: 0; } to { transform: rotate(-4deg) scale(1); opacity: 1; } }
+    .tp-porcelana .tp-carimbo { position: absolute; top: 10px; right: 10px; margin: 0; }
+    .tp-conclusao { margin-top: 12px; padding: 10px 12px; font-size: 14px; background: var(--superficie-2); border-radius: 10px; }
+    .tp-conclusao:empty { display: none; }
+    .tp-dica-texto { margin: 10px 0 0; font-size: 13.5px; font-weight: 600; color: var(--errado); }
+
+    /* parte B: bolsa, tubo, fichas de doador/receptor */
+    .tp-parede--prova { display: flex; justify-content: space-between; align-items: flex-end; gap: 10px; padding: 12px 24px 0; }
+    .tp-objeto { display: flex; flex-direction: column; align-items: center; gap: 4px; margin: 0; }
+    .tp-objeto figcaption { padding: 1px 10px; font-size: 12.5px; font-weight: 700; color: var(--tinta-suave); background: rgba(255, 255, 255, 0.92); border-radius: 999px; }
+    .tp-objeto svg { display: block; width: clamp(62px, 9vw, 86px); height: auto; filter: drop-shadow(0 6px 4px rgba(60, 35, 10, 0.22)); }
+    .tp-prova-rotulo { align-self: center; max-width: 260px; margin: 0 0 18px; font-size: 13.5px; font-weight: 600; color: var(--tinta-suave); text-align: center; line-height: 1.4; }
+    .tp-prova-rotulo b { color: var(--tinta); }
+    .tp-porcelana--prova { max-width: 470px; margin: 0 auto; }
+    .tp-porcelana--prova svg { display: block; width: 100%; height: auto; }
+    .tp-legenda { min-height: 22px; margin: 4px 0 0; font-size: 13px; color: var(--tinta-suave); text-align: center; }
+    .tp-ficha { margin-top: 12px; padding: 10px 12px; font-size: 13.5px; background: var(--superficie-2); border-radius: 10px; }
+    .tp-ficha__titulo { display: block; margin-bottom: 4px; font-weight: 800; }
+    .tp-ficha__rotulo { display: block; margin-top: 6px; font-size: 12px; font-weight: 600; color: var(--tinta-fraca); }
+    .tp-ficha__lista { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 2px; }
+    .tp-ficha .vazio { color: var(--tinta-fraca); }
+    .tp-resultado { margin-top: 16px; padding: 16px 18px; background: var(--superficie); border: 1px solid var(--linha); border-radius: var(--raio); box-shadow: var(--sombra); }
+    .tp-resultado h4 { margin: 0 0 8px; font-size: 13px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--tinta-suave); }
+    .tp-veredito-ok { color: var(--certo); font-weight: 700; }
+    .tp-veredito-nao { color: #b91c1c; font-weight: 700; }
+    .tp-explique { margin-top: 12px; padding: 12px 14px; background: var(--aviso-fundo); border-radius: 12px; }
+    .tp-explique p { margin: 0 0 8px; font-size: 14.5px; }
+    .tp-conf { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+    .tp-conf button { display: inline-flex; align-items: center; gap: 5px; padding: 6px 10px; font: inherit; font-size: 13px; font-weight: 600; background: #fff; border: 1.5px solid var(--linha); border-radius: 10px; cursor: pointer; }
+    .tp-conf button[aria-pressed="true"] { border-color: var(--cor-area); background: var(--cor-area-clara); box-shadow: 0 0 0 2px var(--cor-area-clara); }
+    .tp-explique .botoes .botao { padding: 7px 14px; font-size: 14px; }
+
+    /* matriz de compatibilidade */
+    .tp-matriz-caixa { overflow-x: auto; padding: 12px; background: var(--superficie); border: 1px solid var(--linha); border-radius: 14px; }
+    table.tp-matriz { margin: 0 auto; border-collapse: collapse; font-size: 14.5px; }
+    .tp-matriz th, .tp-matriz td { min-width: 46px; padding: 7px 0; text-align: center; border: 1px solid var(--linha); }
+    .tp-matriz thead th, .tp-matriz tbody th { font-weight: 700; background: var(--superficie-2); }
+    .tp-matriz td.sim { color: var(--certo); font-weight: 800; }
+    .tp-matriz td.nao { color: #d8b6b6; }
+    .tp-matriz td.testado { outline: 2.5px solid var(--cor-area); outline-offset: -2.5px; background: #fdeeee; }
+    .tp-matriz td.testado.sim { background: var(--certo-fundo); }
+    .tp-matriz .canto { min-width: 96px; padding: 4px 6px; font-family: "Plus Jakarta Sans", system-ui, sans-serif; font-size: 11.5px; font-weight: 600; line-height: 1.3; color: var(--tinta-fraca); }
+
+    /* figuras da teoria */
+    .tp-figura svg { display: block; width: 100%; max-width: 420px; height: auto; margin: 0 auto; }
+    .tp-mini { display: block; width: 100%; max-width: 380px; height: auto; margin: 10px auto 12px; }
+    .tp-punnett { width: auto; margin: 10px 0; }
+    .tp-punnett table { width: auto; }
+    .tp-punnett th, .tp-punnett td { text-align: center; min-width: 90px; }
+
+    #tabela td.esq, #tabela-compat td.esq, #rel-dados td.esq { white-space: normal; min-width: 220px; font-family: inherit; font-size: 14px; }
+
+    @media (max-width: 960px) {
+      #parte-B .painel { order: -1; }
+    }
+    @media (max-width: 560px) {
+      .tp-partes button { padding: 10px 12px; font-size: 14px; }
+      .tp-partes button small { display: none; }
+      .tp-parede, .tp-tampo { padding-left: 10px; padding-right: 10px; }
+      .tp-tampo { padding-bottom: 86px; }
+      .tp-frascos { gap: 6px; padding: 0 7px; }
+      .tp-pocos { gap: 6px; }
+      .tp-porcelana { padding: 8px 6px; }
+      .tp-frasco__acao { padding: 2px 7px; font-size: 11.5px; }
+      .tp-poco__status { font-size: 10.5px; letter-spacing: 0.02em; }
+      .tp-parede--prova { padding: 10px 12px 0; }
+      .tp-prova-rotulo { font-size: 12px; }
+      .tp-carimbo strong { font-size: 17px; }
+      .tp-porcelana .tp-carimbo { top: 6px; right: 6px; padding: 4px 10px 3px; }
+      .tp-tipo { font-size: 17px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, .cel { transition-duration: 0.01s !important; animation-duration: 0.01s !important; animation-iteration-count: 1 !important; }
+    }
+  </style>
+</head>
+<body style="--cor-area:#dc2626">
+
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <radialGradient id="tp-grad-plasma" cx="50%" cy="42%" r="70%">
+        <stop offset="0%" stop-color="#fbeeec"/>
+        <stop offset="100%" stop-color="#f3dcd8"/>
+      </radialGradient>
+      <linearGradient id="tp-bolsa-g" x1="0" x2="1"><stop offset="0" stop-color="#9f1239"/><stop offset=".45" stop-color="#dc2626"/><stop offset="1" stop-color="#991b1b"/></linearGradient>
+    </defs>
+  </svg>
+
+  <header class="barra">
+    <a class="barra__marca" href="../../"><span class="barra__logo">B</span>Bancada</a>
+    <span class="barra__titulo">Tipagem Sanguínea</span>
+    <button class="botao-icone" type="button" data-imprimir title="Imprimir relatório" aria-label="Imprimir relatório"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </header>
+
+  <section class="capa">
+    <div class="capa__dentro">
+      <div>
+        <span class="capa__area">🩸 Biologia · Imunologia</span>
+        <h1>Tipagem Sanguínea</h1>
+        <p class="capa__resumo">
+          Pingue os soros anti-A, anti-B e anti-D em amostras de sangue, leia a aglutinação e descubra o tipo de cada uma.
+          Depois, simule provas de compatibilidade e descubra quem pode doar sangue para quem — e por quê.
+        </p>
+        <div class="capa__fichas">
+          <span class="ficha"><span>Laboratório</span><b>04</b></span>
+        </div>
+      </div>
+      <svg class="capa__ilustracao" viewBox="0 0 320 280" role="img" aria-label="Ilustração de uma lâmina de tipagem com três poços, frascos de soro azul, amarelo e cinza, hemácias e uma bolsa de sangue">
+        <defs>
+          <radialGradient id="cv-hem" cx=".4" cy=".35"><stop offset="0" stop-color="#ef5a6b"/><stop offset=".7" stop-color="#c1273c"/><stop offset="1" stop-color="#8f1f2e"/></radialGradient>
+          <linearGradient id="cv-bolsa" x1="0" x2="1"><stop offset="0" stop-color="#9f1239"/><stop offset=".45" stop-color="#dc2626"/><stop offset="1" stop-color="#991b1b"/></linearGradient>
+          <linearGradient id="cv-porc" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#ebe5dc"/></linearGradient>
+        </defs>
+        <!-- bancada -->
+        <path d="M22 196 H298 L310 238 H10 Z" fill="#e8cda6"/>
+        <rect x="10" y="238" width="300" height="14" rx="4" fill="#d9b48a"/>
+        <rect x="10" y="250" width="300" height="10" rx="3" fill="#b88c5e"/>
+        <!-- hemácias flutuando -->
+        <g>
+          <circle cx="54" cy="52" r="16" fill="url(#cv-hem)"/><circle cx="54" cy="52" r="6.5" fill="#8f1f2e" opacity=".35"/>
+          <circle cx="100" cy="28" r="10" fill="url(#cv-hem)"/><circle cx="100" cy="28" r="4" fill="#8f1f2e" opacity=".35"/>
+          <circle cx="136" cy="72" r="13" fill="url(#cv-hem)"/><circle cx="136" cy="72" r="5.2" fill="#8f1f2e" opacity=".35"/>
+          <circle cx="184" cy="34" r="9" fill="url(#cv-hem)"/><circle cx="184" cy="34" r="3.6" fill="#8f1f2e" opacity=".35"/>
+          <circle cx="28" cy="104" r="8" fill="url(#cv-hem)"/><circle cx="28" cy="104" r="3.2" fill="#8f1f2e" opacity=".35"/>
+          <circle cx="182" cy="104" r="7" fill="url(#cv-hem)"/><circle cx="182" cy="104" r="2.8" fill="#8f1f2e" opacity=".35"/>
+          <path d="M84 84 l-5.5 -7.5 M84 84 l5.5 -7.5 M84 84 v8" stroke="#2b5aa7" stroke-width="2.6" stroke-linecap="round" fill="none"/>
+          <path d="M160 128 l-5.5 -7.5 M160 128 l5.5 -7.5 M160 128 v8" stroke="#c08d0e" stroke-width="2.6" stroke-linecap="round" fill="none"/>
+        </g>
+        <!-- bolsa de sangue -->
+        <path d="M262 4 V22" stroke="#94a3b8" stroke-width="3" stroke-linecap="round"/>
+        <path d="M250 22 H274" stroke="#94a3b8" stroke-width="3" stroke-linecap="round"/>
+        <rect x="258" y="22" width="8" height="12" rx="2" fill="#cbd5e1"/>
+        <path d="M226 42 Q226 34 234 34 H290 Q298 34 298 42 V138 Q298 156 280 160 H244 Q226 156 226 138 Z" fill="url(#cv-bolsa)"/>
+        <path d="M234 52 Q235 44 244 43" stroke="#fff" stroke-width="3" opacity=".35" fill="none" stroke-linecap="round"/>
+        <rect x="238" y="68" width="48" height="40" rx="4" fill="#fff" opacity=".94"/>
+        <text x="262" y="80" text-anchor="middle" font-family="Arial" font-weight="700" font-size="7" fill="#64748b">DOADOR</text>
+        <text x="262" y="100" text-anchor="middle" font-family="Arial" font-weight="800" font-size="19" fill="#b91c1c">O−</text>
+        <path d="M262 160 V172 C262 186 272 190 284 198" stroke="#b91c1c" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <!-- frascos de soro -->
+        <g>
+          <path d="M42 138 h6 l2 10 h-10 z" fill="#f1f5f9" stroke="#94a3b8"/><rect x="38" y="146" width="14" height="10" rx="2" fill="#1f2937"/>
+          <rect x="30" y="154" width="30" height="50" rx="7" fill="#2b5aa7"/><rect x="34" y="170" width="22" height="16" rx="2" fill="#fff"/>
+          <text x="45" y="182" text-anchor="middle" font-family="Arial" font-weight="800" font-size="10" fill="#2b5aa7">A</text>
+          <path d="M82 138 h6 l2 10 h-10 z" fill="#f1f5f9" stroke="#94a3b8"/><rect x="78" y="146" width="14" height="10" rx="2" fill="#1f2937"/>
+          <rect x="70" y="154" width="30" height="50" rx="7" fill="#e3ad17"/><rect x="74" y="170" width="22" height="16" rx="2" fill="#fff"/>
+          <text x="85" y="182" text-anchor="middle" font-family="Arial" font-weight="800" font-size="10" fill="#8a6608">B</text>
+          <path d="M122 138 h6 l2 10 h-10 z" fill="#f1f5f9" stroke="#94a3b8"/><rect x="118" y="146" width="14" height="10" rx="2" fill="#1f2937"/>
+          <rect x="110" y="154" width="30" height="50" rx="7" fill="#d4d9df" stroke="#9aa1aa"/><rect x="114" y="170" width="22" height="16" rx="2" fill="#fff"/>
+          <text x="125" y="182" text-anchor="middle" font-family="Arial" font-weight="800" font-size="10" fill="#4b4d53">D</text>
+        </g>
+        <!-- lâmina de tipagem com três poços (padrão A+) -->
+        <ellipse cx="152" cy="248" rx="114" ry="5" fill="#5b3a17" opacity=".22"/>
+        <rect x="42" y="198" width="220" height="48" rx="9" fill="url(#cv-porc)" stroke="#d6cfc4"/>
+        <ellipse cx="86" cy="222" rx="30" ry="17" fill="#dfe7f5" stroke="#d6cfc4"/>
+        <ellipse cx="152" cy="222" rx="30" ry="17" fill="#f6ecd2" stroke="#d6cfc4"/>
+        <ellipse cx="218" cy="222" rx="30" ry="17" fill="#e8e8eb" stroke="#d6cfc4"/>
+        <g fill="#c1273c" stroke="#8f1f2e" stroke-width=".6">
+          <circle cx="78" cy="218" r="3.4"/><circle cx="84" cy="215" r="3.4"/><circle cx="83" cy="221" r="3.4"/><circle cx="77" cy="224" r="3.4"/>
+          <circle cx="94" cy="223" r="3.4"/><circle cx="99" cy="227" r="3.4"/><circle cx="96" cy="218" r="3.4"/>
+          <circle cx="136" cy="216" r="3.4"/><circle cx="148" cy="228" r="3.4"/><circle cx="158" cy="214" r="3.4"/><circle cx="166" cy="225" r="3.4"/><circle cx="151" cy="219" r="3.4"/><circle cx="140" cy="227" r="3.4"/>
+          <circle cx="210" cy="218" r="3.4"/><circle cx="216" cy="215" r="3.4"/><circle cx="215" cy="221" r="3.4"/><circle cx="209" cy="224" r="3.4"/>
+          <circle cx="226" cy="223" r="3.4"/><circle cx="231" cy="227" r="3.4"/><circle cx="228" cy="218" r="3.4"/>
+        </g>
+      </svg>
+    </div>
+  </section>
+
+  <nav class="etapas-nav" aria-label="Etapas do laboratório">
+    <ol>
+      <li><a href="#preparacao"><span class="num">1</span>Preparação</a></li>
+      <li><a href="#teoria"><span class="num">2</span>Teoria</a></li>
+      <li><a href="#pratica"><span class="num">3</span>Prática</a></li>
+      <li><a href="#resultados"><span class="num">4</span>Resultados</a></li>
+      <li><a href="#avaliacao"><span class="num">5</span>Avaliação</a></li>
+      <li><a href="#relatorio"><span class="num">6</span>Relatório</a></li>
+    </ol>
+  </nav>
+
+  <main class="conteudo">
+
+    <!-- ===================== 1. PREPARAÇÃO ===================== -->
+    <section class="etapa" id="preparacao" data-titulo="Preparação">
+      <div class="etapa__cabeca">
+        <p class="etapa__rotulo">Etapa 1 de 6</p>
+        <h2>Preparação da prática</h2>
+        <p class="etapa__intro">Antes de ir para a bancada, entenda como esta prática funciona, conheça os objetivos e registre suas hipóteses.</p>
+      </div>
+
+      <div class="cartao" style="margin-bottom:20px">
+        <h3>👋 Bem-vindo(a) ao laboratório</h3>
+        <p>Esta prática foi pensada para você conseguir fazer <b>sozinho(a)</b>, no seu ritmo. Siga as etapas na ordem,
+          usando os botões no fim de cada página ou a barra de etapas no topo. Tudo o que você faz fica salvo neste navegador —
+          pode fechar e continuar depois.</p>
+        <p style="margin-bottom:8px">Durante a prática, fique atento às caixas coloridas:</p>
+        <div class="grade-3" style="gap:10px">
+          <div class="caixa" style="margin:0"><span class="caixa__icone">💡</span><div><span class="caixa__titulo">Dica</span><p>Explicações e atalhos.</p></div></div>
+          <div class="caixa caixa--pense" style="margin:0"><span class="caixa__icone">🤔</span><div><span class="caixa__titulo">Pense</span><p>Perguntas para refletir.</p></div></div>
+          <div class="caixa caixa--atencao" style="margin:0"><span class="caixa__icone">⚠️</span><div><span class="caixa__titulo">Atenção</span><p>Cuidados importantes.</p></div></div>
+          <div class="caixa caixa--curiosidade" style="margin:0"><span class="caixa__icone">📜</span><div><span class="caixa__titulo">Você sabia?</span><p>Curiosidades e história.</p></div></div>
+        </div>
+      </div>
+
+      <div class="grade-2">
+        <div class="cartao">
+          <h3>🎯 Objetivos</h3>
+          <p style="margin-top:0">Ao final desta prática, você será capaz de:</p>
+          <ul class="lista-check">
+            <li>Explicar o que são antígenos e anticorpos e o que acontece na aglutinação.</li>
+            <li>Identificar o tipo sanguíneo (sistemas ABO e Rh) lendo a reação de uma amostra com os soros anti-A, anti-B e anti-D.</li>
+            <li>Prever se uma transfusão é compatível comparando os antígenos do doador com os anticorpos do receptor.</li>
+            <li>Justificar por que O− é o doador universal e AB+ é o receptor universal.</li>
+            <li><span>Relacionar os tipos sanguíneos aos genótipos, como \(I^A i\) e \(ii\), e calcular probabilidades simples.</span></li>
+          </ul>
+          <p style="margin:14px 0 0;padding-top:12px;border-top:1px dashed var(--linha);font-size:14.5px;color:var(--tinta-suave)">
+            📚 <b>Alinhamento curricular (BNCC):</b> EM13CNT207 — saúde e bem-estar (doação de sangue, transfusões); competências de
+            investigação científica (hipóteses, observação, registro e comunicação de resultados).</p>
+        </div>
+        <div class="cartao">
+          <h3>🧭 O caminho da prática</h3>
+          <ol style="margin:0;padding-left:20px">
+            <li><b>Preparação</b> — você está aqui. Registre suas hipóteses no fim desta página.</li>
+            <li><b>Teoria</b> — antígenos, anticorpos, sistema ABO, fator Rh e exemplos resolvidos.</li>
+            <li><b>Prática</b> — um assistente vai guiar você missão por missão: primeiro a tipagem (Parte A), depois a compatibilidade (Parte B).</li>
+            <li><b>Resultados</b> — suas tabelas, o resumo do seu desempenho e a tabela completa de compatibilidade.</li>
+            <li><b>Avaliação</b> — questões com dica e correção na hora.</li>
+            <li><b>Relatório</b> — tudo reunido; você só completa a conclusão.</li>
+          </ol>
+        </div>
+      </div>
+
+      <h3>🧰 Materiais da bancada</h3>
+      <p>Estes são os materiais de uma aula de tipagem sanguínea. Na bancada virtual, as amostras já estão coletadas e os soros prontos para usar.</p>
+      <div class="grade-3">
+        <div class="material">
+          <svg viewBox="0 0 72 72" aria-hidden="true"><rect x="4" y="22" width="64" height="28" rx="6" fill="#fff" stroke="#cfc6b8" stroke-width="1.5"/><ellipse cx="18" cy="36" rx="9" ry="7" fill="#dfe7f5" stroke="#d6cfc4"/><ellipse cx="36" cy="36" rx="9" ry="7" fill="#f6ecd2" stroke="#d6cfc4"/><ellipse cx="54" cy="36" rx="9" ry="7" fill="#e8e8eb" stroke="#d6cfc4"/></svg>
+          <strong>Lâmina de tipagem</strong><span>placa branca com três poços, um para cada soro</span>
+        </div>
+        <div class="material">
+          <svg viewBox="0 0 72 72" aria-hidden="true"><path d="M33 6 h6 l2 11 h-10 z" fill="#f1f5f9" stroke="#94a3b8"/><rect x="29" y="15" width="14" height="10" rx="2" fill="#1f2937"/><rect x="20" y="24" width="32" height="42" rx="8" fill="#2b5aa7"/><rect x="22" y="36" width="28" height="16" rx="2" fill="#fff"/><text x="36" y="47" text-anchor="middle" font-family="Arial" font-weight="800" font-size="7.5" fill="#2b5aa7">anti-A</text></svg>
+          <strong>Soro anti-A (azul)</strong><span>contém anticorpos que reconhecem o antígeno A</span>
+        </div>
+        <div class="material">
+          <svg viewBox="0 0 72 72" aria-hidden="true"><path d="M33 6 h6 l2 11 h-10 z" fill="#f1f5f9" stroke="#94a3b8"/><rect x="29" y="15" width="14" height="10" rx="2" fill="#1f2937"/><rect x="20" y="24" width="32" height="42" rx="8" fill="#e3ad17"/><rect x="22" y="36" width="28" height="16" rx="2" fill="#fff"/><text x="36" y="47" text-anchor="middle" font-family="Arial" font-weight="800" font-size="7.5" fill="#8a6608">anti-B</text></svg>
+          <strong>Soro anti-B (amarelo)</strong><span>contém anticorpos que reconhecem o antígeno B</span>
+        </div>
+        <div class="material">
+          <svg viewBox="0 0 72 72" aria-hidden="true"><path d="M33 6 h6 l2 11 h-10 z" fill="#f1f5f9" stroke="#94a3b8"/><rect x="29" y="15" width="14" height="10" rx="2" fill="#1f2937"/><rect x="20" y="24" width="32" height="42" rx="8" fill="#d4d9df" stroke="#9aa1aa"/><rect x="22" y="36" width="28" height="16" rx="2" fill="#fff"/><text x="36" y="47" text-anchor="middle" font-family="Arial" font-weight="800" font-size="7.5" fill="#4b4d53">anti-D</text></svg>
+          <strong>Soro anti-D (incolor)</strong><span>reconhece o antígeno D, que define o fator Rh</span>
+        </div>
+        <div class="material">
+          <svg viewBox="0 0 72 72" aria-hidden="true"><rect x="14" y="30" width="36" height="14" rx="5" fill="#7c3aed"/><rect x="48" y="33" width="12" height="8" rx="2" fill="#c4b5fd"/><path d="M60 37 H68" stroke="#64748b" stroke-width="1.5"/><rect x="6" y="32" width="10" height="10" rx="3" fill="#a78bfa"/><path d="M20 30 v-4 h8 v4" fill="none" stroke="#5b21b6" stroke-width="1.5"/></svg>
+          <strong>Lanceta estéril</strong><span>descartável e de uso único, para furar a ponta do dedo</span>
+        </div>
+        <div class="material">
+          <svg viewBox="0 0 72 72" aria-hidden="true"><rect x="10" y="24" width="24" height="40" rx="5" fill="#e0f2fe" stroke="#7fb3cc" stroke-width="1.5"/><rect x="15" y="16" width="14" height="9" rx="2" fill="#0369a1"/><rect x="13" y="36" width="18" height="12" fill="#fff"/><text x="22" y="45" text-anchor="middle" font-family="Arial" font-weight="800" font-size="7" fill="#0369a1">70%</text><circle cx="50" cy="52" r="8" fill="#fff" stroke="#e2e8f0"/><circle cx="58" cy="48" r="7" fill="#fff" stroke="#e2e8f0"/><circle cx="54" cy="42" r="7" fill="#fff" stroke="#e2e8f0"/></svg>
+          <strong>Algodão e álcool 70%</strong><span>para limpar a pele antes de furar</span>
+        </div>
+        <div class="material">
+          <svg viewBox="0 0 72 72" aria-hidden="true"><rect x="10" y="30" width="54" height="5" rx="2.5" fill="#d9b48a" transform="rotate(-20 36 32)"/><rect x="10" y="40" width="54" height="5" rx="2.5" fill="#c99f70" transform="rotate(-8 36 42)"/><rect x="10" y="50" width="54" height="5" rx="2.5" fill="#e4c49c" transform="rotate(6 36 52)"/></svg>
+          <strong>Palitos para misturar</strong><span>um palito limpo para cada poço, para não misturar os soros</span>
+        </div>
+        <div class="material">
+          <svg viewBox="0 0 72 72" aria-hidden="true"><path d="M22 66 V40 L16 30 Q14 25 18 24 Q21 24 23 28 L26 34 V14 Q26 10 30 10 Q33 10 33 14 V30 V10 Q33 6 37 6 Q41 6 41 10 V30 V12 Q41 8 45 8 Q49 8 49 12 V32 V18 Q49 14 53 14 Q57 14 57 18 V46 Q57 58 50 66 Z" fill="#bfdbfe" stroke="#60a5fa" stroke-width="1.5" stroke-linejoin="round"/></svg>
+          <strong>Luvas descartáveis</strong><span>protegem você do contato com sangue</span>
+        </div>
+      </div>
+
+      <div class="caixa caixa--atencao">
+        <span class="caixa__icone">⚠️</span>
+        <div>
+          <span class="caixa__titulo">Se um dia você fizer esta prática em um laboratório real</span>
+          <p><b>Use luvas</b> sempre que manusear sangue — o seu ou o de outra pessoa. Limpe a ponta do dedo com álcool 70% e espere secar antes de furar.</p>
+          <p><b>A lanceta é estéril, descartável e de uso único:</b> use uma nova para cada pessoa e <b>nunca compartilhe lancetas</b>. Depois de usada,
+            ela vai direto para a <b>caixa de perfurocortantes</b> (a caixa amarela de papelão rígido), nunca para o lixo comum.</p>
+          <p>Em aulas, o mais seguro é usar <b>sangue artificial ou um kit didático</b>, que reproduz as reações sem sangue humano. E lembre-se:
+            uma tipagem feita na escola não serve para decisões médicas.</p>
+        </div>
+      </div>
+
+      <h3>💭 Suas hipóteses</h3>
+      <p>Uma <b>hipótese</b> é uma previsão que você faz <b>antes</b> do experimento, com base no que já sabe. Escreva o que você acha
+        que vai acontecer e clique em “Guardar hipótese”. Não existe resposta errada aqui: no relatório, você vai comparar suas
+        hipóteses com o que descobriu.</p>
+      <div id="hipoteses-lista"></div>
+    </section>
+
+    <!-- ===================== 2. TEORIA ===================== -->
+    <section class="etapa" id="teoria" data-titulo="Teoria">
+      <div class="etapa__cabeca">
+        <p class="etapa__rotulo">Etapa 2 de 6</p>
+        <h2>Entendendo os tipos sanguíneos</h2>
+        <p class="etapa__intro">Leia com calma. Os exemplos resolvidos mostram, passo a passo, o raciocínio que você vai usar na bancada.</p>
+      </div>
+
+      <div class="grade-2">
+        <div>
+          <h3 style="margin-top:0">Hemácias, antígenos e anticorpos</h3>
+          <p>O sangue tem uma parte líquida, o <b>plasma</b>, e células: as <b>hemácias</b> (glóbulos vermelhos), os leucócitos e as plaquetas.</p>
+          <p>Na membrana das hemácias existem moléculas que funcionam como “etiquetas”: os <b>antígenos</b>. Os mais importantes para a
+            transfusão são os antígenos <b>A</b>, <b>B</b> e <b>D</b>. Cada pessoa tem alguns deles — ou nenhum.</p>
+          <p>No plasma circulam os <b>anticorpos</b>: proteínas em forma de <b>Y</b>, produzidas pelo sistema imunitário. Cada anticorpo reconhece
+            um único antígeno, como uma chave que só abre uma fechadura: o <b>anti-A</b> só se liga ao antígeno A, o <b>anti-B</b> só ao B e o
+            <b>anti-D</b> só ao D.</p>
+        </div>
+        <figure class="figura tp-figura" style="margin:0">
+          <svg id="fig-antigenos" viewBox="0 0 320 220" role="img" aria-label="Hemácia com antígenos A, B e D na membrana e um anticorpo anti-A em forma de Y"></svg>
+          <figcaption>Uma hemácia de uma pessoa <b>AB+</b> tem os três antígenos. O anticorpo anti-A, em forma de Y, reconhece só o antígeno A.</figcaption>
+        </figure>
+      </div>
+
+      <h3>Aglutinação: quando o anticorpo encontra o seu antígeno</h3>
+      <div class="grade-2">
+        <figure class="figura tp-figura" style="margin:0">
+          <svg id="fig-aglutinacao" viewBox="0 0 320 200" role="img" aria-label="À esquerda, hemácias B soltas com anticorpos anti-A sem se ligar; à direita, hemácias A presas em grumo pelos anticorpos anti-A"></svg>
+          <figcaption>Cada anticorpo tem dois “braços” e pode prender duas hemácias ao mesmo tempo. Assim se formam os <b>grumos</b>.</figcaption>
+        </figure>
+        <div>
+          <p>Se um anticorpo encontra hemácias com o antígeno que ele reconhece, ele se liga a elas. Como tem <b>dois braços</b>, cada anticorpo pode
+            segurar duas hemácias ao mesmo tempo, e milhares de anticorpos juntam as hemácias em <b>grumos</b> visíveis a olho nu. Esse fenômeno se
+            chama <b>aglutinação</b>.</p>
+          <p>Se o anticorpo <b>não</b> encontra o seu antígeno, nada acontece: as hemácias continuam soltas e a mistura fica com aspecto uniforme.</p>
+          <p>Dentro do corpo, a aglutinação é perigosa: as hemácias presas são destruídas (<b>hemólise</b>). É isso que acontece numa transfusão incompatível.</p>
+        </div>
+      </div>
+
+      <h3>O sistema ABO</h3>
+      <p>O tipo ABO depende de quais antígenos (A e/ou B) a pessoa tem nas hemácias. E há uma regra importante: <b>o organismo não produz anticorpos
+        contra os próprios antígenos</b>, mas produz anti-A e anti-B contra os antígenos que <b>não</b> tem. Esses anticorpos são chamados de
+        <b>naturais</b>: aparecem nos primeiros meses de vida, provavelmente pelo contato com substâncias parecidas presentes em bactérias do intestino e nos alimentos.</p>
+      <div class="tp-quadro">
+        <table>
+          <thead><tr><th>Tipo</th><th>Antígenos nas hemácias</th><th>Anticorpos no plasma</th></tr></thead>
+          <tbody>
+            <tr><td>A</td><td><span class="tp-chip a">A</span></td><td><span class="tp-chip b">anti-B</span></td></tr>
+            <tr><td>B</td><td><span class="tp-chip b">B</span></td><td><span class="tp-chip a">anti-A</span></td></tr>
+            <tr><td>AB</td><td><span class="tp-chip a">A</span> <span class="tp-chip b">B</span></td><td><span class="tp-chip neutro">nenhum</span></td></tr>
+            <tr><td>O</td><td><span class="tp-chip neutro">nenhum</span></td><td><span class="tp-chip a">anti-A</span> <span class="tp-chip b">anti-B</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>O fator Rh (antígeno D)</h3>
+      <p>Além do ABO, existe o <b>sistema Rh</b>. Quem tem o antígeno <b>D</b> nas hemácias é <b>Rh positivo (Rh+)</b>; quem não tem é <b>Rh negativo (Rh−)</b>.
+        Combinando os 4 tipos ABO com os 2 tipos Rh, temos <b>8 tipos sanguíneos</b>: O−, O+, A−, A+, B−, B+, AB− e AB+.</p>
+      <div class="caixa caixa--pense">
+        <span class="caixa__icone">🤔</span>
+        <div><span class="caixa__titulo">O anti-D é diferente: ele não é natural</span>
+          <p>Uma pessoa Rh− <b>não nasce</b> com anti-D no plasma. Ela só passa a produzir esse anticorpo depois de entrar em contato com hemácias Rh+ —
+            numa transfusão de sangue Rh+ ou numa gravidez de um bebê Rh+. Esse “primeiro contato” se chama <b>sensibilização</b>. Depois dele, o organismo
+            guarda a memória e, num novo contato, produz muito anti-D rapidamente. Por isso, <b>não se transfunde sangue Rh+ em uma pessoa Rh−</b>.
+            Na bancada, o anti-D do receptor aparece como <b>anti-D*</b> — o asterisco lembra que ele só existe após a sensibilização.</p></div>
+      </div>
+
+      <details class="aprofundamento">
+        <summary>Aprofundamento <span>(opcional) — a doença hemolítica do recém-nascido</span></summary>
+        <div class="aprofundamento__corpo">
+          <p>Imagine uma mãe <b>Rh−</b> grávida de um bebê <b>Rh+</b> (o bebê herdou o fator Rh do pai). Durante a gravidez, o sangue da mãe e o do bebê
+            quase não se misturam, mas no parto algumas hemácias do bebê podem passar para a circulação da mãe. Ela é <b>sensibilizada</b> e passa a produzir anti-D.</p>
+          <p>O primeiro bebê normalmente não é afetado. Mas, numa <b>próxima gravidez</b> de um bebê Rh+, os anticorpos anti-D da mãe atravessam a placenta
+            e destroem as hemácias do bebê: é a <b>doença hemolítica do recém-nascido</b> (também chamada de eritroblastose fetal), que pode causar anemia grave e icterícia.</p>
+          <p><b>Como se evita:</b> a mãe Rh− recebe uma injeção de <b>imunoglobulina anti-D</b> durante a gestação e logo após o parto de um bebê Rh+
+            (de preferência nas primeiras 72 horas). Esses anticorpos prontos eliminam as hemácias Rh+ do bebê antes que o sistema imunitário da mãe
+            “aprenda” a produzir anti-D. Por isso toda gestante faz a tipagem sanguínea no pré-natal.</p>
+        </div>
+      </details>
+
+      <h3>Como funciona a tipagem na lâmina</h3>
+      <p>Para descobrir o tipo de uma pessoa, pingamos uma gota do sangue em cada um dos três poços da lâmina e, sobre cada gota, um soro diferente.
+        Os <b>soros de tipagem</b> são reagentes que contêm anticorpos conhecidos: anti-A (azul), anti-B (amarelo) e anti-D (incolor).</p>
+      <div class="caixa">
+        <span class="caixa__icone">💡</span>
+        <div><span class="caixa__titulo">A regra de leitura</span>
+          <p><b>Aglutinou → o antígeno correspondente está presente.</b> Sem reação → o antígeno está ausente.</p>
+          <p>O anti-A e o anti-B mostram o grupo ABO; o anti-D mostra o fator Rh (+ ou −). Nenhuma aglutinação também é um resultado: significa que a
+            hemácia não tem nenhum dos três antígenos.</p></div>
+      </div>
+
+      <div class="exemplo">
+        <span class="exemplo__titulo">✏️ Exemplo resolvido 1 — lendo uma lâmina</span>
+        <p style="margin-top:0">Uma amostra deu este resultado. Qual é o tipo sanguíneo?</p>
+        <svg class="tp-mini" id="fig-exemplo" viewBox="0 0 330 112" role="img" aria-label="Três poços: aglutinação com anti-A, sem reação com anti-B, aglutinação com anti-D"></svg>
+        <ol>
+          <li>Poço do <b>anti-A</b>: aglutinou → a hemácia <b>tem</b> o antígeno A.</li>
+          <li>Poço do <b>anti-B</b>: sem reação → a hemácia <b>não tem</b> o antígeno B.</li>
+          <li>Só o antígeno A no sistema ABO → grupo <b>A</b>.</li>
+          <li>Poço do <b>anti-D</b>: aglutinou → tem o antígeno D → <b>Rh+</b>.</li>
+          <li><b>Resposta:</b> o tipo sanguíneo é <b>A+</b>.</li>
+        </ol>
+      </div>
+
+      <h3>Compatibilidade nas transfusões</h3>
+      <p>Numa transfusão, o sangue de um <b>doador</b> entra na circulação de um <b>receptor</b>. A pergunta é: os anticorpos do receptor vão atacar as
+        hemácias que estão chegando? A regra é:</p>
+      <div class="formula" style="font-size:18px;font-family:inherit;font-weight:700">
+        Os anticorpos do plasma do <span style="color:var(--cor-area-escura)">receptor</span> não podem reconhecer os antígenos das hemácias do <span style="color:var(--cor-area-escura)">doador</span>.
+        <small>Se reconhecerem, as hemácias doadas aglutinam e são destruídas: a transfusão é incompatível.</small>
+      </div>
+      <div class="caixa">
+        <span class="caixa__icone">🩸</span>
+        <div><span class="caixa__titulo">Por que só olhamos as hemácias do doador?</span>
+          <p>Nesta prática, “doar” significa transfundir <b>hemácias</b> (o <i>concentrado de hemácias</i>, o tipo de transfusão mais comum). Nele, quase
+            todo o plasma do doador — e os anticorpos que vêm com ele — é retirado. Por isso, o que decide a compatibilidade são os <b>antígenos do doador</b>
+            e os <b>anticorpos do receptor</b>.</p></div>
+      </div>
+
+      <div class="exemplo">
+        <span class="exemplo__titulo">✏️ Exemplo resolvido 2 — um doador B− para um receptor A+</span>
+        <ol>
+          <li><b>Hemácias do doador B−:</b> têm o antígeno <span class="tp-chip b">B</span>; não têm A nem D.</li>
+          <li><b>Plasma do receptor A+:</b> tem <span class="tp-chip b">anti-B</span>. Não tem anti-A (ele é do grupo A) nem anti-D (ele é Rh+).</li>
+          <li>Compare: o <span class="tp-chip b">anti-B</span> do receptor reconhece o antígeno <span class="tp-chip b">B</span> do doador.</li>
+          <li><b>Resposta: incompatível.</b> As hemácias do doador aglutinariam. Repare que o fator Rh não é o problema aqui: um doador Rh− pode doar para um receptor Rh+.</li>
+        </ol>
+      </div>
+
+      <div class="exemplo">
+        <span class="exemplo__titulo">✏️ Exemplo resolvido 3 — um doador A− para um receptor A+</span>
+        <ol>
+          <li><b>Hemácias do doador A−:</b> têm só o antígeno <span class="tp-chip a">A</span>.</li>
+          <li><b>Plasma do receptor A+:</b> tem só <span class="tp-chip b">anti-B</span>.</li>
+          <li>O anti-B não reconhece o antígeno A. Nenhum anticorpo do receptor encontra o seu alvo.</li>
+          <li><b>Resposta: compatível.</b></li>
+        </ol>
+      </div>
+
+      <div class="caixa caixa--pense">
+        <span class="caixa__icone">🌍</span>
+        <div><span class="caixa__titulo">Doador universal e receptor universal</span>
+          <p><b>O−</b> é o <b>doador universal</b>: suas hemácias não têm antígeno A, nem B, nem D. Nenhum anticorpo de nenhum receptor encontra alvo nelas.</p>
+          <p><b>AB+</b> é o <b>receptor universal</b>: seu plasma não tem anti-A nem anti-B, e, por ser Rh+, ele não produz anti-D. Ele pode receber hemácias de qualquer tipo.</p>
+          <p>Na prática, os hospitais preferem sangue do <b>mesmo tipo</b> do paciente e guardam o O− para emergências, quando não dá tempo de fazer a tipagem.</p></div>
+      </div>
+
+      <h3>📖 Palavras importantes</h3>
+      <dl class="glossario">
+        <div><dt>Hemácia</dt><dd>Glóbulo vermelho: célula do sangue que transporta oxigênio.</dd></div>
+        <div><dt>Plasma</dt><dd>Parte líquida do sangue, onde ficam os anticorpos.</dd></div>
+        <div><dt>Antígeno</dt><dd>Molécula na superfície da hemácia que pode ser reconhecida por um anticorpo (A, B, D).</dd></div>
+        <div><dt>Anticorpo</dt><dd>Proteína em forma de Y do sistema imunitário que reconhece um antígeno específico.</dd></div>
+        <div><dt>Aglutinação</dt><dd>Formação de grumos de hemácias presas umas às outras pelos anticorpos.</dd></div>
+        <div><dt>Hemólise</dt><dd>Destruição das hemácias; acontece numa transfusão incompatível.</dd></div>
+        <div><dt>Soro de tipagem</dt><dd>Reagente com anticorpos conhecidos (anti-A, anti-B, anti-D) usado para descobrir o tipo.</dd></div>
+        <div><dt>Fator Rh</dt><dd>Presença (Rh+) ou ausência (Rh−) do antígeno D nas hemácias.</dd></div>
+        <div><dt>Sensibilização</dt><dd>Primeiro contato com um antígeno estranho, que faz o organismo passar a produzir o anticorpo (como o anti-D).</dd></div>
+        <div><dt>Doador e receptor</dt><dd>Quem doa o sangue e quem o recebe na transfusão.</dd></div>
+      </dl>
+
+      <details class="aprofundamento">
+        <summary>Aprofundamento <span>(opcional) — a genética dos tipos sanguíneos</span></summary>
+        <div class="aprofundamento__corpo">
+          <p>O tipo ABO é determinado por um gene com <b>três alelos</b>: \(I^A\), \(I^B\) e \(i\). Os alelos \(I^A\) e \(I^B\) são <b>codominantes</b>
+            (quando estão juntos, os dois se manifestam) e ambos são <b>dominantes</b> sobre \(i\), que é recessivo.</p>
+          <div class="tp-quadro tp-quadro--centro">
+            <table>
+              <thead><tr><th>Tipo (fenótipo)</th><th>Genótipos possíveis</th></tr></thead>
+              <tbody>
+                <tr><td>A</td><td>\(I^A I^A\) ou \(I^A i\)</td></tr>
+                <tr><td>B</td><td>\(I^B I^B\) ou \(I^B i\)</td></tr>
+                <tr><td>AB</td><td>\(I^A I^B\)</td></tr>
+                <tr><td>O</td><td>\(ii\)</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>No modelo simplificado usado na escola, o fator Rh depende de um par de alelos: \(D\) (dominante, produz o antígeno D) e \(d\) (recessivo).
+            Pessoas Rh+ são \(DD\) ou \(Dd\); pessoas Rh− são \(dd\). Por isso, dois pais Rh+ que sejam \(Dd\) podem ter um filho Rh−.</p>
+          <p><b>Exemplo:</b> um pai do tipo A (\(I^A i\)) e uma mãe do tipo B (\(I^B i\)). Cada um passa <b>um</b> alelo para o filho:</p>
+          <div class="tp-quadro tp-punnett">
+            <table>
+              <thead><tr><th></th><th>\(I^B\)</th><th>\(i\)</th></tr></thead>
+              <tbody>
+                <tr><th>\(I^A\)</th><td>\(I^A I^B\) — AB</td><td>\(I^A i\) — A</td></tr>
+                <tr><th>\(i\)</th><td>\(I^B i\) — B</td><td>\(ii\) — O</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>Cada casa tem probabilidade \(\tfrac{1}{4}\). Então esse casal pode ter filhos dos <b>quatro</b> tipos ABO, cada um com 25% de chance —
+            inclusive do tipo O, mesmo que nenhum dos pais seja O.</p>
+        </div>
+      </details>
+
+      <div class="caixa caixa--curiosidade">
+        <span class="caixa__icone">📜</span>
+        <div><span class="caixa__titulo">Você sabia?</span>
+          <p>Em 1901, o médico austríaco <b>Karl Landsteiner</b> misturou as hemácias e o soro de várias pessoas e percebeu que algumas combinações aglutinavam
+            e outras não. Assim ele descobriu os grupos sanguíneos A, B e O (o grupo AB foi descrito logo depois por colegas dele). A descoberta tornou as
+            transfusões muito mais seguras e rendeu a Landsteiner o <b>Prêmio Nobel de Fisiologia ou Medicina de 1930</b>. Em 1940, ele e Alexander Wiener
+            descreveram o fator Rh — o nome vem dos macacos <i>Rhesus</i>, usados nos experimentos.</p>
+          <p>O Dia Mundial do Doador de Sangue, <b>14 de junho</b>, é a data de nascimento de Landsteiner. No Brasil, o tipo mais comum é o <b>O+</b>, seguido
+            de perto pelo A+; os tipos Rh negativo são bem menos frequentes, e o AB− é o mais raro.</p></div>
+      </div>
+    </section>
+
+    <!-- ===================== 3. PRÁTICA ===================== -->
+    <section class="etapa" id="pratica" data-titulo="Prática">
+      <div class="etapa__cabeca">
+        <p class="etapa__rotulo">Etapa 3 de 6</p>
+        <h2>Na bancada</h2>
+        <p class="etapa__intro">Primeiro, veja como usar a bancada. Depois, siga as missões do assistente: ele diz o que fazer e marca sozinho cada missão concluída.</p>
+      </div>
+
+      <h3 style="margin-top:0">🕹️ Como usar a bancada</h3>
+      <ol class="guia-uso">
+        <li><b>Escolha a parte</b>Use as abas acima da bancada: <i>Parte A</i> para identificar o tipo, <i>Parte B</i> para testar a compatibilidade.</li>
+        <li><b>Pingue os soros</b>Na Parte A, clique em cada frasco — anti-A, anti-B e anti-D — para pingar o soro no poço logo abaixo dele.</li>
+        <li><b>Leia e responda</b>Veja em quais poços houve aglutinação (grumos) e escolha o tipo na grade <i>Qual é o tipo?</i>.</li>
+        <li><b>Teste doador × receptor</b>Na Parte B, escolha uma bolsa de doador e um receptor. A lâmina mostra se há aglutinação.</li>
+        <li><b>Tudo é registrado</b>Cada tipagem e cada par testado vão sozinhos para as tabelas da etapa <i>Resultados</i>.</li>
+      </ol>
+
+      <div class="assistente" id="assistente" aria-live="polite"></div>
+
+      <div class="tp-partes" role="tablist" aria-label="Partes da prática">
+        <button type="button" role="tab" data-parte="A" aria-selected="true" aria-controls="parte-A">🔬 Parte A — Identificação<small>tipagem em lâmina com os três soros</small></button>
+        <button type="button" role="tab" data-parte="B" aria-selected="false" aria-controls="parte-B">🩸 Parte B — Compatibilidade<small>doador × receptor</small></button>
+      </div>
+
+      <!-- ---------- Parte A ---------- -->
+      <div id="parte-A" role="tabpanel">
+        <div class="laboratorio">
+          <div>
+            <div class="cena tp-cena">
+              <div class="tp-parede">
+                <div class="tp-cena-topo">
+                  <span class="tp-etiqueta">🧪 Amostra <b id="tpA-num">—</b></span>
+                  <span class="tp-etiqueta tp-etiqueta--suave">Soros de tipagem</span>
+                </div>
+                <div class="tp-frascos" id="frascos"></div>
+              </div>
+              <div class="tp-tampo">
+                <div class="tp-porcelana">
+                  <div class="tp-pocos" id="pocos"></div>
+                </div>
+              </div>
+              <div class="cena__dica" id="tpA-dica"></div>
+            </div>
+
+            <div class="caixa">
+              <span class="caixa__icone">🔎</span>
+              <div><span class="caixa__titulo">Como ler os poços</span>
+                <p><b>Aglutinou:</b> as hemácias se juntam em poucos grumos grandes, e os anticorpos (os pequenos Y coloridos) aparecem presos entre elas.
+                  <b>Sem reação:</b> as hemácias continuam soltas, espalhadas por todo o poço.</p>
+                <p>Pingue os três soros antes de responder — cada poço dá uma parte da resposta.</p></div>
+            </div>
+            <div class="caixa caixa--atencao">
+              <span class="caixa__icone">💡</span>
+              <div><span class="caixa__titulo">Travou?</span>
+                <p>Releia o <a href="#teoria">Exemplo resolvido 1</a>. Se mesmo assim não souber, use <i>Desistir e ver a resposta</i>: o tipo aparece, mas
+                  essa amostra não conta como acerto. Depois, clique em <i>Nova amostra</i> e tente de novo!</p></div>
+            </div>
+          </div>
+
+          <aside class="painel">
+            <div class="painel__bloco">
+              <h4>🧾 Amostra</h4>
+              <div class="tp-amostra"><span>Amostra atual</span><b id="tpA-num2">—</b></div>
+              <div class="botoes">
+                <button class="botao botao--primario botao--largo" id="btn-nova" type="button">Nova amostra</button>
+                <button class="botao botao--largo" id="btn-desistir" type="button">Desistir e ver a resposta</button>
+              </div>
+              <div class="leituras" style="margin-top:12px">
+                <div class="leitura"><span>Tipagens registradas</span><b id="pl-total">0</b></div>
+                <div class="leitura"><span>Acertos na 1ª tentativa</span><b id="pl-acertos">0</b></div>
+              </div>
+            </div>
+
+            <div class="painel__bloco">
+              <h4>🔎 Leitura das reações</h4>
+              <div class="tp-linhas" id="tpA-leitura" aria-live="polite"></div>
+            </div>
+
+            <div class="painel__bloco">
+              <h4>🩸 Qual é o tipo?</h4>
+              <div class="tp-tipos" id="grade-resposta"></div>
+              <p class="tp-dica-texto" id="tpA-erro" hidden></p>
+              <div class="tp-carimbo" id="carimbo-id" role="status"><strong id="carimbo-id-t"></strong><span id="carimbo-id-s"></span></div>
+              <div class="tp-conclusao" id="conclusao" aria-live="polite"></div>
+              <p class="mensagem ok" id="tpA-msg"></p>
+            </div>
+          </aside>
+        </div>
+      </div>
+
+      <!-- ---------- Parte B ---------- -->
+      <div id="parte-B" role="tabpanel" hidden>
+        <div class="laboratorio">
+          <div>
+            <div class="cena tp-cena" id="cena-B">
+              <div class="tp-parede tp-parede--prova">
+                <figure class="tp-objeto">
+                  <figcaption>Bolsa do doador</figcaption>
+                  <svg viewBox="0 0 96 132" aria-hidden="true">
+                    <path d="M48 0 V12" stroke="#94a3b8" stroke-width="3" stroke-linecap="round"/>
+                    <path d="M36 12 H60" stroke="#94a3b8" stroke-width="3" stroke-linecap="round"/>
+                    <rect x="44" y="12" width="8" height="10" rx="2" fill="#cbd5e1"/>
+                    <path id="bolsa-corpo" d="M14 28 Q14 22 20 22 H76 Q82 22 82 28 V104 Q82 118 68 120 H28 Q14 118 14 104 Z" fill="#eef0f3" stroke="#cbd5e1"/>
+                    <path d="M22 36 Q23 29 30 28" stroke="#fff" stroke-width="3" opacity=".45" fill="none" stroke-linecap="round"/>
+                    <rect x="24" y="50" width="48" height="40" rx="4" fill="#fff" stroke="#e2e8f0"/>
+                    <text x="48" y="62" text-anchor="middle" font-size="7" font-weight="700" fill="#64748b" font-family="Plus Jakarta Sans, Arial, sans-serif">DOADOR</text>
+                    <text id="bolsa-tipo" x="48" y="83" text-anchor="middle" font-size="19" font-weight="800" fill="#b91c1c" font-family="Plus Jakarta Sans, Arial, sans-serif">?</text>
+                    <path d="M48 120 V132" stroke="#b91c1c" stroke-width="3"/>
+                  </svg>
+                </figure>
+                <p class="tp-prova-rotulo">Prova de compatibilidade:<br><b>hemácias do doador</b> + <b>plasma do receptor</b></p>
+                <figure class="tp-objeto">
+                  <figcaption>Plasma do receptor</figcaption>
+                  <svg viewBox="0 0 80 132" aria-hidden="true">
+                    <rect x="26" y="8" width="28" height="11" rx="3" fill="#475569"/>
+                    <path d="M27 19 V110 Q27 124 40 124 Q53 124 53 110 V19 Z" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.5"/>
+                    <path id="tubo-plasma" d="M28.5 62 V110 Q28.5 122.5 40 122.5 Q51.5 122.5 51.5 110 V62 Z" fill="#f4d774" opacity="0"/>
+                    <rect x="28" y="28" width="24" height="26" rx="2" fill="#fff" stroke="#e2e8f0"/>
+                    <text x="40" y="37" text-anchor="middle" font-size="5.5" font-weight="700" fill="#64748b" font-family="Plus Jakarta Sans, Arial, sans-serif">PACIENTE</text>
+                    <text id="tubo-tipo" x="40" y="49" text-anchor="middle" font-size="10" font-weight="800" fill="#1a2233" font-family="Plus Jakarta Sans, Arial, sans-serif">?</text>
+                    <rect x="4" y="98" width="72" height="34" rx="4" fill="#94a3b8"/>
+                    <rect x="4" y="98" width="72" height="6" rx="2" fill="#cbd5e1"/>
+                  </svg>
+                </figure>
+              </div>
+              <div class="tp-tampo">
+                <div class="tp-porcelana tp-porcelana--prova">
+                  <svg id="svg-lamina" viewBox="0 0 360 290" role="img" aria-label="Lâmina de prova de compatibilidade"></svg>
+                  <p class="tp-legenda" id="legenda">escolha as duas amostras para pingar na lâmina</p>
+                  <div class="tp-carimbo" id="carimbo" role="status"><strong id="carimbo-titulo"></strong><span id="carimbo-sub"></span></div>
+                </div>
+              </div>
+              <div class="cena__dica" id="tpB-dica"></div>
+            </div>
+
+            <div class="tp-resultado" id="tpB-resultado" hidden>
+              <h4>🧬 Leitura imunológica</h4>
+              <div class="tp-linhas" id="explicacao" aria-live="polite"></div>
+              <div id="tpB-explique"></div>
+            </div>
+
+            <div class="caixa">
+              <span class="caixa__icone">✳️</span>
+              <div><span class="caixa__titulo">Por que o anti-D tem asterisco?</span>
+                <p>O anti-A e o anti-B são naturais: já estão no plasma. O <b>anti-D*</b> só aparece em uma pessoa Rh− depois que ela é sensibilizada
+                  (transfusão de sangue Rh+ ou gravidez de um bebê Rh+). Mesmo assim, a regra de segurança é tratar Rh+ → Rh− como incompatível.</p></div>
+            </div>
+          </div>
+
+          <aside class="painel">
+            <div class="painel__bloco">
+              <h4>🩸 Doador — bolsa de sangue</h4>
+              <div class="tp-tipos" id="grade-doador"></div>
+              <div class="tp-ficha" id="cartao-doador"></div>
+            </div>
+            <div class="painel__bloco">
+              <h4>🧪 Receptor — paciente</h4>
+              <div class="tp-tipos" id="grade-receptor"></div>
+              <div class="tp-ficha" id="cartao-receptor"></div>
+            </div>
+            <div class="painel__bloco">
+              <h4>📋 Registro</h4>
+              <p class="mensagem" style="margin-top:0">Cada par diferente que você testar vai automaticamente para a tabela da etapa Resultados.</p>
+              <div class="leituras" style="margin-top:10px">
+                <div class="leitura"><span>Pares testados</span><b id="pl-pares">0</b></div>
+                <div class="leitura"><span>Incompatíveis</span><b id="pl-incomp">0</b></div>
+              </div>
+              <button class="botao botao--largo" id="btn-limpar" type="button" style="margin-top:10px">Limpar seleção</button>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== 4. RESULTADOS ===================== -->
+    <section class="etapa" id="resultados" data-titulo="Resultados">
+      <div class="etapa__cabeca">
+        <p class="etapa__rotulo">Etapa 4 de 6</p>
+        <h2>Resultados e análise</h2>
+        <p class="etapa__intro">Suas tipagens e provas de compatibilidade estão organizadas aqui. Siga o roteiro de análise para tirar conclusões.</p>
+      </div>
+
+      <div class="exemplo" style="margin-top:0">
+        <span class="exemplo__titulo">🧭 Roteiro de análise</span>
+        <ol>
+          <li><b>Confira a tabela da Parte A.</b> Para cada amostra, veja as três reações e o tipo. Você consegue explicar cada tipo só olhando as reações?</li>
+          <li><b>Veja seus erros.</b> Nas linhas em que você não acertou na 1ª tentativa, descubra qual reação você leu errado.</li>
+          <li><b>Confira a tabela da Parte B.</b> Em cada par incompatível, identifique qual anticorpo do receptor reconheceu qual antígeno do doador.</li>
+          <li><b>Compare com a tabela completa.</b> Os pares que você testou estão destacados. Procure padrões: qual linha é toda ✓? Qual coluna é toda ✓?</li>
+          <li><b>Reflita.</b> Responda à pergunta da caixa “Pense” no fim da página.</li>
+        </ol>
+      </div>
+
+      <h3>Parte A — Tipagens registradas</h3>
+      <div id="tabela"></div>
+
+      <h3>Parte B — Provas de compatibilidade</h3>
+      <div id="tabela-compat"></div>
+
+      <h3>Resumo dos seus resultados</h3>
+      <div id="resumo"></div>
+
+      <h3>Tabela completa de compatibilidade</h3>
+      <p style="margin-top:0">Cada linha é um doador e cada coluna, um receptor. Os pares que <b>você testou</b> na Parte B aparecem com contorno vermelho.</p>
+      <div class="tp-matriz-caixa"><table class="tp-matriz" id="matriz"></table></div>
+      <p class="mensagem" id="matriz-legenda"></p>
+
+      <div class="caixa caixa--pense">
+        <span class="caixa__icone">🤔</span>
+        <div><span class="caixa__titulo">Se O− pode doar para todos, por que os hospitais não usam só O−?</span>
+          <p>Porque o O− é raro: poucas pessoas têm esse tipo, e os estoques são pequenos. Ele é guardado para emergências, quando não dá tempo de tipar o paciente.
+            No dia a dia, dá-se preferência ao sangue do <b>mesmo tipo</b> do receptor. Além disso, existem outros sistemas de antígenos além do ABO e do Rh:
+            por isso, antes de uma transfusão, o banco de sangue também faz a <b>prova cruzada</b>, misturando de verdade o sangue do doador com o do receptor.</p></div>
+      </div>
+    </section>
+
+    <!-- ===================== 5. AVALIAÇÃO ===================== -->
+    <section class="etapa" id="avaliacao" data-titulo="Avaliação">
+      <div class="etapa__cabeca">
+        <p class="etapa__rotulo">Etapa 5 de 6</p>
+        <h2>Avaliação</h2>
+        <p class="etapa__intro">Responda às questões. Se travar, clique em <b>💡 Ver dica</b>. As objetivas são corrigidas na hora, com explicação;
+          nas dissertativas, escreva sua resposta antes de comparar com a resposta-modelo.</p>
+      </div>
+      <div id="questoes-lista"></div>
+    </section>
+
+    <!-- ===================== 6. RELATÓRIO ===================== -->
+    <section class="etapa" id="relatorio" data-etapa="relatorio" data-titulo="Relatório">
+      <div class="etapa__cabeca">
+        <p class="etapa__rotulo">Etapa 6 de 6</p>
+        <h2>Relatório da prática</h2>
+        <p class="etapa__intro">O relatório já vem preenchido com suas hipóteses, dados e resumo. Complete a identificação e escreva a conclusão
+          seguindo o roteiro. Depois, clique em <b>Imprimir / salvar PDF</b> para entregar.</p>
+      </div>
+
+      <div class="relatorio">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+          <div>
+            <div style="font-size:13px;font-weight:700;color:var(--cor-area);letter-spacing:.06em">RELATÓRIO DE PRÁTICA · BIOLOGIA</div>
+            <div style="font-size:26px;font-weight:800">Tipagem Sanguínea</div>
+          </div>
+          <button class="botao botao--primario nao-imprimir" type="button" data-imprimir>⎙ Imprimir / salvar PDF</button>
+        </div>
+        <div class="relatorio__cabeca" style="margin-top:18px">
+          <label>Nome<input class="campo" data-rel="nome"></label>
+          <label>Turma<input class="campo" data-rel="turma"></label>
+          <label>Professor(a)<input class="campo" data-rel="professor"></label>
+          <label>Data<input class="campo" data-rel="data" type="date"></label>
+        </div>
+
+        <h3>1. Objetivo</h3>
+        <p>Identificar o tipo sanguíneo (sistemas ABO e Rh) de amostras pela reação de aglutinação com os soros anti-A, anti-B e anti-D, e investigar a
+          compatibilidade entre doadores e receptores em transfusões de hemácias.</p>
+
+        <h3>2. Hipóteses</h3>
+        <div id="rel-hipoteses"></div>
+
+        <h3>3. Dados coletados</h3>
+        <div id="rel-dados"></div>
+
+        <h3>4. Resumo dos resultados</h3>
+        <div id="rel-resumo"></div>
+
+        <h3>5. Avaliação</h3>
+        <p id="rel-avaliacao"></p>
+
+        <h3>6. Conclusão</h3>
+        <div class="orientacao nao-imprimir">
+          <b>Roteiro para escrever sua conclusão</b> (um parágrafo curto para cada item):
+          <ol style="margin:6px 0 0;padding-left:20px">
+            <li>Como você identificou o tipo de cada amostra? Explique a relação entre aglutinação e antígenos, com um exemplo da sua tabela.</li>
+            <li>Como foi seu desempenho na Parte A? Se errou alguma tipagem, qual foi o erro e o que você aprendeu com ele?</li>
+            <li>Cite um par compatível e um incompatível que você testou na Parte B e explique cada resultado com antígenos e anticorpos.</li>
+            <li>Suas hipóteses se confirmaram? Se não, o que você pensava e o que descobriu?</li>
+          </ol>
+        </div>
+        <textarea class="campo" data-rel="conclusao" rows="8" placeholder="Escreva aqui a sua conclusão…"></textarea>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="rodape-lab"><div class="rodape-lab__dentro"></div></footer>
+
+  <script src="../_comum/bancada.js"></script>
+  <script>
+  (function () {
+    "use strict";
+    Lab.iniciar({ id: "tipagem3" });
+    const { fmt } = Lab;
+    const $ = (id) => document.getElementById(id);
+    const armazem = Lab.armazenamento;
+    const NS = "http://www.w3.org/2000/svg";
+
+    /* ====================== Modelo imunológico ======================
+     * Antígenos A, B e D nas hemácias; anti-A e anti-B naturais no plasma; anti-D só após sensibilização.
+     * Compatível = nenhum anticorpo do receptor reconhece um antígeno do doador (27 pares de 64).
+     */
+    const TIPOS = ["O-", "O+", "A-", "A+", "B-", "B+", "AB-", "AB+"];
+    function infoTipo(t) {
+      const rh = t.endsWith("+");
+      const abo = t.replace(/[+-]/g, "");
+      const antigenos = [];
+      if (abo.includes("A")) antigenos.push("A");
+      if (abo.includes("B")) antigenos.push("B");
+      if (rh) antigenos.push("D");
+      const anticorpos = [];
+      if (!abo.includes("A")) anticorpos.push("anti-A");
+      if (!abo.includes("B")) anticorpos.push("anti-B");
+      if (!rh) anticorpos.push("anti-D*");
+      return { abo, rh, antigenos, anticorpos };
+    }
+    function conflitos(d, r) {
+      const D = infoTipo(d), R = infoTipo(r), c = [];
+      if (D.antigenos.includes("A") && R.anticorpos.includes("anti-A")) c.push({ ac: "anti-A", ag: "A", classe: "a" });
+      if (D.antigenos.includes("B") && R.anticorpos.includes("anti-B")) c.push({ ac: "anti-B", ag: "B", classe: "b" });
+      if (D.antigenos.includes("D") && !R.rh) c.push({ ac: "anti-D*", ag: "D (Rh)", classe: "d" });
+      return c;
+    }
+    const compativel = (d, r) => conflitos(d, r).length === 0;
+    const doaPara = (d) => TIPOS.filter((r) => compativel(d, r));
+    const recebeDe = (r) => TIPOS.filter((d) => compativel(d, r));
+    const bonito = (t) => t.replace("-", "−");
+
+    const CLASSE_AG = { A: "a", B: "b", D: "d" };
+    const CLASSE_AC = { "anti-A": "a", "anti-B": "b", "anti-D*": "d" };
+    const COR = { a: "#2b5aa7", b: "#c08d0e", d: "#6d6f76" };
+    const GOTA = '<svg class="gota" viewBox="0 0 13 17" aria-hidden="true"><path d="M6.5 0C6.5 0 0 8.2 0 11.4 0 14.5 2.9 17 6.5 17s6.5-2.5 6.5-5.6C13 8.2 6.5 0 6.5 0Z"/></svg>';
+
+    function el(nome, attrs, pai) {
+      const n = document.createElementNS(NS, nome);
+      for (const k in attrs) n.setAttribute(k, attrs[k]);
+      if (pai) pai.appendChild(n);
+      return n;
+    }
+    function espalhar(n, rx, ry, minDist) {
+      const pts = [];
+      let guarda = 0;
+      while (pts.length < n && guarda < 3000) {
+        guarda++;
+        const a = Math.random() * Math.PI * 2, rr = Math.sqrt(Math.random());
+        const x = Math.cos(a) * rr * rx, y = Math.sin(a) * rr * ry;
+        if (pts.every((p) => Math.hypot(p[0] - x, p[1] - y) > minDist)) pts.push([x, y]);
+      }
+      return pts;
+    }
+    function celula(pai, x, y, opts) {
+      const o = opts || {};
+      const r = o.r || 11;
+      const g = el("g", { class: "cel", style: `transform:translate(${x}px,${y}px)` }, pai);
+      const m = el("g", { class: "miolo" }, g);
+      if (o.drift) {
+        m.style.setProperty("--dx", (Math.random() * 10 - 5).toFixed(1) + "px");
+        m.style.setProperty("--dy", (Math.random() * 10 - 5).toFixed(1) + "px");
+        m.style.animationDelay = (-Math.random() * 5).toFixed(2) + "s";
+        m.style.animationDuration = (4.4 + Math.random() * 2.2).toFixed(2) + "s";
+      } else {
+        m.style.animationDelay = (-Math.random() * 0.3).toFixed(2) + "s";
+      }
+      el("circle", { cx: 0, cy: 0, r: r, fill: "#c1273c", stroke: "#8f1f2e", "stroke-width": r * 0.13 }, m);
+      el("circle", { cx: 0, cy: 0, r: r * 0.42, fill: "#8f1f2e", opacity: 0.45 }, m);
+      el("ellipse", { cx: -r * 0.33, cy: -r * 0.38, rx: r * 0.31, ry: r * 0.18, fill: "#ffffff", opacity: 0.35, transform: `rotate(-25 ${-r * 0.33} ${-r * 0.38})` }, m);
+      return g;
+    }
+    function anticorpoY(pai, x, y, cor, atraso, escala, angulo) {
+      const g = el("g", {
+        class: atraso === null ? "" : "anticorpo",
+        style: atraso === null ? "" : `animation-delay:${atraso}s`,
+        transform: `translate(${x} ${y}) rotate(${angulo ?? Math.floor(Math.random() * 360)}) scale(${escala || 1})`,
+      }, pai);
+      el("path", { d: "M-5.5,-7.5 L0,-1 L5.5,-7.5 M0,-1 L0,7.5", stroke: cor, "stroke-width": 2.6, "stroke-linecap": "round", fill: "none" }, g);
+      return g;
+    }
+
+    /* ====================== Figuras da teoria ====================== */
+    function antigeno(pai, x, y, ang, tipo, esc) {
+      const g = el("g", { transform: `translate(${x.toFixed(1)} ${y.toFixed(1)}) rotate(${(ang * 180 / Math.PI).toFixed(1)}) scale(${esc})` }, pai);
+      el("line", { x1: 0, y1: 0, x2: 7, y2: 0, stroke: "#8f1f2e", "stroke-width": 1.6 }, g);
+      if (tipo === "A") el("path", { d: "M7,-5 L15,0 L7,5 Z", fill: COR.a }, g);
+      else if (tipo === "B") el("rect", { x: 7, y: -4.5, width: 9, height: 9, fill: COR.b }, g);
+      else el("circle", { cx: 12, cy: 0, r: 4.6, fill: COR.d }, g);
+    }
+    function hemaciaFig(pai, x, y, r, ags, rot) {
+      el("circle", { cx: x, cy: y, r, fill: "#c1273c", stroke: "#8f1f2e", "stroke-width": Math.max(1.2, r * 0.07) }, pai);
+      el("circle", { cx: x, cy: y, r: r * 0.42, fill: "#8f1f2e", opacity: 0.35 }, pai);
+      el("ellipse", { cx: x - r * 0.33, cy: y - r * 0.38, rx: r * 0.3, ry: r * 0.17, fill: "#fff", opacity: 0.3, transform: `rotate(-25 ${x - r * 0.33} ${y - r * 0.38})` }, pai);
+      const esc = r > 30 ? 1 : 0.62;
+      ags.forEach((a, k) => { const ang = (rot || 0) + (k * 2 * Math.PI) / ags.length; antigeno(pai, x + Math.cos(ang) * r, y + Math.sin(ang) * r, ang, a, esc); });
+    }
+    function texto(pai, x, y, conteudo, attrs) {
+      const t = el("text", Object.assign({ x, y, "text-anchor": "middle", "font-family": "Plus Jakarta Sans, system-ui, sans-serif", "font-size": 12, fill: "#1a2233" }, attrs || {}), pai);
+      t.textContent = conteudo;
+      return t;
+    }
+    (function figuraAntigenos() {
+      const s = $("fig-antigenos");
+      const ags = []; for (let k = 0; k < 12; k++) ags.push(["A", "B", "D"][k % 3]);
+      hemaciaFig(s, 104, 104, 60, ags, -Math.PI / 2);
+      texto(s, 104, 206, "hemácia AB+", { "font-weight": 700 });
+      anticorpoY(s, 256, 52, COR.a, null, 3.2, 0);
+      texto(s, 256, 100, "anticorpo anti-A", { "font-weight": 700, "font-size": 12 });
+      texto(s, 256, 115, "(dissolvido no plasma)", { fill: "#5a6579", "font-size": 11 });
+      const leg = [["A", "antígeno A"], ["B", "antígeno B"], ["D", "antígeno D (Rh)"]];
+      leg.forEach(([t, nome], i) => {
+        const y = 146 + i * 22;
+        antigeno(s, 200, y, 0, t, 1);
+        texto(s, 222, y + 4, nome, { "text-anchor": "start", "font-size": 12 });
+      });
+    })();
+    (function figuraAglutinacao() {
+      const s = $("fig-aglutinacao");
+      el("line", { x1: 160, y1: 12, x2: 160, y2: 168, stroke: "#cbd5e1", "stroke-dasharray": "5 5" }, s);
+      [[46, 60], [112, 52], [64, 122], [124, 116]].forEach(([x, y], i) => hemaciaFig(s, x, y, 16, ["B", "B", "B", "B", "B"], i));
+      [[84, 88, 20], [30, 100, 160], [142, 84, 290], [96, 150, 70], [20, 36, 200]].forEach(([x, y, a]) => anticorpoY(s, x, y, COR.a, null, 1.25, a));
+      const grumo = [[212, 72], [248, 64], [230, 100], [266, 98], [246, 132], [210, 124]];
+      grumo.forEach(([x, y], i) => hemaciaFig(s, x, y, 16, ["A", "A", "A", "A", "A"], i * 0.7));
+      [[230, 66, 100], [220, 88, 30], [240, 82, 200], [257, 82, 320], [248, 100, 90], [238, 117, 250], [256, 116, 20], [220, 112, 150]].forEach(([x, y, a]) => anticorpoY(s, x, y, COR.a, null, 1.15, a));
+      texto(s, 80, 184, "anti-A + hemácias B", { "font-weight": 700, "font-size": 11.5 });
+      texto(s, 80, 198, "nada se liga: sem reação", { fill: "#16a34a", "font-size": 11 });
+      texto(s, 240, 184, "anti-A + hemácias A", { "font-weight": 700, "font-size": 11.5 });
+      texto(s, 240, 198, "grumos: aglutinação", { fill: "#a01c30", "font-size": 11 });
+    })();
+    (function figuraExemplo() {
+      const s = $("fig-exemplo");
+      const pocos = [["anti-A", "rgba(43,90,167,.16)", COR.a, true], ["anti-B", "rgba(192,141,14,.18)", COR.b, false], ["anti-D", "rgba(109,111,118,.16)", COR.d, true]];
+      const grumo = [[-5, -3], [2, -6], [7, 0], [-1, 4], [-8, 4], [5, 6], [0, -1]];
+      const solto = [[-30, -10], [-14, 12], [2, -16], [16, 8], [30, -6], [-24, 16], [22, -18], [6, 20], [-6, -2]];
+      pocos.forEach(([nome, tinta, cor, ag], i) => {
+        const cx = 55 + i * 110, cy = 46;
+        el("ellipse", { cx, cy, rx: 48, ry: 34, fill: "url(#tp-grad-plasma)", stroke: "#e4ddd0", "stroke-width": 2 }, s);
+        el("ellipse", { cx, cy, rx: 48, ry: 34, fill: tinta }, s);
+        const pts = ag ? [...grumo.map(([x, y]) => [x - 14, y - 4]), ...grumo.slice(0, 5).map(([x, y]) => [x + 16, y + 8])] : solto;
+        pts.forEach(([x, y]) => el("circle", { cx: cx + x, cy: cy + y, r: 4.6, fill: "#c1273c", stroke: "#8f1f2e", "stroke-width": 0.8 }, s));
+        if (ag) { anticorpoY(s, cx + 2, cy - 18, cor, null, 0.8, 30); anticorpoY(s, cx - 26, cy + 14, cor, null, 0.8, 200); }
+        texto(s, cx, 96, nome, { "font-weight": 700, "font-size": 12, fill: cor === COR.b ? "#8a6608" : cor, "font-family": "JetBrains Mono, monospace" });
+        texto(s, cx, 110, ag ? "aglutinou" : "sem reação", { "font-size": 11, "font-weight": 700, fill: ag ? "#a01c30" : "#16a34a" });
+      });
+    })();
+
+    /* ====================== Progresso (usado pelo assistente) ====================== */
+    const marcos = armazem.ler("bancada:tipagem3:marcos", { pingouTres: false });
+    const marcar = (k) => { if (!marcos[k]) { marcos[k] = true; armazem.gravar("bancada:tipagem3:marcos", marcos); atualizarTudo(); } };
+
+    let tabela = null, pronto = false; // pronto: a tabela chama aoMudar já na criação
+    let relAvaliacao = "";
+    let parteAtual = armazem.ler("bancada:tipagem3:parte", "A") === "B" ? "B" : "A";
+
+    /* ====================== Abas: Parte A / Parte B ====================== */
+    function mostrarParte(p) {
+      parteAtual = p;
+      $("parte-A").hidden = p !== "A";
+      $("parte-B").hidden = p !== "B";
+      document.querySelectorAll(".tp-partes [data-parte]").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.parte === p)));
+      armazem.gravar("bancada:tipagem3:parte", p);
+      atualizarAssistente();
+    }
+    document.querySelectorAll(".tp-partes [data-parte]").forEach((b) => b.addEventListener("click", () => mostrarParte(b.dataset.parte)));
+
+    /* ==================================================================
+       PARTE A — IDENTIFICAÇÃO (tipagem em lâmina)
+       ================================================================== */
+    const SOROS = [
+      { chave: "A", nome: "anti-A", cor: "#2b5aa7", frasco: "#2b5aa7", borda: "#1e3f78", tinta: "rgba(43,90,167,.14)", achado: "antígeno A", poco: "primeiro" },
+      { chave: "B", nome: "anti-B", cor: "#c08d0e", frasco: "#e3ad17", borda: "#a67c0b", tinta: "rgba(192,141,14,.16)", achado: "antígeno B", poco: "segundo" },
+      { chave: "D", nome: "anti-D", cor: "#6d6f76", frasco: "#d4d9df", borda: "#9aa1aa", tinta: "rgba(109,111,118,.14)", achado: "antígeno D (fator Rh)", poco: "terceiro" },
+    ];
+    const t1 = { tipo: null, numero: 0, aplicados: {}, resolvido: false, primeira: true, tentativas: 0, svgs: {}, status: {}, frascos: {}, geracao: 0 };
+
+    function reageCom(tipo, chave) {
+      const i = infoTipo(tipo);
+      if (chave === "A") return i.antigenos.includes("A");
+      if (chave === "B") return i.antigenos.includes("B");
+      return i.rh;
+    }
+    function frascoSVG(s) {
+      return `<svg viewBox="0 0 60 100" aria-hidden="true">
+        <path d="M26 3 L34 3 L36 19 L24 19 Z" fill="#f1f5f9" stroke="#94a3b8"/>
+        <rect x="20" y="17" width="20" height="14" rx="3" fill="#1f2937"/>
+        <rect x="8" y="29" width="44" height="68" rx="10" fill="${s.frasco}" stroke="${s.borda}" stroke-width="1.5"/>
+        <rect x="13" y="35" width="6" height="54" rx="3" fill="#fff" opacity=".3"/>
+        <rect x="13" y="50" width="34" height="30" rx="3" fill="#fff"/>
+        <text x="30" y="61" text-anchor="middle" font-family="Plus Jakarta Sans, Arial, sans-serif" font-size="7" font-weight="700" fill="#64748b">SORO</text>
+        <text x="30" y="74" text-anchor="middle" font-family="Plus Jakarta Sans, Arial, sans-serif" font-size="10" font-weight="800" fill="${s.cor === "#c08d0e" ? "#8a6608" : s.cor === "#6d6f76" ? "#4b4d53" : s.cor}">${s.nome}</text>
+      </svg>`;
+    }
+    function montarPocos() {
+      SOROS.forEach((s) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "tp-frasco";
+        b.setAttribute("aria-label", `Pingar o soro ${s.nome} no ${s.poco} poço`);
+        b.innerHTML = `<span class="tp-frasco__acao">💧 Pingar</span>${frascoSVG(s)}`;
+        b.addEventListener("click", () => aplicarSoro(s));
+        $("frascos").appendChild(b);
+        t1.frascos[s.chave] = b;
+
+        const p = document.createElement("div");
+        p.className = "tp-poco";
+        p.innerHTML = `<svg viewBox="0 0 170 150" role="img" aria-label="Poço do soro ${s.nome}"></svg>
+          <span class="tp-poco__nome" style="color:${s.chave === "B" ? "#8a6608" : s.cor}">${s.nome}</span>
+          <span class="tp-poco__status">—</span>`;
+        $("pocos").appendChild(p);
+        t1.svgs[s.chave] = p.querySelector("svg");
+        t1.status[s.chave] = p.querySelector(".tp-poco__status");
+      });
+    }
+    function pocoLimpo(sv) {
+      sv.innerHTML = "";
+      sv.classList.remove("granulado");
+      sv.classList.add("flutua");
+      el("ellipse", { cx: 85, cy: 78, rx: 71, ry: 57, fill: "url(#tp-grad-plasma)", stroke: "#e4ddd0", "stroke-width": 2 }, sv);
+      el("ellipse", { cx: 85, cy: 76, rx: 71, ry: 57, fill: "none", stroke: "#ffffff", "stroke-width": 3, opacity: 0.6 }, sv);
+      return sv;
+    }
+    function pocoPuro(sv) {
+      pocoLimpo(sv);
+      espalhar(8, 52, 40, 21).forEach((p) => celula(sv, 85 + p[0], 78 + p[1], { r: 8, drift: true }));
+    }
+    function pocoReacao(sv, soro, aglutina, ger) {
+      pocoLimpo(sv);
+      el("ellipse", { cx: 85, cy: 78, rx: 71, ry: 57, fill: soro.tinta }, sv);
+      if (aglutina) {
+        let centros = espalhar(2, 30, 22, 34).map((p) => [85 + p[0], 78 + p[1]]);
+        if (!centros.length) centros = [[85, 78]];
+        const kc = centros.length;
+        const AUREO = Math.PI * (3 - Math.sqrt(5));
+        const cels = espalhar(9, 54, 42, 19).map((p) => celula(sv, 85 + p[0], 78 + p[1], { r: 8, drift: false }));
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          if (ger !== t1.geracao) return;
+          cels.forEach((g, idx) => {
+            const c = centros[idx % kc];
+            const ordem = Math.floor(idx / kc);
+            const raio = 9.5 * Math.sqrt(ordem + 0.4);
+            const ang = ordem * AUREO + (idx % kc) * 2.1;
+            g.style.transform = `translate(${c[0] + Math.cos(ang) * raio}px,${c[1] + Math.sin(ang) * raio * 0.9}px)`;
+          });
+          setTimeout(() => {
+            if (ger !== t1.geracao) return;
+            sv.classList.add("granulado");
+            centros.forEach((c, ci) => {
+              anticorpoY(sv, c[0] + 14, c[1] - 16, soro.cor, 0.1 * ci, 0.85);
+              anticorpoY(sv, c[0] - 15, c[1] + 13, soro.cor, 0.18 + 0.1 * ci, 0.85);
+            });
+          }, 1050);
+        }));
+      } else {
+        espalhar(8, 52, 40, 21).forEach((p) => celula(sv, 85 + p[0], 78 + p[1], { r: 8, drift: true }));
+      }
+    }
+    const linhaLeituraInicial = (s) => `<div class="tp-linha" id="leitura-${s.chave}"><span class="tp-quem">${s.nome}</span><span class="tp-pendente">pingue o soro para ler a reação</span></div>`;
+
+    function aplicarSoro(s) {
+      if (!t1.tipo || t1.aplicados[s.chave]) return;
+      t1.aplicados[s.chave] = true;
+      const b = t1.frascos[s.chave];
+      b.disabled = true;
+      b.classList.remove("pingando"); void b.offsetWidth; b.classList.add("pingando");
+      b.querySelector(".tp-frasco__acao").textContent = "✓ Pingado";
+      const sv = t1.svgs[s.chave];
+      const aglutina = reageCom(t1.tipo, s.chave);
+      const ger = t1.geracao;
+      // gota do soro caindo no poço (translate estático no pai; animação no filho)
+      const porta = el("g", { style: "transform:translate(85px,-4px)" }, sv);
+      const gt = el("g", { class: "pinga" }, porta);
+      el("circle", { cx: 0, cy: 0, r: 5.5, fill: s.cor, opacity: 0.9 }, gt);
+      atualizarDicaA();
+      setTimeout(() => {
+        if (ger !== t1.geracao) return;
+        pocoReacao(sv, s, aglutina, ger);
+        const st = t1.status[s.chave];
+        st.textContent = aglutina ? "aglutinou" : "sem reação";
+        st.className = "tp-poco__status " + (aglutina ? "pos" : "neg");
+        $("leitura-" + s.chave).innerHTML = `<span class="tp-quem">${s.nome}</span>` + (aglutina
+          ? `<span><b class="tp-pos">aglutinou</b> → ${s.achado} <b>presente</b></span>`
+          : `<span><b class="tp-neg">sem reação</b> → ${s.achado} ausente</span>`);
+        if (SOROS.every((x) => t1.aplicados[x.chave])) marcar("pingouTres");
+      }, 480);
+    }
+
+    function novaAmostra() {
+      t1.geracao++;
+      let novo;
+      do { novo = TIPOS[Math.floor(Math.random() * TIPOS.length)]; } while (novo === t1.tipo && Math.random() < 0.7);
+      t1.tipo = novo;
+      t1.aplicados = {};
+      t1.resolvido = false;
+      t1.primeira = true;
+      t1.tentativas = 0;
+      t1.numero = 1000 + Math.floor(Math.random() * 9000);
+      $("tpA-num").textContent = "nº " + t1.numero;
+      $("tpA-num2").textContent = "nº " + t1.numero;
+      SOROS.forEach((s) => {
+        pocoPuro(t1.svgs[s.chave]);
+        const b = t1.frascos[s.chave];
+        b.disabled = false;
+        b.querySelector(".tp-frasco__acao").textContent = "💧 Pingar";
+        t1.status[s.chave].textContent = "—";
+        t1.status[s.chave].className = "tp-poco__status";
+      });
+      $("tpA-leitura").innerHTML = SOROS.map(linhaLeituraInicial).join("");
+      $("carimbo-id").className = "tp-carimbo";
+      $("conclusao").innerHTML = "";
+      $("tpA-erro").hidden = true;
+      $("tpA-msg").textContent = "";
+      $("btn-desistir").disabled = false;
+      const grade = $("grade-resposta");
+      grade.classList.remove("travado");
+      grade.querySelectorAll(".tp-tipo").forEach((b) => b.classList.remove("certo", "nega"));
+      atualizarDicaA();
+    }
+
+    function concluirAmostra(desistiu) {
+      t1.resolvido = true;
+      $("grade-resposta").classList.add("travado");
+      $("btn-desistir").disabled = true;
+      $("tpA-erro").hidden = true;
+
+      const carimbo = $("carimbo-id");
+      carimbo.className = "tp-carimbo " + (desistiu ? "info" : "ok");
+      void carimbo.offsetWidth;
+      carimbo.classList.add("bate");
+      $("carimbo-id-t").textContent = "Tipo " + bonito(t1.tipo);
+      $("carimbo-id-s").textContent = desistiu ? "resposta revelada" : (t1.primeira ? "acertou na 1ª tentativa" : "identificação correta");
+
+      // completa a lâmina: pinga os soros que ainda faltam, para os poços mostrarem o padrão da conclusão
+      const ger = t1.geracao;
+      let atraso = 150;
+      SOROS.forEach((s) => {
+        if (!t1.aplicados[s.chave]) { setTimeout(() => { if (ger === t1.geracao) aplicarSoro(s); }, atraso); atraso += 380; }
+      });
+
+      const i = infoTipo(t1.tipo);
+      const pos = SOROS.filter((s) => reageCom(t1.tipo, s.chave)).map((s) => s.nome);
+      const neg = SOROS.filter((s) => !reageCom(t1.tipo, s.chave)).map((s) => s.nome);
+      let padrao = "";
+      if (pos.length) padrao += `aglutinou com <b>${pos.join(" e ")}</b>`;
+      if (pos.length && neg.length) padrao += "; ";
+      if (neg.length) padrao += `sem reação com <b>${neg.join(" e ")}</b>`;
+      if (!pos.length) padrao = "<b>nenhuma aglutinação</b> — a ausência de reação também é informação";
+      $("conclusao").innerHTML =
+        `<div class="tp-linha"><span class="tp-quem">Padrão</span><span>${padrao}.</span></div>
+         <div class="tp-linha"><span class="tp-quem">Antígenos</span><span>${i.antigenos.length
+            ? i.antigenos.map((a) => `<span class="tp-chip ${CLASSE_AG[a]}">${a === "D" ? "D (Rh)" : a}</span>`).join(" ")
+            : '<span class="tp-chip neutro">nenhum</span>'} → tipo <b>${bonito(t1.tipo)}</b></span></div>`;
+      $("grade-resposta").querySelectorAll(".tp-tipo").forEach((b) => { if (b.dataset.tipo === t1.tipo) b.classList.add("certo"); });
+
+      const leitura = (k) => (reageCom(t1.tipo, k) ? "aglutinou (+)" : "sem reação (−)");
+      tabela.adicionar({
+        amostra: "nº " + t1.numero, a: leitura("A"), b: leitura("B"), d: leitura("D"),
+        tipo: bonito(t1.tipo), chave: t1.tipo, acertou: !desistiu,
+        primeira: desistiu ? "desistiu" : (t1.primeira ? "sim" : "não"),
+        tentativas: t1.tentativas,
+      });
+      $("tpA-msg").textContent = `✓ Tipagem registrada na tabela (linha ${tabela.linhas().length}).`;
+      atualizarDicaA();
+    }
+
+    function responder(t, botao) {
+      if (t1.resolvido || !t1.tipo) return;
+      t1.tentativas++;
+      if (t === t1.tipo) { concluirAmostra(false); return; }
+      t1.primeira = false;
+      botao.classList.remove("nega"); void botao.offsetWidth; botao.classList.add("nega");
+      const todos = SOROS.every((s) => t1.aplicados[s.chave]);
+      const erro = $("tpA-erro");
+      erro.hidden = false;
+      erro.textContent = todos
+        ? `Ainda não é ${bonito(t)}. Confira cada leitura: anti-A e anti-B dizem o grupo ABO; o anti-D diz se é + ou −.`
+        : "Ainda não. Dica: pingue os três soros e leia as reações antes de concluir.";
+    }
+    function montarRespostas() {
+      TIPOS.forEach((t) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "tp-tipo";
+        b.dataset.tipo = t;
+        b.innerHTML = GOTA + bonito(t);
+        b.addEventListener("click", () => responder(t, b));
+        $("grade-resposta").appendChild(b);
+      });
+    }
+    $("btn-nova").addEventListener("click", novaAmostra);
+    $("btn-desistir").addEventListener("click", () => { if (!t1.resolvido) { t1.tentativas = Math.max(t1.tentativas, 0); concluirAmostra(true); } });
+
+    function textoDicaA() {
+      if (t1.resolvido) return "✓ Tipagem registrada! Clique em “Nova amostra” para analisar outra";
+      const falta = SOROS.find((s) => !t1.aplicados[s.chave]);
+      if (falta) {
+        return Object.keys(t1.aplicados).length === 0
+          ? `💧 Clique no frasco de soro ${falta.nome} para pingar no ${falta.poco} poço`
+          : `💧 Agora pingue o soro ${falta.nome} no ${falta.poco} poço`;
+      }
+      return "🔎 Leia as reações e escolha o tipo em “Qual é o tipo?”";
+    }
+    function atualizarDicaA() {
+      const d = textoDicaA();
+      if ($("tpA-dica").textContent !== d) $("tpA-dica").textContent = d;
+      const proximo = t1.resolvido ? null : SOROS.find((s) => !t1.aplicados[s.chave]);
+      SOROS.forEach((s) => t1.frascos[s.chave].classList.toggle("proximo", proximo === s));
+    }
+
+    function atualizarPlacar() {
+      const ls = tabela.linhas();
+      const acertos = ls.filter((l) => l.primeira === "sim").length;
+      $("pl-total").textContent = ls.length;
+      $("pl-acertos").textContent = `${acertos} de ${ls.length}`;
+      $("pl-pares").textContent = compat.length;
+      $("pl-incomp").textContent = compat.filter((c) => !c.ok).length;
+    }
+
+    /* ==================================================================
+       PARTE B — COMPATIBILIDADE
+       ================================================================== */
+    const estado = { d: null, r: null };
+    let geracaoCompat = 0;
+    let explSel = new Set();
+    const svg = $("svg-lamina");
+
+    function chips(itens, mapa) {
+      if (!itens.length) return '<span class="tp-chip neutro">nenhum</span>';
+      return itens.map((x) => `<span class="tp-chip ${mapa[x] || "neutro"}">${x === "D" ? "D (Rh)" : x}</span>`).join(" ");
+    }
+    function montarGrade(idGrade, lado) {
+      TIPOS.forEach((t) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "tp-tipo";
+        b.dataset.tipo = t;
+        b.setAttribute("aria-pressed", "false");
+        b.setAttribute("aria-label", (lado === "d" ? "Doador " : "Receptor ") + bonito(t));
+        b.innerHTML = GOTA + bonito(t);
+        b.addEventListener("click", () => {
+          estado[lado] = estado[lado] === t ? null : t;
+          atualizarB(true);
+        });
+        $(idGrade).appendChild(b);
+      });
+    }
+    function cartaoDoador() {
+      const alvo = $("cartao-doador");
+      if (!estado.d) { alvo.innerHTML = '<span class="tp-ficha__titulo">Hemácias do doador</span><span class="vazio">— nenhuma bolsa selecionada</span>'; return; }
+      const i = infoTipo(estado.d);
+      alvo.innerHTML = `<span class="tp-ficha__titulo">Hemácias do doador ${bonito(estado.d)}</span>
+        <span class="tp-ficha__rotulo">antígenos nas hemácias</span><div class="tp-ficha__lista">${chips(i.antigenos, CLASSE_AG)}</div>`;
+    }
+    function cartaoReceptor() {
+      const alvo = $("cartao-receptor");
+      if (!estado.r) { alvo.innerHTML = '<span class="tp-ficha__titulo">Plasma do receptor</span><span class="vazio">— nenhum paciente selecionado</span>'; return; }
+      const i = infoTipo(estado.r);
+      alvo.innerHTML = `<span class="tp-ficha__titulo">Plasma do receptor ${bonito(estado.r)}</span>
+        <span class="tp-ficha__rotulo">anticorpos no plasma${i.rh ? "" : " (* só após sensibilização)"}</span><div class="tp-ficha__lista">${chips(i.anticorpos, CLASSE_AC)}</div>`;
+    }
+    function bolsaTubo() {
+      $("bolsa-corpo").setAttribute("fill", estado.d ? "url(#tp-bolsa-g)" : "#eef0f3");
+      $("bolsa-tipo").textContent = estado.d ? bonito(estado.d) : "?";
+      $("tubo-plasma").setAttribute("opacity", estado.r ? "0.9" : "0");
+      $("tubo-tipo").textContent = estado.r ? bonito(estado.r) : "?";
+    }
+    function pocoBase() {
+      svg.innerHTML = "";
+      el("ellipse", { cx: 180, cy: 145, rx: 152, ry: 114, fill: "url(#tp-grad-plasma)", stroke: "#e4ddd0", "stroke-width": 2 }, svg);
+      el("ellipse", { cx: 180, cy: 145, rx: 152, ry: 114, fill: "none", stroke: "#ffffff", "stroke-width": 5, opacity: 0.55, transform: "translate(0,-3)" }, svg);
+    }
+    function laminaVazia() {
+      pocoBase();
+      el("ellipse", { cx: 180, cy: 145, rx: 118, ry: 86, fill: "none", stroke: "#d9cfc4", "stroke-width": 1.6, "stroke-dasharray": "6 7" }, svg);
+      const t = el("text", { x: 180, y: 150, "text-anchor": "middle", fill: "#b0a89a", "font-family": "JetBrains Mono, monospace", "font-size": "13" }, svg);
+      t.textContent = "aguardando amostras";
+      $("legenda").textContent = "escolha as duas amostras para pingar na lâmina";
+    }
+    function laminaParcial() {
+      pocoBase();
+      if (estado.d) {
+        espalhar(12, 112, 80, 27).forEach((p) => celula(svg, 180 + p[0], 145 + p[1], { drift: true }));
+        $("legenda").textContent = "hemácias do doador " + bonito(estado.d) + " na lâmina — escolha o receptor";
+      } else {
+        const i = infoTipo(estado.r);
+        let k = 0;
+        i.anticorpos.forEach((ac) => {
+          const cor = COR[CLASSE_AC[ac]];
+          espalhar(4, 105, 75, 34).forEach((p) => anticorpoY(svg, 180 + p[0], 145 + p[1], cor, 0.05 * k++, 1.15));
+        });
+        if (!i.anticorpos.length) {
+          const t = el("text", { x: 180, y: 150, "text-anchor": "middle", fill: "#b0a89a", "font-family": "JetBrains Mono, monospace", "font-size": "13" }, svg);
+          t.textContent = "plasma sem anticorpos ABO·Rh";
+        }
+        $("legenda").textContent = "plasma do receptor " + bonito(estado.r) + " na lâmina — escolha o doador";
+      }
+    }
+    function laminaResultado(lista) {
+      pocoBase();
+      const N = 22;
+      if (!lista.length) {
+        espalhar(N, 118, 86, 26).forEach((p) => celula(svg, 180 + p[0], 145 + p[1], { drift: true }));
+        $("legenda").textContent = "suspensão homogênea — sem aglutinação";
+        return;
+      }
+      const iniciais = espalhar(N, 122, 88, 25);
+      const nc = Math.min(2 + (lista.length > 1 ? 1 : 0), 3);
+      let centros = espalhar(nc, 68, 48, 62).map((p) => [180 + p[0], 145 + p[1]]);
+      if (!centros.length) centros = [[180, 145]];
+      const kc = centros.length;
+      const AUREO = Math.PI * (3 - Math.sqrt(5));
+      const ger = geracaoCompat;
+      const cels = iniciais.map((p) => celula(svg, 180 + p[0], 145 + p[1], { drift: false }));
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        if (ger !== geracaoCompat) return;
+        cels.forEach((g, idx) => {
+          const c = centros[idx % kc];
+          const ordem = Math.floor(idx / kc);
+          const raio = 12.5 * Math.sqrt(ordem + 0.4);
+          const ang = ordem * AUREO + (idx % kc) * 2.1;
+          g.style.transform = `translate(${c[0] + Math.cos(ang) * raio}px,${c[1] + Math.sin(ang) * raio * 0.92}px)`;
+        });
+        setTimeout(() => {
+          if (ger !== geracaoCompat) return;
+          svg.classList.add("granulado");
+          centros.forEach((c, ci) => {
+            lista.forEach((conf, k) => {
+              for (let j = 0; j < 2; j++) {
+                const a = Math.random() * Math.PI * 2, rr = 30 + Math.random() * 14;
+                anticorpoY(svg, c[0] + Math.cos(a) * rr, c[1] + Math.sin(a) * rr * 0.9, COR[conf.classe], 0.12 * (ci + k + j), 1);
+              }
+            });
+          });
+        }, 1050);
+      }));
+      $("legenda").textContent = "aglutinação — os anticorpos ligam as hemácias em grumos";
+    }
+
+    /* ---- tabela local da Parte B (persistida à parte: Lab.tabela usa uma única chave por página) ---- */
+    const CH_COMPAT = "bancada:tipagem3:compat";
+    let compat = armazem.ler(CH_COMPAT, []);
+    if (!Array.isArray(compat)) compat = [];
+    const TEXTO_EXPL = { pendente: "ainda não explicou", errada: "✗ errada — tente de novo", correta: "✓ correta", mostrada: "viu a resposta", na: "—" };
+    const COLS_B = [
+      { chave: "doador", titulo: "Doador" }, { chave: "receptor", titulo: "Receptor" },
+      { chave: "resultado", titulo: "Resultado" }, { chave: "motivo", titulo: "Motivo", texto: true },
+      { chave: "expl", titulo: "Sua explicação" },
+    ];
+    const motivoDe = (d, r) => {
+      const c = conflitos(d, r);
+      return c.length
+        ? c.map((x) => (x.classe === "d" ? "anti-D* do receptor (após sensibilização) × antígeno D do doador" : `${x.ac} do receptor × antígeno ${x.ag} do doador`)).join("; ")
+        : "nenhum anticorpo do receptor reconhece as hemácias do doador";
+    };
+    const linhaB = (c) => ({ doador: bonito(c.d), receptor: bonito(c.r), resultado: c.ok ? "✓ compatível" : "✕ incompatível", motivo: c.motivo, expl: TEXTO_EXPL[c.explicacao] || "—" });
+    function htmlTabelaB(comControles) {
+      const cab = `<thead><tr><th>#</th>${COLS_B.map((c) => `<th${c.texto ? ' class="esq"' : ""}>${c.titulo}</th>`).join("")}${comControles ? '<th class="nao-imprimir"></th>' : ""}</tr></thead>`;
+      const corpo = compat.length
+        ? compat.map((c, i) => { const l = linhaB(c); return `<tr><td>${i + 1}</td>${COLS_B.map((k) => `<td${k.texto ? ' class="esq"' : ""}>${Lab.escapar(l[k.chave])}</td>`).join("")}${comControles ? `<td class="nao-imprimir"><button type="button" class="tabela-dados__remover" data-remover="${i}" aria-label="Remover par ${i + 1}">×</button></td>` : ""}</tr>`; }).join("")
+        : `<tr class="tabela-dados__vazia"><td colspan="${COLS_B.length + 2}">Nenhum par testado ainda. Vá até a etapa <b>Prática</b>, abra a <b>Parte B</b> e siga as missões do assistente.</td></tr>`;
+      return `<div class="tabela-dados__rolagem"><table>${cab}<tbody>${corpo}</tbody></table></div>`;
+    }
+    function desenharCompat() {
+      const alvo = $("tabela-compat");
+      alvo.classList.add("tabela-dados");
+      alvo.innerHTML = htmlTabelaB(true) + `<div class="botoes nao-imprimir">
+          <button type="button" class="botao" data-acao="csv">⤓ Baixar tabela (CSV)</button>
+          <button type="button" class="botao" data-acao="limpar">Limpar tabela</button></div>`;
+      armazem.gravar(CH_COMPAT, compat);
+      atualizarTudo();
+    }
+    $("tabela-compat").addEventListener("click", (ev) => {
+      const rem = ev.target.closest("[data-remover]");
+      if (rem) { compat.splice(+rem.dataset.remover, 1); desenharCompat(); if (estado.d && estado.r) mostrarResultado(false); return; }
+      const acao = ev.target.closest("[data-acao]")?.dataset.acao;
+      if (acao === "limpar") { compat = []; desenharCompat(); if (estado.d && estado.r) mostrarResultado(false); }
+      if (acao === "csv") {
+        const cab = ["#", ...COLS_B.map((c) => c.titulo)].join(";");
+        const corpo = compat.map((c, i) => { const l = linhaB(c); return [i + 1, ...COLS_B.map((k) => l[k.chave])].join(";"); }).join("\n");
+        const blob = new Blob(["﻿" + cab + "\n" + corpo], { type: "text/csv;charset=utf-8" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "tipagem-compatibilidade.csv";
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+      }
+    });
+    const parAtual = () => compat.find((c) => c.d === estado.d && c.r === estado.r) || null;
+    function registrarPar() {
+      if (parAtual()) return;
+      const ok = compativel(estado.d, estado.r);
+      compat.push({ d: estado.d, r: estado.r, ok, motivo: motivoDe(estado.d, estado.r), explicacao: ok ? "na" : "pendente" });
+      desenharCompat();
+    }
+
+    function mostrarResultado(bater) {
+      const d = estado.d, r = estado.r;
+      const lista = conflitos(d, r);
+      const ok = lista.length === 0;
+      const carimbo = $("carimbo");
+      if (bater) {
+        carimbo.className = "tp-carimbo " + (ok ? "ok" : "nao");
+        void carimbo.offsetWidth;
+        carimbo.classList.add("bate");
+        $("carimbo-titulo").textContent = ok ? "Compatível" : "Incompatível";
+        $("carimbo-sub").textContent = ok ? bonito(d) + " → " + bonito(r) : "aglutinação · " + bonito(d) + " → " + bonito(r);
+      }
+      const iD = infoTipo(d), iR = infoTipo(r);
+      const linha = parAtual();
+      const explicado = ok || (linha && (linha.explicacao === "correta" || linha.explicacao === "mostrada"));
+      let html = `<div class="tp-linha"><span class="tp-quem">Doador ${bonito(d)}</span><span>hemácias com antígenos ${chips(iD.antigenos, CLASSE_AG)}</span></div>
+        <div class="tp-linha"><span class="tp-quem">Receptor ${bonito(r)}</span><span>plasma com anticorpos ${chips(iR.anticorpos, CLASSE_AC)}</span></div>`;
+      if (ok) {
+        html += `<div class="tp-linha"><span class="tp-quem">Prova</span><span class="tp-veredito-ok">nenhum anticorpo do receptor reconhece os antígenos do doador — transfusão compatível.</span></div>`;
+      } else if (explicado) {
+        const cruzes = lista.map((c) => `<span class="tp-chip ${c.classe}">${c.ac}</span> ✕ antígeno <span class="tp-chip ${c.classe}">${c.ag}</span>`).join(" &nbsp;·&nbsp; ");
+        html += `<div class="tp-linha"><span class="tp-quem">Prova</span><span class="tp-veredito-nao">${cruzes} → aglutinação e hemólise.</span></div>`;
+        if (lista.some((c) => c.classe === "d")) html += `<div class="tp-linha"><span class="tp-quem">Rh</span><span>O receptor Rh− ainda pode não ter anti-D, mas seria sensibilizado e passaria a produzi-lo: por segurança, Rh+ não é transfundido em Rh−.</span></div>`;
+      } else {
+        html += `<div class="tp-linha"><span class="tp-quem">Prova</span><span class="tp-veredito-nao">houve aglutinação! Descubra o motivo abaixo.</span></div>`;
+      }
+      $("explicacao").innerHTML = html;
+      $("tpB-resultado").hidden = false;
+
+      const caixa = $("tpB-explique");
+      if (ok || explicado) {
+        caixa.innerHTML = linha && linha.explicacao === "correta" ? '<p class="mensagem ok" style="margin-top:10px">✓ Explicação correta registrada na tabela.</p>' : "";
+      } else {
+        const opcoes = [["a", "anti-A", "antígeno A"], ["b", "anti-B", "antígeno B"], ["d", "anti-D*", "antígeno D (Rh)"]];
+        caixa.innerHTML = `<div class="tp-explique">
+          <p>🧠 <b>Explique o motivo:</b> quais anticorpos do plasma do receptor reconheceram antígenos das hemácias do doador? Marque <b>todos</b> os pares que causaram a aglutinação.</p>
+          <div class="tp-conf">${opcoes.map(([k, ac, ag]) => `<button type="button" data-conf="${k}" aria-pressed="${explSel.has(k)}"><span class="tp-chip ${k}">${ac}</span> × <span class="tp-chip ${k}">${ag}</span></button>`).join("")}</div>
+          <div class="botoes"><button type="button" class="botao botao--primario" data-acao-b="conferir">Conferir explicação</button><button type="button" class="botao" data-acao-b="mostrar">Não sei — mostrar a resposta</button></div>
+          <p class="mensagem" id="tpB-msg">${linha && linha.explicacao === "errada" ? "Ainda não. Compare os cartões: um anticorpo só reconhece o antígeno com a mesma letra." : "Use os cartões do doador e do receptor para comparar."}</p>
+        </div>`;
+      }
+    }
+    $("tpB-explique").addEventListener("click", (ev) => {
+      const conf = ev.target.closest("[data-conf]");
+      if (conf) {
+        const k = conf.dataset.conf;
+        explSel.has(k) ? explSel.delete(k) : explSel.add(k);
+        conf.setAttribute("aria-pressed", String(explSel.has(k)));
+        return;
+      }
+      const acao = ev.target.closest("[data-acao-b]")?.dataset.acaoB;
+      if (!acao || !estado.d || !estado.r) return;
+      const linha = parAtual();
+      if (!linha) return;
+      if (acao === "mostrar") {
+        if (linha.explicacao !== "correta") linha.explicacao = "mostrada";
+      } else {
+        if (!explSel.size) { $("tpB-msg").textContent = "Marque pelo menos um par anticorpo × antígeno antes de conferir."; $("tpB-msg").className = "mensagem erro"; return; }
+        const certo = conflitos(estado.d, estado.r).map((c) => c.classe).sort().join() === [...explSel].sort().join();
+        linha.explicacao = certo ? "correta" : "errada";
+      }
+      desenharCompat();
+      mostrarResultado(false);
+      atualizarDicaB();
+      if (linha.explicacao === "errada") { $("tpB-msg").className = "mensagem erro"; }
+    });
+
+    function marcarBotoes() {
+      document.querySelectorAll("#grade-doador .tp-tipo").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.tipo === estado.d)));
+      document.querySelectorAll("#grade-receptor .tp-tipo").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.tipo === estado.r)));
+    }
+    function esconderResultado() {
+      $("carimbo").className = "tp-carimbo";
+      $("tpB-resultado").hidden = true;
+      $("explicacao").innerHTML = "";
+      $("tpB-explique").innerHTML = "";
+    }
+    function textoDicaB() {
+      if (!estado.d && !estado.r) return "🩸 Escolha a bolsa do doador no painel “Doador”";
+      if (!estado.r) return "🧪 Agora escolha um receptor no painel “Receptor”";
+      if (!estado.d) return "🩸 Agora escolha um doador no painel “Doador”";
+      const l = parAtual();
+      if (l && !l.ok && (l.explicacao === "pendente" || l.explicacao === "errada")) return "🧠 Incompatível! Explique o motivo na caixa abaixo da lâmina";
+      return "🔁 Troque o doador ou o receptor para testar outro par";
+    }
+    function atualizarDicaB() {
+      const d = textoDicaB();
+      if ($("tpB-dica").textContent !== d) $("tpB-dica").textContent = d;
+    }
+    function atualizarB(doClique) {
+      geracaoCompat++;
+      explSel = new Set();
+      marcarBotoes();
+      cartaoDoador();
+      cartaoReceptor();
+      bolsaTubo();
+      svg.classList.remove("granulado");
+      svg.classList.add("flutua");
+      if (estado.d && estado.r) {
+        laminaResultado(conflitos(estado.d, estado.r));
+        registrarPar();
+        mostrarResultado(true);
+        if (doClique && matchMedia("(max-width: 960px)").matches) $("cena-B").scrollIntoView({ behavior: "smooth", block: "start" });
+      } else if (estado.d || estado.r) {
+        laminaParcial();
+        esconderResultado();
+      } else {
+        laminaVazia();
+        esconderResultado();
+      }
+      atualizarDicaB();
+    }
+    $("btn-limpar").addEventListener("click", () => { estado.d = null; estado.r = null; atualizarB(false); });
+
+    /* ====================== Assistente de missões ====================== */
+    const corretas = (ls) => ls.filter((l) => l.acertou);
+    const MISSOES = [
+      { parte: "A", titulo: "Primeira tipagem",
+        texto: "Vamos começar! Descubra como uma amostra reage a cada soro.",
+        passos: ["Na <b>Parte A</b>, clique no frasco azul de <b>anti-A</b>: ele pinga o soro no primeiro poço.", "Depois, pingue o <b>anti-B</b> (amarelo) e o <b>anti-D</b> (incolor) nos outros dois poços.", "Observe cada poço e leia o painel <i>Leitura das reações</i>."],
+        observe: "Cada soro revela um antígeno: onde as hemácias se juntaram em grumos (aglutinação), o antígeno correspondente está presente; onde continuaram soltas, ele está ausente.",
+        feita: () => marcos.pingouTres },
+      { parte: "A", titulo: "Identifique o tipo",
+        texto: "Agora use as três leituras para descobrir o tipo sanguíneo da amostra.",
+        passos: ["Anti-A e anti-B dizem o grupo ABO: aglutinou só com anti-A → A; só com anti-B → B; com os dois → AB; com nenhum → O.", "Anti-D diz o fator Rh: aglutinou → +; sem reação → −.", "Clique no tipo certo na grade <b>Qual é o tipo?</b>."],
+        observe: "O tipo é montado a partir das reações: anti-A e anti-B dão a parte ABO, e o anti-D dá o sinal (+ ou −). A tipagem foi registrada na tabela da etapa Resultados.",
+        feita: (ls) => corretas(ls).length >= 1 },
+      { parte: "A", titulo: "Tipe 4 amostras corretamente",
+        texto: "Treine a leitura com outras amostras.",
+        passos: ["Clique em <b>Nova amostra</b>.", "Pingue os três soros, leia as reações e escolha o tipo.", "Repita até ter <b>4 identificações corretas</b> (as amostras em que você desistiu não contam)."],
+        progresso: (ls) => `${Math.min(4, corretas(ls).length)} de 4 identificações corretas`,
+        observe: "Cada tipo produz um padrão diferente nos três poços — são 8 padrões para 8 tipos. Se uma amostra não aglutina com nenhum soro, ela é O−.",
+        feita: (ls) => corretas(ls).length >= 4 },
+      { parte: "A", titulo: "Encontre um Rh negativo",
+        texto: "As amostras são sorteadas. Continue tipando até encontrar uma pessoa Rh−.",
+        passos: ["Clique em <b>Nova amostra</b> e pingue os soros.", "Observe o poço do <b>anti-D</b>: em uma amostra Rh−, ele fica <b>sem reação</b>.", "Identifique corretamente o tipo dessa amostra."],
+        observe: "No Rh negativo, o poço do anti-D fica sem aglutinação: as hemácias não têm o antígeno D. Na população, Rh− é bem menos comum que Rh+.",
+        feita: (ls) => corretas(ls).some((l) => String(l.chave).endsWith("-")) },
+      { parte: "B", titulo: "Primeira prova de compatibilidade",
+        texto: "Mude de parte: agora você vai testar transfusões.",
+        passos: ["Clique na aba <b>Parte B — Compatibilidade</b>.", "No painel <i>Doador</i>, escolha uma bolsa de sangue.", "No painel <i>Receptor</i>, escolha um paciente. A lâmina mostra o resultado."],
+        observe: "A prova junta as hemácias do doador com o plasma do receptor. Se algum anticorpo do receptor reconhece um antígeno do doador, as hemácias aglutinam: a transfusão é incompatível.",
+        feita: () => compat.length >= 1 },
+      { parte: "B", titulo: "Teste o doador universal",
+        texto: "Será que o O− pode mesmo doar para qualquer pessoa?",
+        passos: ["Escolha o doador <b>O−</b>.", "Teste-o com <b>três receptores diferentes</b>, trocando só o receptor (de preferência tipos bem diferentes, como A+, B− e AB+)."],
+        progresso: () => `${Math.min(3, new Set(compat.filter((c) => c.d === "O-").map((c) => c.r)).size)} de 3 receptores testados com O−`,
+        observe: "As hemácias O− não têm antígenos A, B nem D: nenhum anticorpo do receptor encontra alvo. Por isso o O− é o doador universal de hemácias.",
+        feita: () => new Set(compat.filter((c) => c.d === "O-").map((c) => c.r)).size >= 3 },
+      { parte: "B", titulo: "Explique uma transfusão incompatível",
+        texto: "Encontre um par que dá aglutinação e descubra por quê.",
+        passos: ["Teste pares até o carimbo mostrar <b>Incompatível</b> (dica: tente um doador AB+ com um receptor O−).", "Compare os cartões: os <b>antígenos do doador</b> e os <b>anticorpos do receptor</b>.", "Na caixa <i>Explique o motivo</i>, abaixo da lâmina, marque os pares anticorpo × antígeno e clique em <b>Conferir explicação</b>."],
+        observe: "Os anticorpos se ligam aos antígenos de várias hemácias ao mesmo tempo e as prendem em grumos. No corpo, isso leva à destruição das hemácias (hemólise) — uma reação grave.",
+        feita: () => compat.some((c) => !c.ok && c.explicacao === "correta") },
+      { parte: "B", titulo: "Desafio: complete a tabela",
+        texto: "Monte a sua própria tabela de compatibilidade.",
+        passos: ["Teste pelo menos <b>8 pares diferentes</b> de doador × receptor.", "Procure variar: doadores Rh+ e Rh−, receptores de grupos ABO diferentes.", "Depois, vá para a etapa <b>Resultados</b> e compare seus pares com a tabela completa."],
+        progresso: () => `${Math.min(8, compat.length)} de 8 pares diferentes`,
+        observe: "Na etapa <a href=\"#resultados\">Resultados</a>, veja a tabela completa: dos 64 pares possíveis, só 27 são compatíveis. Repare na linha do O− e na coluna do AB+.",
+        feita: () => compat.length >= 8 },
+    ];
+    let missaoVista = null; // missão escolhida pelo aluno nos botões; null = a próxima pendente
+
+    function atualizarAssistente() {
+      if (!tabela) return;
+      const ls = tabela.linhas();
+      const estados = MISSOES.map((m) => m.feita(ls));
+      const feitas = estados.filter(Boolean).length;
+      const pendente = estados.indexOf(false);
+      const i = missaoVista ?? (pendente === -1 ? MISSOES.length - 1 : pendente);
+      const m = MISSOES[i];
+      const irParte = !estados[i] && m.parte !== parteAtual
+        ? `<p style="margin-top:8px"><button type="button" class="botao botao--primario" data-ir-parte="${m.parte}">Abrir a Parte ${m.parte} — ${m.parte === "A" ? "Identificação" : "Compatibilidade"}</button></p>` : "";
+      const corpo = pendente === -1 && missaoVista === null
+        ? `<div class="parabens">🎉 Parabéns! Você concluiu todas as missões. Vá para a etapa <a href="#resultados">Resultados</a> para analisar seus dados.</div>`
+        : `<div class="missao-atual">
+            <div class="missao-atual__num">${estados[i] ? "✓" : i + 1}</div>
+            <div>
+              ${!estados[i] && i > 0 && estados[i - 1] ? `<div class="observe" style="margin:0 0 12px;border-left-color:var(--certo)">✓ <b>Missão ${i} concluída! O que observar:</b> ${MISSOES[i - 1].observe}</div>` : ""}
+              <h4>Missão ${i + 1}: ${m.titulo}</h4>
+              <p>${m.texto}</p>
+              <ol>${m.passos.map((p) => `<li>${p}</li>`).join("")}</ol>
+              ${m.progresso ? `<p style="margin-top:8px"><b>Progresso:</b> ${m.progresso(ls)}</p>` : ""}
+              ${irParte}
+              ${estados[i] ? `<div class="observe">👀 <b>O que observar:</b> ${m.observe}</div>` : ""}
+            </div>
+          </div>`;
+      $("assistente").innerHTML = `
+        <div class="assistente__topo">
+          <p class="assistente__titulo">🤖 Assistente da prática</p>
+          <div class="assistente__progresso">${feitas} de ${MISSOES.length} missões
+            <div class="assistente__barra"><span style="width:${(feitas / MISSOES.length) * 100}%"></span></div></div>
+        </div>
+        ${corpo}
+        <ul class="missoes-lista">${MISSOES.map((mm, k) =>
+          `<li><button type="button" data-missao="${k}" class="${estados[k] ? "feita" : ""} ${k === i ? "atual" : ""}">${estados[k] ? "✓" : k + 1} ${mm.titulo}</button></li>`).join("")}</ul>`;
+    }
+    $("assistente").addEventListener("click", (e) => {
+      const ir = e.target.closest("[data-ir-parte]");
+      if (ir) { mostrarParte(ir.dataset.irParte); return; }
+      const b = e.target.closest("[data-missao]");
+      if (!b) return;
+      const k = +b.dataset.missao;
+      missaoVista = missaoVista === k ? null : k;
+      atualizarAssistente();
+    });
+
+    /* ====================== Resultados ====================== */
+    tabela = Lab.tabela($("tabela"), {
+      nomeArquivo: "tipagem-identificacoes",
+      textoVazio: "Nenhuma tipagem ainda. Vá até a etapa <b>Prática</b>, abra a <b>Parte A</b> e siga as missões do assistente.",
+      colunas: [
+        { chave: "amostra", titulo: "Amostra", texto: true },
+        { chave: "a", titulo: "anti-A" },
+        { chave: "b", titulo: "anti-B" },
+        { chave: "d", titulo: "anti-D" },
+        { chave: "tipo", titulo: "Tipo identificado" },
+        { chave: "primeira", titulo: "Acertou na 1ª?" },
+        { chave: "tentativas", titulo: "Tentativas", casas: 0 },
+      ],
+      aoMudar: () => { if (pronto) atualizarTudo(); },
+    });
+
+    function resumoHTML() {
+      const ls = tabela.linhas();
+      const n = ls.length, acertos = ls.filter((l) => l.primeira === "sim").length, desist = ls.filter((l) => l.primeira === "desistiu").length;
+      const tiposVistos = TIPOS.filter((t) => ls.some((l) => l.chave === t));
+      const rhNeg = ls.filter((l) => String(l.chave).endsWith("-")).length;
+      const nc = compat.filter((c) => c.ok).length, ni = compat.length - nc;
+      const expl = compat.filter((c) => c.explicacao === "correta").length;
+      const cartaoA = n
+        ? `<ul style="margin:0;padding-left:20px">
+            <li><b>${n}</b> ${n === 1 ? "tipagem registrada" : "tipagens registradas"}.</li>
+            <li>Acertos na 1ª tentativa: <b>${acertos} de ${n}</b> (${fmt((100 * acertos) / n, 0)}%).${desist ? ` Desistências: ${desist}.` : ""}</li>
+            <li>Tipos encontrados: ${tiposVistos.map((t) => `<span class="tp-chip tipo">${bonito(t)}</span>`).join(" ")}</li>
+            <li>Amostras Rh−: <b>${rhNeg}</b> de ${n}.</li></ul>`
+        : '<p class="relatorio__vazio" style="margin:0">Nenhuma tipagem registrada ainda.</p>';
+      const cartaoB = compat.length
+        ? `<ul style="margin:0;padding-left:20px">
+            <li><b>${compat.length}</b> ${compat.length === 1 ? "par testado" : "pares testados"}, de 64 possíveis.</li>
+            <li>Compatíveis: <b>${nc}</b> · Incompatíveis: <b>${ni}</b>.</li>
+            <li>Transfusões incompatíveis explicadas corretamente: <b>${expl}</b>.</li></ul>`
+        : '<p class="relatorio__vazio" style="margin:0">Nenhum par testado ainda.</p>';
+      const doadores = TIPOS.filter((t) => compat.some((c) => c.d === t));
+      const quem = doadores.length
+        ? `<div class="tp-quadro"><table><thead><tr><th>Doador</th><th>Compatível com (testado por você)</th><th>Incompatível com (testado por você)</th></tr></thead><tbody>${doadores.map((d) => {
+            const sim = compat.filter((c) => c.d === d && c.ok).map((c) => bonito(c.r)), nao = compat.filter((c) => c.d === d && !c.ok).map((c) => bonito(c.r));
+            return `<tr><td>${bonito(d)}</td><td>${sim.join(", ") || "—"}</td><td>${nao.join(", ") || "—"}</td></tr>`;
+          }).join("")}</tbody></table></div>`
+        : "";
+      return `<div class="grade-2">
+          <div class="cartao"><h3>🔬 Parte A — Identificação</h3>${cartaoA}</div>
+          <div class="cartao"><h3>🩸 Parte B — Compatibilidade</h3>${cartaoB}</div>
+        </div>${quem ? `<h4 style="margin:20px 0 0">Quem pode doar para quem — segundo os seus testes</h4>${quem}` : ""}`;
+    }
+
+    function atualizarMatriz() {
+      const testados = new Set(compat.map((c) => c.d + "|" + c.r));
+      let html = '<thead><tr><th class="canto">doador ↓ · receptor →</th>' + TIPOS.map((r) => `<th scope="col">${bonito(r)}</th>`).join("") + "</tr></thead><tbody>";
+      let total = 0;
+      TIPOS.forEach((d) => {
+        html += `<tr><th scope="row">${bonito(d)}</th>`;
+        TIPOS.forEach((r) => {
+          const ok = compativel(d, r);
+          if (ok) total++;
+          const t = testados.has(d + "|" + r);
+          html += `<td class="${ok ? "sim" : "nao"}${t ? " testado" : ""}" title="${bonito(d)} → ${bonito(r)}: ${ok ? "compatível" : "incompatível"}${t ? " (testado)" : ""}">${ok ? "✓" : "✕"}</td>`;
+        });
+        html += "</tr>";
+      });
+      $("matriz").innerHTML = html + "</tbody>";
+      $("matriz-legenda").innerHTML = `✓ compatível · ✕ incompatível. Dos 64 pares possíveis, <b>${total}</b> são compatíveis. Você testou <b>${testados.size}</b> ${testados.size === 1 ? "par" : "pares"}.`;
+    }
+
+    function atualizarTudo() {
+      if (!pronto) return;
+      atualizarAssistente();
+      atualizarPlacar();
+      $("resumo").innerHTML = resumoHTML();
+      atualizarMatriz();
+    }
+
+    /* ====================== Hipóteses ====================== */
+    const guardar = { botao: "Guardar hipótese", rotuloModelo: "Hipótese guardada ✓" };
+    const hipoteses = Lab.questoes($("hipoteses-lista"), [
+      { ...guardar, tipo: "aberta",
+        enunciado: "<p><b>H1.</b> Na tipagem, pingamos os soros anti-A, anti-B e anti-D no sangue. O que você espera ver na lâmina se a pessoa for do tipo <b>O−</b>? E se for <b>AB+</b>?</p>",
+        modelo: "<p>Você vai testar isso nas missões 1 a 4 da prática.</p>" },
+      { ...guardar, tipo: "aberta",
+        enunciado: "<p><b>H2.</b> Dizem que o tipo <b>O−</b> é “doador universal”. Você acha que ele pode doar para qualquer pessoa? E uma pessoa O− pode receber sangue de qualquer tipo? Por quê?</p>",
+        modelo: "<p>Você vai testar isso na missão 6 da prática.</p>" },
+      { ...guardar, tipo: "aberta",
+        enunciado: "<p><b>H3.</b> Numa transfusão incompatível, o que você acha que acontece com as hemácias do doador quando entram no sangue do receptor?</p>",
+        modelo: "<p>Você vai testar isso na missão 7 da prática.</p>" },
+    ], { chave: "hipoteses", semPlacar: true });
+
+    /* ====================== Questões ====================== */
+    Lab.questoes($("questoes-lista"), [
+      { tipo: "multipla", nivel: "fácil",
+        enunciado: "<p>Na tipagem de uma amostra, houve aglutinação nos poços do <b>anti-A</b> e do <b>anti-B</b>, mas <b>não</b> no poço do <b>anti-D</b>. Qual é o tipo sanguíneo?</p>",
+        alternativas: ["A+", "AB+", "AB−", "O−"],
+        correta: 2, dica: "Cada aglutinação indica um antígeno presente. Quais antígenos do sistema ABO a amostra tem? E o antígeno D?",
+        explicacao: "Aglutinou com anti-A e com anti-B → tem os antígenos A e B → grupo AB. Sem reação com anti-D → não tem o antígeno D → Rh−. Tipo AB−." },
+      { tipo: "multipla", nivel: "fácil",
+        enunciado: "<p>Quais anticorpos estão presentes no plasma de uma pessoa do tipo <b>A+</b>?</p>",
+        alternativas: ["anti-A", "anti-B", "anti-A e anti-B", "anti-B e anti-D"],
+        correta: 1, dica: "O organismo não produz anticorpos contra os próprios antígenos. Veja a tabela do sistema ABO na etapa Teoria — e lembre que o anti-D não é natural.",
+        explicacao: "Quem é do grupo A tem o antígeno A e, por isso, não produz anti-A: tem anti-B no plasma. Como é Rh+, também não produz anti-D." },
+      { tipo: "multipla", nivel: "fácil",
+        enunciado: "<p>Uma amostra <b>não aglutinou</b> com nenhum dos três soros. O que isso significa?</p>",
+        alternativas: ["O teste falhou e precisa ser repetido", "A pessoa é do tipo O−: suas hemácias não têm os antígenos A, B nem D", "A pessoa é do tipo AB+", "A pessoa não tem anticorpos no plasma"],
+        correta: 1, dica: "Lembre da Parte A: a ausência de aglutinação também é informação. Sem reação → antígeno ausente.",
+        explicacao: "Sem aglutinação com anti-A e anti-B → sem antígenos A e B → grupo O. Sem aglutinação com anti-D → Rh−. É o tipo O−." },
+      { tipo: "multipla", nivel: "médio",
+        enunciado: "<p>Uma pessoa <b>O+</b> pode doar hemácias para uma pessoa <b>A−</b>?</p>",
+        alternativas: ["Sim, porque o tipo O é doador universal", "Sim, porque o receptor A− não tem anti-A", "Não, porque as hemácias O+ têm o antígeno D, e o receptor Rh− pode produzir anti-D", "Não, porque o receptor tem anticorpos anti-O"],
+        correta: 2, dica: "O doador universal é o O−, não o O+. Compare o fator Rh dos dois.",
+        explicacao: "As hemácias O+ não têm A nem B, mas têm o antígeno D. O receptor A− é Rh− e seria sensibilizado, passando a produzir anti-D; por isso não se transfunde Rh+ em Rh−. (Não existe anticorpo “anti-O”.)" },
+      { tipo: "numerica", nivel: "médio",
+        enunciado: "<p>Quantos dos 8 tipos sanguíneos podem <b>receber</b> hemácias de um doador <b>O+</b>?</p>",
+        resposta: 4, tolerancia: 0, unidade: "tipos",
+        dica: "As hemácias O+ não têm A nem B, mas têm D. Quais receptores não têm (nem podem produzir) anti-D? Confira na tabela completa, na etapa Resultados.",
+        explicacao: "Os quatro tipos Rh+: O+, A+, B+ e AB+. Os receptores Rh− poderiam produzir anti-D contra o antígeno D do doador." },
+      { tipo: "multipla", nivel: "médio",
+        enunciado: "<p>Um doador <b>B−</b> foi testado com um receptor <b>A+</b>. Qual é o resultado e o motivo?</p>",
+        alternativas: ["Compatível, porque o doador é Rh−", "Incompatível: o anti-B do plasma do receptor reconhece o antígeno B das hemácias do doador", "Incompatível: o anti-D do receptor reconhece o antígeno D do doador", "Incompatível: o anti-A do doador ataca as hemácias do receptor"],
+        correta: 1, dica: "Releia o Exemplo resolvido 2 na etapa Teoria: liste os antígenos do doador e os anticorpos do receptor.",
+        explicacao: "O doador B− tem o antígeno B; o receptor A+ tem anti-B no plasma. O anti-B reconhece o antígeno B e as hemácias aglutinam. O Rh não é o problema: Rh− pode doar para Rh+." },
+      { tipo: "multipla", nivel: "desafio",
+        enunciado: "<p>Por que uma pessoa Rh− que <b>nunca</b> recebeu transfusão nem esteve grávida normalmente <b>não</b> tem anti-D no plasma?</p>",
+        alternativas: ["Porque o anti-D só existe em pessoas Rh+", "Porque o anti-D não é natural: só é produzido depois do contato com hemácias Rh+ (sensibilização)", "Porque o fator Rh não é um antígeno", "Porque o anti-D é destruído pelo anti-A e pelo anti-B"],
+        correta: 1, dica: "Releia a caixa “O anti-D é diferente” na etapa Teoria.",
+        explicacao: "Diferente do anti-A e do anti-B, o anti-D não é um anticorpo natural. O organismo Rh− só passa a produzi-lo após ser sensibilizado por hemácias Rh+, numa transfusão ou numa gravidez." },
+      { tipo: "multipla", nivel: "desafio",
+        enunciado: "<p>Um pai do tipo <b>A</b> e uma mãe do tipo <b>B</b> podem ter um filho do tipo <b>O</b>?</p>",
+        alternativas: ["Não, porque nenhum dos dois é do tipo O", "Sim, se o pai for \\(I^A i\\) e a mãe for \\(I^B i\\): cada um pode passar o alelo \\(i\\)", "Sim, mas só se os dois forem homozigotos (\\(I^A I^A\\) e \\(I^B I^B\\))", "Não, porque \\(I^A\\) e \\(I^B\\) são codominantes"],
+        correta: 1, dica: "O tipo O tem genótipo \\(ii\\), e o filho recebe um alelo de cada pai. Veja o aprofundamento de genética na etapa Teoria.",
+        explicacao: "Se os pais forem heterozigotos, \\(I^A i \\times I^B i\\), cada um pode passar o alelo \\(i\\), e o filho pode ser \\(ii\\) — tipo O. Se algum deles fosse homozigoto, isso não seria possível." },
+      { tipo: "numerica", nivel: "desafio",
+        enunciado: "<p>No cruzamento \\(I^A i \\times I^B i\\), qual é a probabilidade, em porcentagem, de nascer um filho do tipo <b>O</b>?</p>",
+        resposta: 25, tolerancia: 0.01, unidade: "%",
+        dica: "Monte o quadro de Punnett com os gametas \\(I^A\\) e \\(i\\) de um lado e \\(I^B\\) e \\(i\\) do outro. Quantas das 4 casas são \\(ii\\)?",
+        explicacao: "Só uma das quatro casas do quadro é \\(ii\\): \\(\\tfrac{1}{4} = 25\\%\\)." },
+      { tipo: "aberta", nivel: "reflexão",
+        enunciado: "<p>Explique, usando as palavras <b>antígeno</b> e <b>anticorpo</b>, por que O− é chamado de doador universal e AB+ de receptor universal.</p>",
+        dica: "Pense no que cada um tem: quais antígenos há nas hemácias do O−? Quais anticorpos há no plasma do AB+? Lembre da missão 6.",
+        modelo: "<p>As hemácias do tipo <b>O−</b> não têm nenhum dos antígenos A, B ou D. Assim, nenhum anticorpo do plasma de qualquer receptor encontra um alvo nelas, e não há aglutinação: por isso O− é o doador universal. Já o plasma do <b>AB+</b> não tem anti-A nem anti-B (a pessoa tem os dois antígenos) e, por ser Rh+, ela não produz anti-D. Sem esses anticorpos, ela pode receber hemácias de qualquer tipo: é o receptor universal.</p>" },
+      { tipo: "aberta", nivel: "reflexão",
+        enunciado: "<p>Uma mulher <b>Rh−</b> está grávida pela segunda vez de um bebê <b>Rh+</b>. Após o primeiro parto (também de um bebê Rh+), ela não recebeu nenhum tratamento. Por que o segundo bebê corre risco? Como isso poderia ter sido evitado?</p>",
+        dica: "Leia o aprofundamento sobre a doença hemolítica do recém-nascido na etapa Teoria. O que acontece com a mãe no primeiro parto?",
+        modelo: "<p>No primeiro parto, hemácias Rh+ do bebê passaram para o sangue da mãe e a <b>sensibilizaram</b>: ela passou a produzir anti-D. Na segunda gravidez, esses anticorpos atravessam a placenta e destroem as hemácias do bebê Rh+ (doença hemolítica do recém-nascido). Isso poderia ter sido evitado com a aplicação de <b>imunoglobulina anti-D</b> na mãe logo após o primeiro parto (e durante a gestação), que elimina as hemácias Rh+ antes que o organismo dela aprenda a produzir anti-D.</p>" },
+    ], {
+      aoAtualizar(acertos, total) { relAvaliacao = `${acertos} de ${total} questões objetivas corretas.`; },
+    });
+
+    /* ====================== Relatório ====================== */
+    document.querySelectorAll("[data-rel]").forEach((campo) => {
+      const chave = "bancada:tipagem3:rel:" + campo.dataset.rel;
+      campo.value = armazem.ler(chave, campo.dataset.rel === "data" ? new Date().toISOString().slice(0, 10) : "");
+      campo.addEventListener("input", () => armazem.gravar(chave, campo.value));
+    });
+    function montarRelatorio() {
+      const hs = hipoteses.respostas();
+      $("rel-hipoteses").innerHTML = hs.map((h) =>
+        `<p>${h.q.enunciado.replace(/<\/?p>/g, "")}<br><i>Minha hipótese:</i> ${h.valor ? Lab.escapar(h.valor) : '<span class="relatorio__vazio">não respondida</span>'}</p>`).join("");
+      $("rel-dados").innerHTML =
+        `<p style="margin:0 0 4px"><b>Parte A — Tipagens</b></p>${tabela.html() || '<p class="relatorio__vazio">Nenhuma tipagem registrada.</p>'}` +
+        `<p style="margin:12px 0 4px"><b>Parte B — Provas de compatibilidade</b></p>${compat.length ? `<div class="tabela-dados">${htmlTabelaB(false)}</div>` : '<p class="relatorio__vazio">Nenhum par testado.</p>'}`;
+      $("rel-resumo").innerHTML = resumoHTML();
+      $("rel-avaliacao").textContent = relAvaliacao || "Questões ainda não respondidas.";
+    }
+    document.addEventListener("lab:etapa", (e) => { if (e.detail === "relatorio") montarRelatorio(); });
+
+    /* ====================== Início ====================== */
+    montarPocos();
+    montarRespostas();
+    montarGrade("grade-doador", "d");
+    montarGrade("grade-receptor", "r");
+    pronto = true;
+    desenharCompat();
+    novaAmostra();
+    atualizarB(false);
+    mostrarParte(parteAtual);
+    atualizarTudo();
+    if ($("relatorio").classList.contains("ativa")) montarRelatorio();
+  })();
+  </script>
+</body>
+</html>

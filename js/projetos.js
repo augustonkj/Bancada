@@ -8,7 +8,6 @@
  *  link       (obrigatório) "projetos/<pasta>/" ou "https://..."
  *  cor        (opcional)    Cor da disciplina, ex.: "#2563eb"
  *  ilustracao (opcional)    SVG exibido no topo do cartão
- *  duracao    (opcional)    Ex.: "2 aulas"
  *  etiquetas  (opcional)    Palavras-chave para a busca
  *  status     (opcional)    "pronto", "em reformulação" ou "planejado"
  * ============================================================
@@ -21,7 +20,6 @@ const PROJETOS = [
     area: "Física",
     link: "projetos/pendulo/",
     cor: "#2563eb",
-    duracao: "2 aulas",
     etiquetas: ["mecânica", "oscilações", "gráficos", "gravidade", "cronômetro"],
     status: "pronto",
     ilustracao: `<svg viewBox="0 0 240 150" aria-hidden="true">
@@ -40,7 +38,6 @@ const PROJETOS = [
     area: "Química",
     link: "projetos/titulacao/",
     cor: "#9333ea",
-    duracao: "2 aulas",
     etiquetas: ["soluções", "pH", "indicadores", "estequiometria", "bureta"],
     status: "pronto",
     ilustracao: `<svg viewBox="0 0 240 150" aria-hidden="true">
@@ -58,7 +55,6 @@ const PROJETOS = [
     area: "Biologia",
     link: "projetos/microscopio/",
     cor: "#16a34a",
-    duracao: "2 aulas",
     etiquetas: ["citologia", "microscopia", "células", "lâminas"],
     status: "pronto",
     ilustracao: `<svg viewBox="0 0 240 150" aria-hidden="true">
@@ -68,5 +64,25 @@ const PROJETOS = [
       <rect x="106" y="56" width="8" height="18" rx="2" fill="#64748b"/>
       <circle cx="186" cy="54" r="30" fill="#fff" opacity=".9"/><g fill="none" stroke="#16a34a" stroke-width="1.5"><rect x="166" y="38" width="18" height="12"/><rect x="184" y="38" width="20" height="12"/><rect x="162" y="50" width="22" height="12"/><rect x="184" y="50" width="16" height="12"/><rect x="170" y="62" width="20" height="10"/></g>
       <circle cx="174" cy="44" r="2" fill="#15803d"/><circle cx="192" cy="56" r="2" fill="#15803d"/></svg>`,
+  },
+  {
+    titulo: "Tipagem Sanguínea",
+    descricao: "Pingue os soros anti-A, anti-B e anti-D, descubra o tipo de amostras desconhecidas e teste a compatibilidade entre doadores e receptores.",
+    area: "Biologia",
+    link: "projetos/tipagem/",
+    cor: "#dc2626",
+    etiquetas: ["imunologia", "sangue", "ABO", "Rh", "transfusão", "antígenos", "anticorpos"],
+    status: "pronto",
+    ilustracao: `<svg viewBox="0 0 240 150" aria-hidden="true">
+      <rect x="0" y="126" width="240" height="24" fill="#d9b48a"/><rect x="0" y="134" width="240" height="16" fill="#b88c5e"/>
+      <rect x="38" y="96" width="164" height="30" rx="6" fill="#fff" opacity=".95" stroke="#e5d9d0"/>
+      <ellipse cx="72" cy="111" rx="20" ry="10" fill="#fbe4e4"/><ellipse cx="120" cy="111" rx="20" ry="10" fill="#fbe4e4"/><ellipse cx="168" cy="111" rx="20" ry="10" fill="#fbe4e4"/>
+      <circle cx="66" cy="110" r="4" fill="#c1273c"/><circle cx="72" cy="113" r="4" fill="#c1273c"/><circle cx="77" cy="109" r="4" fill="#c1273c"/>
+      <circle cx="112" cy="109" r="4" fill="#c1273c"/><circle cx="128" cy="113" r="4" fill="#c1273c"/>
+      <circle cx="164" cy="110" r="4" fill="#c1273c"/><circle cx="169" cy="113" r="4" fill="#c1273c"/><circle cx="173" cy="108" r="4" fill="#c1273c"/>
+      <rect x="62" y="52" width="16" height="30" rx="4" fill="#2b5aa7"/><rect x="66" y="44" width="8" height="9" rx="2" fill="#3a3e46"/>
+      <rect x="112" y="52" width="16" height="30" rx="4" fill="#c08d0e"/><rect x="116" y="44" width="8" height="9" rx="2" fill="#3a3e46"/>
+      <rect x="160" y="52" width="16" height="30" rx="4" fill="#6d6f76"/><rect x="164" y="44" width="8" height="9" rx="2" fill="#3a3e46"/>
+      <path d="M205 20 C205 20 188 42 188 52 C188 62 196 68 205 68 C214 68 222 62 222 52 C222 42 205 20 205 20Z" fill="#dc2626" opacity=".9"/></svg>`,
   },
 ];
